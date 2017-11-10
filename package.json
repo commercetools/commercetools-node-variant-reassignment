@@ -1,0 +1,20 @@
+{
+  "name": "commercetools-node-variant-reassignment",
+  "version": "0.0.0",
+  "description": "Node.js utility which complements product sync/import process by automatic conflicts resolution and reassignment of variants from one product to another",
+  "license": "MIT",
+  "homepage": "https://github.com/commercetools/commercetools-node-variant-reassignment",
+  "engines": {
+    "node": ">=8.9",
+    "npm": ">=3.10.8"
+  },
+  "scripts": {
+    "build": "npm run clean && ./node_modules/.bin/babel --optional runtime lib --out-dir dist",
+    "test": "npm run build && LOG_LEVEL=debug node_modules/.bin/mocha --bail --full-trace -t 100000 --recursive spec/**/*.spec.js"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha": "^4.0.1"
+  }
+}
