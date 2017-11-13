@@ -1,0 +1,7 @@
+.idea
+bin
+dist
+node_modules
+logs
+coverage
+examples
