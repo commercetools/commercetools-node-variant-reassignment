@@ -1,8 +1,12 @@
 import Promise from 'bluebird'
 import bunyan from 'bunyan'
+import _ from 'lodash'
+import path from 'path'
 import * as sphere from '../../lib/services/sphere'
+import Logger from '../../lib/services/logger'
 
 const sampleProductType = require('../resources/productType.json')
+const sampleProduct = require('../resources/product.json')
 
 export const projectKey = process.env.TEST_PROJECT_KEY
   || 'ctp-node-variant-reassignment-tests'
@@ -36,12 +40,12 @@ export function deleteResource (resource, predicate) {
     .where(predicate || '')
     .perPage(500)
     .process(res =>
-      Promise.map(res.body.results, item =>
-        resource
-          .byId(item.id)
-          .delete(item.version)
-      , { concurrency: 10 })
-    , { accumulate: false })
+        Promise.map(res.body.results, item =>
+            resource
+              .byId(item.id)
+              .delete(item.version)
+          , { concurrency: 10 })
+      , { accumulate: false })
 }
 
 /**
@@ -55,17 +59,17 @@ export function unpublishAllProducts (client) {
     .where('published=true')
     .perPage(200)
     .process(res =>
-      Promise.map(res.body.results, item =>
-          client.products
-            .byId(item.id)
-            .update({
-              version: item.version,
-              actions: [{
-                action: 'unpublish'
-              }]
-            })
-        , { concurrency: 10 })
-    , { accumulate: false })
+        Promise.map(res.body.results, item =>
+            client.products
+              .byId(item.id)
+              .update({
+                version: item.version,
+                actions: [{
+                  action: 'unpublish'
+                }]
+              })
+          , { concurrency: 10 })
+      , { accumulate: false })
 }
 
 /**
@@ -116,16 +120,63 @@ export function createProduct (sphereClient, product) {
  * @param item Item which should be created
  * @param conditionKey Object property nameused in predicate
  */
-export function ensureResource (resource, item, conditionKey = 'key') {
-  return resource
+export async function ensureResource (resource, item, conditionKey = 'key') {
+  const res = await resource
     .perPage(1)
     .where(`${conditionKey} = "${item[conditionKey]}"`)
     .fetch()
-    .then((res) => {
-      if (res.body.results.length)
-        return res.body.results[0]
 
-      return resource.create(item)
-        .then(createRes => createRes.body)
-    })
+  if (res.body.results.length)
+    return res.body.results[0]
+
+  const createRes = await resource.create(item)
+  return createRes.body
+}
+
+
+/**
+ * Will generate a product with variants based on given skus
+ * @param sku products SKU
+ * @param productTypeId ID of a productType
+ */
+export function generateProduct (skus, productTypeId) {
+  skus = _.isArray(skus)
+    ? _.cloneDeep(skus)
+    : [skus]
+
+  const product = _.cloneDeep(sampleProduct)
+  const sku = skus.shift()
+  product.productType.id = productTypeId
+  product.masterVariant.sku = sku
+  product.slug.en += sku
+  product.name.en += sku
+  product.key += sku
+
+
+  for (const variantSku of skus) {
+    const variant = _.cloneDeep(product.masterVariant)
+    variant.sku = variantSku
+    product.variants.push(variant)
+  }
+  return product
+}
+
+/**
+ * Delete all resources used in tests
+ */
+export async function deleteResourcesAll (client, _logger) {
+  const resourcesToDelete = [
+    client.products,
+    client.productDiscounts,
+    client.inventoryEntries,
+    client.productTypes,
+    client.channels
+  ]
+  for (const resource of resourcesToDelete)
+    await deleteResource(resource, '', _logger)
+}
+
+export function createLogger (filename) {
+  return Logger(
+    `Test::helper::${path.basename(filename)}`, process.env.LOG_LEVEL)
 }

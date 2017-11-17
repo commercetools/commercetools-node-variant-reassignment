@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
-import * as utils from '../utils/helper'
-import Transaction from '../../lib/services/transaction'
+import * as utils from '../../utils/helper'
+import Transaction from '../../../lib/services/transaction'
 
 let sphereClient = null
 
