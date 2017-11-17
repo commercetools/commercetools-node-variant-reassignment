@@ -24,6 +24,7 @@
       "functions": "ignore"
     }],
     "no-restricted-syntax": ["error", "WithStatement"],
-    "no-await-in-loop": 0
+    "no-await-in-loop": 0,
+    "max-len": ["error", 100]
   }
 }

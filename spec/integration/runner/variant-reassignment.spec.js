@@ -23,7 +23,7 @@ describe('Variant reassignment', () => {
 
   it('move variant v3 to another product', async () => {
     const reassignment = new VariantReassignment(logger, {})
-    await reassignment.execute({
+    await reassignment.execute([{
       key: 'sample-product1',
       name: {
         en: 'Sample product1'
@@ -41,7 +41,7 @@ describe('Variant reassignment', () => {
           prices: []
         }
       ]
-    }, [product1, product2])
+    }], [product1, product2])
     const { body: { results } } = await ctpClient.productProjections
       .staged(true)
       .where('masterVariant(sku in ("1", "3", "4"))')
@@ -49,5 +49,8 @@ describe('Variant reassignment', () => {
       .whereOperator('or')
       .fetch()
     expect(results.length).to.equal(2)
+    const backupProduct = results.find(product => product.masterVariant.sku === '4')
+    expect(backupProduct).to.exist()
+    expect(backupProduct.variants.length).to.equal(0)
   })
 })
