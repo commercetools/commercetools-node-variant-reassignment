@@ -24,6 +24,9 @@ describe('Variant reassignment', () => {
   it('move variant v3 to another product', async () => {
     const reassignment = new VariantReassignment(logger, {})
     await reassignment.execute([{
+      productType: {
+        id: product1.productType.id
+      },
       key: 'sample-product1',
       name: {
         en: 'Sample product1'
