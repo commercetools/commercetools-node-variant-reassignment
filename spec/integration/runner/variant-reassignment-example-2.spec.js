@@ -56,5 +56,11 @@ describe('Variant reassignment', () => {
       .whereOperator('or')
       .fetch()
     expect(results.length).to.equal(3)
+    const backupProduct = results.find(product => product.masterVariant.sku === '2')
+    expect(backupProduct).to.exist()
+    expect(backupProduct.variants.length).to.equal(0)
+
+    const newProduct = results.find(product => product.masterVariant.sku === '1')
+    expect(newProduct.productType.id).to.not.equal(product1.productType.id)
   })
 })
