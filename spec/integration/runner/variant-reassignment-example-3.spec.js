@@ -1,3 +1,4 @@
+import { expect } from 'chai'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 import * as utils from '../../utils/helper'
 
