@@ -1,8 +1,9 @@
 import { expect } from 'chai'
+import _ from 'lodash'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
-const productTypeDraft2 = require('../../resources/productType.json')
+const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'))
 
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)

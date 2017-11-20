@@ -1,9 +1,6 @@
 import { expect } from 'chai'
-import _ from 'lodash'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
-
-const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'))
 
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
@@ -18,10 +15,7 @@ describe('Variant reassignment', () => {
     productDraft1.slug.en = 'product'
     product1 = await utils.ensureResource(ctpClient.products, productDraft1)
 
-    productTypeDraft2.name = 'product-type-2'
-    const productType2 = await utils.ensureResource(ctpClient.productTypes,
-      productTypeDraft2)
-    const productDraft2 = utils.generateProduct(['3', '4'], productType2.id)
+    const productDraft2 = utils.generateProduct(['3', '4'], productType.id)
     productDraft2.slug.de = 'produkte'
     product2 = await utils.ensureResource(ctpClient.products, productDraft2)
   })
@@ -30,9 +24,9 @@ describe('Variant reassignment', () => {
     utils.deleteResourcesAll(ctpClient, logger)
   )
 
-  it('merge products with duplicate slugs + remove variants v2 and v4', async () => {
+  it('merge variants v1 and v3 + remove variants v2 and v4', async () => {
     const reassignment = new VariantReassignment(logger, {})
-    const productDraft = {
+    await reassignment.execute([{
       productType: {
         id: product1.productType.id
       },
@@ -54,8 +48,7 @@ describe('Variant reassignment', () => {
           prices: []
         }
       ]
-    }
-    await reassignment.execute([productDraft], [product1, product2])
+    }], [product1, product2])
 
     const { body: { results } } = await ctpClient.productProjections
       .staged(true)
@@ -68,6 +61,7 @@ describe('Variant reassignment', () => {
       || product.masterVariant.sku === '3')
     expect(updatedProduct1.variants.length).to.equal(1)
     expect(updatedProduct1.id).to.equal(product1.id)
+    expect(updatedProduct1.slug.de).to.be.an('object')
 
     const updatedProduct2 = results.find(product => product.masterVariant.sku === '4')
     expect(updatedProduct2.variants.length).to.equal(0)
