@@ -1,6 +1,6 @@
 import { expect } from 'chai'
-import VariantReassignment from '../../../lib/runner/variant-reassignment'
 import * as utils from '../../utils/helper'
+import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
@@ -10,7 +10,7 @@ describe('Variant reassignment', () => {
   before(async () => {
     ctpClient = await utils.createClient()
     const productType = await utils.ensureProductType(ctpClient)
-    const productDraft1 = utils.generateProduct(['1', '2', '3'], productType.id)
+    const productDraft1 = utils.generateProduct(['1', '2'], productType.id)
     product1 = await utils.ensureResource(ctpClient.products, productDraft1)
   })
 
@@ -18,7 +18,7 @@ describe('Variant reassignment', () => {
     utils.deleteResourcesAll(ctpClient, logger)
   )
 
-  it('remove variants v2 and v3 from product 1', async () => {
+  it('change backup variant to valid variant', async () => {
     const reassignment = new VariantReassignment(logger, {})
     await reassignment.execute([{
       productType: {
@@ -29,7 +29,8 @@ describe('Variant reassignment', () => {
         en: 'Sample product1'
       },
       slug: {
-        en: 'sample-product1'
+        en: 'product',
+        de: 'produkte'
       },
       masterVariant: {
         sku: '1',
@@ -37,19 +38,17 @@ describe('Variant reassignment', () => {
       },
       variants: []
     }], [product1])
+
     const { body: { results } } = await ctpClient.productProjections
       .staged(true)
-      .where('masterVariant(sku in ("1", "2", "3"))')
-      .where('variants(sku in ("1", "2", "3"))')
+      .where('masterVariant(sku in ("1", "2"))')
+      .where('variants(sku in ("1", "2"))')
       .whereOperator('or')
       .fetch()
     expect(results).to.have.lengthOf(2)
-    const updatedProduct = results.find(product => product.masterVariant.sku === '1')
-    expect(updatedProduct).to.be.an('object')
-    expect(updatedProduct.variants).to.have.lengthOf(0)
-
-    const newProduct = results.find(product => product.masterVariant.sku !== '1')
-    expect(newProduct.variants).to.have.lengthOf(1)
-    expect(newProduct.slug._ctsd).to.be.a('string')
+    const updatedProduct1 = results.find(product => product.masterVariant.sku === '1')
+    expect(updatedProduct1.variants).to.have.lengthOf(0)
+    const updatedProduct2 = results.find(product => product.masterVariant.sku === '2')
+    expect(updatedProduct2.variants).to.have.lengthOf(0)
   })
 })

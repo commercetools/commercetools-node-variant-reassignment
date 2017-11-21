@@ -55,18 +55,18 @@ describe('Variant reassignment', () => {
         .where('variants(sku in ("1", "2", "3", "4"))')
         .whereOperator('or')
         .fetch()
-      expect(results.length).to.equal(3)
+      expect(results).to.have.lengthOf(3)
       const updatedProduct1 = results.find(product => product.masterVariant.sku === '2')
       const updatedProduct2 = results.find(product => product.masterVariant.sku === '4')
       const newProduct3 = results.find(product => product.masterVariant.sku === '1'
         || product.masterVariant.sku === '3')
-      expect(updatedProduct1.variants.length).to.equal(0)
+      expect(updatedProduct1.variants).to.have.lengthOf(0)
       expect(updatedProduct1.id).to.equal(product1.id)
 
-      expect(updatedProduct2.variants.length).to.equal(0)
-      expect(updatedProduct2.variants.length).to.equal(product2.id)
+      expect(updatedProduct2.variants).to.have.lengthOf(0)
+      expect(updatedProduct2.id).to.equal(product2.id)
 
-      expect(newProduct3.variants.length).to.equal(1)
+      expect(newProduct3.variants).to.have.lengthOf(1)
       expect(newProduct3.slug.en).to.equal(productDraft.slug.en)
     })
 })

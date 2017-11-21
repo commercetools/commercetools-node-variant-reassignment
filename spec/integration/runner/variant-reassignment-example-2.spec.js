@@ -56,10 +56,10 @@ describe('Variant reassignment', () => {
       .where('variants(sku in ("1", "2", "3", "4"))')
       .whereOperator('or')
       .fetch()
-    expect(results.length).to.equal(3)
+    expect(results).to.have.lengthOf(2)
     const backupProduct = results.find(product => product.masterVariant.sku === '2')
-    expect(backupProduct).to.exist()
-    expect(backupProduct.variants.length).to.equal(0)
+    expect(backupProduct).to.be.an('object')
+    expect(backupProduct.variants).to.have.lengthOf(2)
 
     const newProduct = results.find(product => product.masterVariant.sku === '1')
     expect(newProduct.productType.id).to.not.equal(product1.productType.id)
