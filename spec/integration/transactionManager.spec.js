@@ -1,0 +1,98 @@
+import _ from 'lodash'
+import { expect } from 'chai'
+
+import * as utils from '../utils/helper'
+import * as constants from '../../lib/constants'
+import TransactionManager from '../../lib/services/transactionManager'
+
+describe('TransactionManager', () => {
+  let sphereClient = null
+  let transactionService = null
+
+  before(async () => {
+    sphereClient = await utils.createClient()
+    transactionService = new TransactionManager(utils.logger, sphereClient)
+
+    await utils.deleteResource(sphereClient.customObjects)
+  })
+
+  afterEach(() =>
+    utils.deleteResource(sphereClient.customObjects)
+  )
+
+  it('should fetch no transactions', async () => {
+    const transactions = await transactionService.getTransactions()
+    expect(transactions).to.have.lengthOf(0)
+  })
+
+  it('should load all unfinished transactions from API', async () => {
+    await sphereClient.customObjects.create({
+      key: '1',
+      container: constants.TRANSACTION_CONTAINER,
+      value: 1
+    })
+    await sphereClient.customObjects.create({
+      key: '2',
+      container: constants.TRANSACTION_CONTAINER,
+      value: 1
+    })
+    await sphereClient.customObjects.create({
+      key: '3',
+      container: constants.TRANSACTION_CONTAINER,
+      value: 1
+    })
+    await sphereClient.customObjects.create({
+      key: '4',
+      container: constants.TRANSACTION_CONTAINER,
+      value: 1
+    })
+
+    const transactions = await transactionService.getTransactions()
+
+    expect(transactions).to.be.an('array')
+    expect(transactions).to.have.lengthOf(4)
+    const keys = _.map(transactions, 'key').sort()
+    expect(keys).to.deep.equal(['1', '2', '3', '4'])
+  })
+
+  it('should create a transaction on API', async () => {
+    const productId = 123
+    const transaction = {
+      info: 'transactionInfo',
+      actions: []
+    }
+
+    const createdTransaction = await transactionService.createTransaction(
+      productId, transaction
+    )
+
+    expect(createdTransaction.container).to.equal(
+      constants.TRANSACTION_CONTAINER
+    )
+    expect(createdTransaction.key.split('-')[0]).to.equal(String(productId))
+    expect(createdTransaction.value).to.deep.equal(transaction)
+
+    const { body: { results: transactions } } = await sphereClient
+      .customObjects
+      .fetch()
+
+    expect(transactions).to.have.lengthOf(1)
+    expect(transactions[0].key).to.equal(createdTransaction.key)
+  })
+
+  it('should delete a transaction on API', async () => {
+    await transactionService.createTransaction('produtId1', {})
+
+    const transaction = await transactionService.createTransaction(
+      'produtId2', {}
+    )
+
+    const transactionsBefore = await transactionService.getTransactions()
+    expect(transactionsBefore).to.have.lengthOf(2)
+
+    await transactionService.deleteTransaction(transaction.key)
+    const transactionsAfter = await transactionService.getTransactions()
+    expect(transactionsAfter).to.have.lengthOf(1)
+    expect(transactionsAfter[0].key).to.contain('produtId1')
+  })
+})

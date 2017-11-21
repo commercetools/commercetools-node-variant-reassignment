@@ -28,12 +28,12 @@ export function createClient (key) {
  * @param resource  Sphere client resource (eg. sphereClient.customObjects)
  * @param predicate Sphere predicate of items which should be deleted
  */
-export function deleteResource (resource, predicate) {
+export function deleteResource (resource, predicate = '') {
   logger.debug(`Deleting Sphere resource ${resource._currentEndpoint}`
     + ` with predicate`, predicate)
 
   return resource
-    .where(predicate || '')
+    .where(predicate)
     .perPage(500)
     .process(res =>
       Promise.map(res.body.results, item =>
