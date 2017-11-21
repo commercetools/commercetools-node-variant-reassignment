@@ -1,4 +1,17 @@
 {
   "name": "test-product-type",
-  "description": "Test product type"
+  "description": "Test product type",
+  "attributes": [
+    {
+      "name": "brandId",
+      "label": {
+        "en": "brandId"
+      },
+      "isRequired": false,
+      "type": {
+        "name": "text"
+      },
+      "attributeConstraint": "SameForAll"
+    }
+  ]
 }
