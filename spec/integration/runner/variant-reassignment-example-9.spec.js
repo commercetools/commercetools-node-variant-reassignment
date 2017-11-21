@@ -24,7 +24,7 @@ describe('Variant reassignment', () => {
     utils.deleteResourcesAll(ctpClient, logger)
   )
 
-  it('merge variants with different sameForAll attributes on CTP product and product draft',
+  it('merge variants with different sameForAll attributes with blacklist',
     async () => {
       const reassignment = new VariantReassignment(['brandId'], logger, {})
       await reassignment.execute([{

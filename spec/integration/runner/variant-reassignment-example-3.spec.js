@@ -19,7 +19,7 @@ describe('Variant reassignment', () => {
   )
 
   it('remove variants v2 and v3 from product 1', async () => {
-    const reassignment = new VariantReassignment(logger, {})
+    const reassignment = new VariantReassignment([], logger, {})
     await reassignment.execute([{
       productType: {
         id: product1.productType.id
