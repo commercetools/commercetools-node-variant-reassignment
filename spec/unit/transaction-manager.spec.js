@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import * as utils from '../utils/helper'
-import TransactionManager from '../../lib/services/transactionManager'
+import TransactionManager from '../../lib/services/transaction-manager'
 
 describe('TransactionManager', () => {
   let transactionService = null
@@ -15,6 +15,6 @@ describe('TransactionManager', () => {
     const [productId, time] = key.split('-')
 
     expect(productId).to.equal('123')
-    expect(Number(time)).to.be.below(+new Date())
+    expect(Number(time)).to.be.most(+new Date())
   })
 })

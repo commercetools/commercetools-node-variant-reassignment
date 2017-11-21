@@ -3,7 +3,7 @@ import { expect } from 'chai'
 
 import * as utils from '../utils/helper'
 import * as constants from '../../lib/constants'
-import TransactionManager from '../../lib/services/transactionManager'
+import TransactionManager from '../../lib/services/transaction-manager'
 
 describe('TransactionManager', () => {
   let sphereClient = null
