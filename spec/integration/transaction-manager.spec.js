@@ -6,18 +6,18 @@ import * as constants from '../../lib/constants'
 import TransactionManager from '../../lib/services/transaction-manager'
 
 describe('TransactionManager', () => {
-  let sphereClient = null
+  let ctpClient = null
   let transactionService = null
 
   before(async () => {
-    sphereClient = await utils.createClient()
-    transactionService = new TransactionManager(utils.logger, sphereClient)
+    ctpClient = await utils.createClient()
+    transactionService = new TransactionManager(utils.logger, ctpClient)
 
-    await utils.deleteResource(sphereClient.customObjects)
+    await utils.deleteResource(ctpClient.customObjects)
   })
 
   afterEach(() =>
-    utils.deleteResource(sphereClient.customObjects)
+    utils.deleteResource(ctpClient.customObjects)
   )
 
   it('should fetch no transactions', async () => {
@@ -26,22 +26,22 @@ describe('TransactionManager', () => {
   })
 
   it('should load all unfinished transactions from API', async () => {
-    await sphereClient.customObjects.create({
+    await ctpClient.customObjects.create({
       key: '1',
       container: constants.TRANSACTION_CONTAINER,
       value: 1
     })
-    await sphereClient.customObjects.create({
+    await ctpClient.customObjects.create({
       key: '2',
       container: constants.TRANSACTION_CONTAINER,
       value: 1
     })
-    await sphereClient.customObjects.create({
+    await ctpClient.customObjects.create({
       key: '3',
       container: constants.TRANSACTION_CONTAINER,
       value: 1
     })
-    await sphereClient.customObjects.create({
+    await ctpClient.customObjects.create({
       key: '4',
       container: constants.TRANSACTION_CONTAINER,
       value: 1
@@ -72,7 +72,7 @@ describe('TransactionManager', () => {
     expect(createdTransaction.key.split('-')[0]).to.equal(String(productId))
     expect(createdTransaction.value).to.deep.equal(transaction)
 
-    const { body: { results: transactions } } = await sphereClient
+    const { body: { results: transactions } } = await ctpClient
       .customObjects
       .fetch()
 
