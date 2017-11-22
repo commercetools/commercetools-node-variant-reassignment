@@ -5,6 +5,31 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
 const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'))
 
+/* eslint-disable max-len */
+/**
+ * +-----------------------------------------+--------------------------+--------------------+----------------------------------------------------------------+
+ * | New product draft                       | CTP product              | After reassignment | CTP product                                                    |
+ * +-----------------------------------------+--------------------------+                    +----------------------------------------------------------------+
+ * | Product:                                | Product:                 |                    | Product:                                                       |
+ * | slug: { en: "product", de: "produkte" } | id: "1"                  |                    | id: "1"                                                        |
+ * | product-type: "pt1"                     | slug: { en: "product" }  |                    | slug: { en: "product" }                                        |
+ * | variants: v1, v3                        | product-type: "pt1"      |                    | product-type: "pt1"                                            |
+ * |                                         | variants: v1, v2         |                    | variants: v1, v3                                               |
+ * +-----------------------------------------+--------------------------+                    +----------------------------------------------------------------+
+ * |                                         | Product:                 |                    | Product:                                                       |
+ * |                                         | id: "2"                  |                    | id: "2"                                                        |
+ * |                                         | slug: { de: "produkte" } |                    | slug: { de: "produkte_${timestamp1}", _ctsd: "${timestamp1}" } |
+ * |                                         | product-type: "pt2"      |                    | product-type: "pt2"                                            |
+ * |                                         | variants: v3, v4         |                    | variants: v4                                                   |
+ * +-----------------------------------------+--------------------------+--------------------+----------------------------------------------------------------+
+ * |                                         |                          |                    | Product:                                                       |
+ * |                                         |                          |                    | id: "3"                                                        |
+ * |                                         |                          |                    | slug: { en: "product_${timestamp2}", _ctsd: "${timestamp2}" }  |
+ * |                                         |                          |                    | product-type: "pt1"                                            |
+ * |                                         |                          |                    | variants: v2                                                   |
+ * +-----------------------------------------+--------------------------+--------------------+----------------------------------------------------------------+
+ */
+/* eslint-enable max-len */
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient

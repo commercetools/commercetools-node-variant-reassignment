@@ -4,6 +4,31 @@ import * as utils from '../../utils/helper'
 
 const productDraftProductType = require('../../resources/productType.json')
 
+/* eslint-disable max-len */
+/**
+ * +---------------------------+---------------------------------------------+--------------------+---------------------------------------------------------------+
+ * | New product draft         | CTP product                                 | After reassignment | CTP product                                                   |
+ * +---------------------------+---------------------------------------------+                    +---------------------------------------------------------------+
+ * | Product:                  | Product:                                    |                    | Product:                                                      |
+ * | slug: { en: "product-1" } | id: "1"                                     |                    | id: "1"                                                       |
+ * | product-type: "pt2"       | slug: { en: "product-1", de: "produkte-1" } |                    | slug: { en: "product-1_${timestamp}", _ctsd: "${timestamp}" } |
+ * | variants: v1, v3          | product-type: "pt1"                         |                    | product-type: "pt1"                                           |
+ * |                           | variants: v1, v2                            |                    | variants: v2                                                  |
+ * +---------------------------+---------------------------------------------+                    +---------------------------------------------------------------+
+ * |                           | Product:                                    |                    | Product:                                                      |
+ * |                           | id: "2"                                     |                    | id: "2"                                                       |
+ * |                           | slug: { en: "product-2" }                   |                    | slug: { en: "product-2" }                                     |
+ * |                           | product-type: "pt1"                         |                    | product-type: "pt1"                                           |
+ * |                           | variants: v3, v4                            |                    | variants: v4                                                  |
+ * +---------------------------+---------------------------------------------+                    +---------------------------------------------------------------+
+ * |                           |                                             |                    | Product:                                                      |
+ * |                           |                                             |                    | id: "3"                                                       |
+ * |                           |                                             |                    | slug: { en: "product-1", de: "produkte-1" }                   |
+ * |                           |                                             |                    | product-type: "pt2"                                           |
+ * |                           |                                             |                    | variants: v1, v3                                              |
+ * +---------------------------+---------------------------------------------+--------------------+---------------------------------------------------------------+
+ */
+/* eslint-enable max-len */
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient

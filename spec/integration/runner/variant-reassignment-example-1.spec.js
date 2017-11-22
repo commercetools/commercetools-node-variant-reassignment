@@ -2,6 +2,25 @@ import { expect } from 'chai'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
+/* eslint-disable max-len */
+/**
+ * +---------------------------+---------------------------------------------+--------------------+---------------------------------------------+
+ * | New product draft         | CTP product                                 | After reassignment | CTP product                                 |
+ * +---------------------------+---------------------------------------------+                    +---------------------------------------------+
+ * | Product:                  | Product:                                    |                    | Product:                                    |
+ * | slug: { en: "product-1" } | id: "1"                                     |                    | id: "1"                                     |
+ * | product-type: "pt1"       | slug: { en: "product-1", de: "produkte-1" } |                    | slug: { en: "product-1", de: "produkte-1" } |
+ * | variants: v1, v3          | product-type: "pt1"                         |                    | product-type: "pt1"                         |
+ * |                           | variants: v1                                |                    | variants: v1, v3                            |
+ * +---------------------------+---------------------------------------------+                    +---------------------------------------------+
+ * |                           | Product:                                    |                    | Product:                                    |
+ * |                           | id: "2"                                     |                    | id: "2"                                     |
+ * |                           | slug: { en: "product-2" }                   |                    | slug: { en: "product-2" }                   |
+ * |                           | product-type: "pt1"                         |                    | product-type: "pt1"                         |
+ * |                           | variants: v3, v4                            |                    | variants: v4                                |
+ * +---------------------------+---------------------------------------------+--------------------+---------------------------------------------+
+ */
+/* eslint-enable max-len */
 describe('Variant reassignment', () => {
   let ctpClient
   let product1

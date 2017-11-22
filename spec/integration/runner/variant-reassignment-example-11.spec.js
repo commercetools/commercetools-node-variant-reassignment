@@ -2,6 +2,25 @@ import { expect } from 'chai'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
+/* eslint-disable max-len */
+/**
+ * +-----------+------------------------------------------------------------+-------------------------------------------------------------------------+--------+
+ * | Blacklist | Product draft                                              | CTP product                                                             | Error! |
+ * +-----------+------------------------------------------------------------+-------------------------------------------------------------------------+        +
+ * | [ ]       | Product:                                                   | Product:                                                                |        |
+ * |           | slug: { en: "product" }                                    | id: 1                                                                   |        |
+ * |           | product-type: "pt1"                                        | slug: { en: "product-1" }                                               |        |
+ * |           | masterVariant: { sku: v1, attributes: [ { brandId: 1 } ] } | product-type: "pt1"                                                     |        |
+ * |           | variants: { sku: v2, attributes: [ { brandId: 2 } ] }      | masterVariant: { sku: v1, attributes: [ { brandId (sameForAll): 2 } ] } |        |
+ * +-----------+------------------------------------------------------------+-------------------------------------------------------------------------+        +
+ * |           |                                                            | Product:                                                                |        |
+ * |           |                                                            | id: 2                                                                   |        |
+ * |           |                                                            | slug: { en: "product-2" }                                               |        |
+ * |           |                                                            | product-type: "pt1"                                                     |        |
+ * |           |                                                            | masterVariant: { sku: v2, attributes: [ { brandId (sameForAll): 2 } ] } |        |
+ * +-----------+------------------------------------------------------------+-------------------------------------------------------------------------+--------+
+ */
+/* eslint-enable max-len */
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient

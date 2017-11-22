@@ -2,6 +2,26 @@ import { expect } from 'chai'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
+/* eslint-disable max-len */
+/**
+ * +-------------------------+---------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+ * | New product draft       | CTP product                                                   | After reassignment | CTP product                                                   |
+ * +-------------------------+---------------------------------------------------------------+                    +---------------------------------------------------------------+
+ * | Product:                | Product:                                                      |                    | Product:                                                      |
+ * | slug: { en: "product" } | id: "1"                                                       |                    | id: "1"                                                       |
+ * | product-type: "pt1"     | slug: { en: "product_${timestamp1}", _ctsd: "${timestamp1}" } |                    | slug: { en: "product_${timestamp1}", _ctsd: "${timestamp1}" } |
+ * | masterVariant: v1       | product-type: "pt1"                                           |                    | product-type: "pt1"                                           |
+ * |                         | masterVariant: v1                                             |                    | masterVariant: v1                                             |
+ * |                         | variant: v2                                                   |                    |                                                               |
+ * +-------------------------+---------------------------------------------------------------+                    +---------------------------------------------------------------+
+ * |                         |                                                               |                    | Product:                                                      |
+ * |                         |                                                               |                    | id: "2"                                                       |
+ * |                         |                                                               |                    | slug: { en: "product_${timestamp2}", _ctsd: "${timestamp2}" } |
+ * |                         |                                                               |                    | product-type: "pt1"                                           |
+ * |                         |                                                               |                    | masterVariant: v2                                             |
+ * +-------------------------+---------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+ */
+/* eslint-enable max-len */
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient

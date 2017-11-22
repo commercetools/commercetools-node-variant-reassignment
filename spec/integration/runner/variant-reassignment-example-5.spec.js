@@ -2,6 +2,31 @@ import { expect } from 'chai'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
+/* eslint-disable max-len */
+/**
+ * +-------------------------------------------------+---------------------------+--------------------+-------------------------------------------------+
+ * | New product draft                               | CTP product               | After reassignment | CTP product                                     |
+ * +-------------------------------------------------+---------------------------+                    +-------------------------------------------------+
+ * | Product:                                        | Product:                  |                    | Product:                                        |
+ * | slug: { en: "product-xxx", de: "produkte-xxx" } | id: "1"                   |                    | id: "1"                                         |
+ * | product-type: "pt2"                             | slug: { en: "product-1" } |                    | slug: { en: "product-1" }                       |
+ * | variants: v1, v3                                | product-type: "pt2"       |                    | product-type: "pt2"                             |
+ * |                                                 | variants: v1, v2          |                    | variants: v2                                    |
+ * +-------------------------------------------------+---------------------------+                    +-------------------------------------------------+
+ * |                                                 | Product:                  |                    | Product:                                        |
+ * |                                                 | id: "2"                   |                    | id: "2"                                         |
+ * |                                                 | slug: { en: "product-2" } |                    | slug: { en: "product-2" }                       |
+ * |                                                 | product-type: "pt2"       |                    | product-type: "pt2"                             |
+ * |                                                 | variants: v3, v4          |                    | variants: v4                                    |
+ * +-------------------------------------------------+---------------------------+--------------------+-------------------------------------------------+
+ * |                                                 |                           |                    | Product:                                        |
+ * |                                                 |                           |                    | id: "3"                                         |
+ * |                                                 |                           |                    | slug: { en: "product-xxx", de: "produkte-xxx" } |
+ * |                                                 |                           |                    | product-type: "pt2"                             |
+ * |                                                 |                           |                    | variants: v1, v3                                |
+ * +-------------------------------------------------+---------------------------+--------------------+-------------------------------------------------+
+ */
+/* eslint-enable max-len */
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient

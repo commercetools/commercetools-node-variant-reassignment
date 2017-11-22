@@ -5,6 +5,19 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
 const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'))
 
+/* eslint-disable max-len */
+/**
+ * +---------------------------+----------------------------+--------------------+----------------------------+
+ * | Product draft             | CTP product                | After reassignment | CTP product                |
+ * +---------------------------+----------------------------+--------------------+----------------------------+
+ * | Product:                  | Product:                   |                    | Product:                   |
+ * | slug: { en: "product" }   | id: 1                      |                    | id: 2                      |
+ * | product-type: "pt2"       | slug: { en: "product" }    |                    | slug: { en: "product" }    |
+ * | masterVariant: { sku: v1} | product-type: "pt1"        |                    | product-type: "pt2"        |
+ * |                           | masterVariant: { sku: v1 } |                    | masterVariant: { sku: v1 } |
+ * +---------------------------+----------------------------+--------------------+----------------------------+
+ */
+/* eslint-enable max-len */
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
