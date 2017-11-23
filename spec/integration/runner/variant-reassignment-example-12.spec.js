@@ -40,7 +40,7 @@ describe('Variant reassignment', () => {
     utils.deleteResourcesAll(ctpClient, logger)
   )
 
-  it('only product type changes', async () => {
+  it('product type changes', async () => {
     const reassignment = new VariantReassignment([], logger, {})
     await reassignment.execute([{
       productType: {
