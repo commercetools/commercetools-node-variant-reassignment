@@ -74,12 +74,7 @@ describe('Variant reassignment', () => {
       }
       await reassignment.execute([productDraft], [product1, product2])
 
-      const { body: { results } } = await ctpClient.productProjections
-        .staged(true)
-        .where('masterVariant(sku in ("1", "2", "3", "4"))')
-        .where('variants(sku in ("1", "2", "3", "4"))')
-        .whereOperator('or')
-        .fetch()
+      const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
       expect(results).to.have.lengthOf(3)
       const updatedProduct1 = results.find(product => product.masterVariant.sku === '2')
       const updatedProduct2 = results.find(product => product.masterVariant.sku === '4')

@@ -180,3 +180,12 @@ export function createLogger (filename) {
   return Logger(
     `Test::helper::${path.basename(filename)}`, process.env.LOG_LEVEL)
 }
+
+export function getProductsBySkus (skus, ctpClient) {
+  return ctpClient.productProjections
+    .staged(true)
+    .where(`masterVariant(sku in ("${skus.join('","')}"))`)
+    .where(`variants(sku in ("${skus.join('","')}"))`)
+    .whereOperator('or')
+    .fetch()
+}
