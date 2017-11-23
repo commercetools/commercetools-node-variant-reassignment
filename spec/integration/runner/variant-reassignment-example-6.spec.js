@@ -85,14 +85,17 @@ describe('Variant reassignment', () => {
       || product.masterVariant.sku === '3')
     expect(updatedProduct1.variants).to.have.lengthOf(1)
     expect(updatedProduct1.id).to.equal(product1.id)
+    expect(updatedProduct1.productType.id).to.equal(product1.productType.id)
 
     const updatedProduct2 = results.find(product => product.masterVariant.sku === '4')
     expect(updatedProduct2.variants).to.have.lengthOf(0)
     expect(updatedProduct2.slug._ctsd).to.be.a('string')
     expect(updatedProduct2.id).to.equal(product2.id)
+    expect(updatedProduct2.productType.id).to.equal(product2.productType.id)
 
     const newProduct = results.find(product => product.masterVariant.sku === '2')
     expect(newProduct.variants).to.have.lengthOf(0)
     expect(newProduct.slug._ctsd).to.be.a('string')
+    expect(newProduct.productType.id).to.be.a(product1.productType.id)
   })
 })
