@@ -51,7 +51,6 @@ describe('Variant reassignment', () => {
         productType: {
           id: product1.productType.id
         },
-        key: 'sample-product1',
         name: {
           en: 'Sample product1'
         },
@@ -60,7 +59,6 @@ describe('Variant reassignment', () => {
         },
         masterVariant: {
           sku: '1',
-          prices: [],
           attributes: [
             {
               name: 'brandId',
@@ -71,7 +69,6 @@ describe('Variant reassignment', () => {
         variants: [
           {
             sku: '2',
-            prices: [],
             attributes: [
               {
                 name: 'brandId',
