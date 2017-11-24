@@ -69,20 +69,25 @@ describe('ProductManager', () => {
 
     it('should delete a product using its id', async () => {
       const newProduct = getProductMock()
+      const sku = newProduct.masterVariant.sku
       const createdProduct = await productService.createProduct(newProduct)
-      await productService.deleteProductById(createdProduct.id)
+      let apiProducts = await productService.getProductsBySkus([sku])
+      expect(apiProducts).to.have.lengthOf(1)
 
+      await productService.deleteByProductId(createdProduct.id)
       const deletedProduct = await productService.getProductById(
         createdProduct.id
       )
-
       expect(deletedProduct).to.be.an('undefined')
+
+      apiProducts = await productService.getProductsBySkus(sku)
+      expect(apiProducts).to.have.lengthOf(0)
     })
 
     it('should delete a product', async () => {
       const newProduct = getProductMock()
       const createdProduct = await productService.createProduct(newProduct)
-      await productService.deleteProduct(createdProduct)
+      await productService.deleteByProduct(createdProduct)
 
       const deletedProduct = await productService.getProductById(
         createdProduct.id
