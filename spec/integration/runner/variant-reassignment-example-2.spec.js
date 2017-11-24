@@ -77,8 +77,12 @@ describe('Variant reassignment', () => {
     const backupProduct = results.find(product => product.masterVariant.sku === '2')
     expect(backupProduct).to.be.an('object')
     expect(backupProduct.variants).to.have.lengthOf(2)
+    expect(backupProduct.slug._ctsd).to.be.a('string')
 
     const newProduct = results.find(product => product.masterVariant.sku === '1')
     expect(newProduct.productType.id).to.not.equal(product1.productType.id)
+
+    const updatedProduct = results.find(product => product.masterVariant.sku === '4')
+    expect(updatedProduct).to.be.an('object')
   })
 })
