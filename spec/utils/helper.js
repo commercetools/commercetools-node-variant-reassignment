@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 import bunyan from 'bunyan'
-import * as ctp from '../../lib/services/ctp'
+import * as ctp from './ctp'
 
 const sampleProductType = require('../resources/productType.json')
 
