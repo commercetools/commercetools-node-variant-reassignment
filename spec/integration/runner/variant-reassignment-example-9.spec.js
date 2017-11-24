@@ -11,7 +11,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  * |             | slug: { en: "product" }                                    | id: 1                                                                   |                    | id: "1"                                    |
  * |             | product-type: "pt1"                                        | slug: { en: "product-1" }                                               |                    | slug: { en: "product" }                    |
  * |             | masterVariant: { sku: v1, attributes: [ { brandId: 1 } ] } | product-type: "pt1"                                                     |                    | product-type: "pt1"                        |
- * |             | variants: { sku: v2, attributes: [ { brandId: 1 } ] }      | masterVariant: { sku: v1, attributes: [ { brandId (sameForAll): 2 } ] } |                    | masterVariant: { sku: v1, attributes: [] } |
+ * |             | variants: { sku: v2, attributes: [ { brandId: 2 } ] }      | masterVariant: { sku: v1, attributes: [ { brandId (sameForAll): 2 } ] } |                    | masterVariant: { sku: v1, attributes: [] } |
  * |             |                                                            |                                                                         |                    | variants: { sku: v2, attributes: [] }      |
  * +-------------+------------------------------------------------------------+-------------------------------------------------------------------------+                    +--------------------------------------------+
  * |             |                                                            | Product:                                                                |                    |                                            |
@@ -72,7 +72,7 @@ describe('Variant reassignment', () => {
             attributes: [
               {
                 name: 'brandId',
-                value: '1'
+                value: '2'
               }
             ]
           }
@@ -82,7 +82,8 @@ describe('Variant reassignment', () => {
       const { body: { results } } = await utils.getProductsBySkus(['1', '2'], ctpClient)
       expect(results).to.have.lengthOf(1)
       const product = results[0]
+      expect(product.masterVariant.attributes).to.have.lengthOf(0)
       expect(product.variants).to.have.lengthOf(1)
-      expect(product.variants.attributes).to.have.lengthOf(0)
+      expect(product.variants[0].attributes).to.have.lengthOf(0)
     })
 })
