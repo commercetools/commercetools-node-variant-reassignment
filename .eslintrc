@@ -23,6 +23,8 @@
       "exports": "never",
       "functions": "ignore"
     }],
-    "no-restricted-syntax": ["error", "WithStatement"]
+    "no-restricted-syntax": ["error", "WithStatement"],
+    "no-await-in-loop": 0,
+    "max-len": ["error", 100]
   }
 }

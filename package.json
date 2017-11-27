@@ -19,7 +19,8 @@
     "coverage": "npm run lint && npm run build && LOG_LEVEL=info NODE_ENV=test ./node_modules/.bin/babel-node node_modules/.bin/babel-istanbul cover node_modules/.bin/_mocha -- --full-trace -t 60000 --recursive spec/**/*.spec.js",
     "test": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive spec/**/*.spec.js",
     "test:unit": "LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 10000 --require babel-core/register --recursive spec/unit/*.spec.js",
-    "test:integration": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive spec/integration/*.spec.js"
+    "test:integration": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive spec/integration/*.spec.js",
+    "validate": "npm ls"
   },
   "pre-commit": [
     "lint"
@@ -38,7 +39,9 @@
     "bunyan": "^1.8.12",
     "lodash": "^4.17.4",
     "sphere-node-sdk": "^1.20.0",
-    "sphere-node-utils": "^0.9.1"
+    "sphere-node-utils": "^0.9.1",
+    "utils-error-to-json": "^1.0.0",
+    "uuid": "^3.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
