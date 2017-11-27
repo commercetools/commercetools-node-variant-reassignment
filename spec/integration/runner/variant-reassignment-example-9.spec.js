@@ -30,14 +30,15 @@ describe('Variant reassignment', () => {
 
   before(async () => {
     ctpClient = await utils.createClient()
-    const productType = await utils.ensureProductType(ctpClient)
-    const productDraft1 = utils.generateProduct(['1'], productType.id)
-    productDraft1.masterVariant.attributes = [{ name: 'brandId', value: '2' }]
-    product1 = await utils.ensureResource(ctpClient.products, productDraft1)
 
-    const productDraft2 = utils.generateProduct(['2'], productType.id)
-    productDraft2.masterVariant.attributes = [{ name: 'brandId', value: '3' }]
-    product2 = await utils.ensureResource(ctpClient.products, productDraft2)
+    const results = await utils.createCtpProducts([['1'], ['2']], ctpClient, (pD) => {
+      if (pD.masterVariant.sku === '1')
+        pD.masterVariant.attributes = [{ name: 'brandId', value: '2' }]
+      else if (pD.masterVariant.sku === '2')
+        pD.masterVariant.attributes = [{ name: 'brandId', value: '3' }]
+    })
+    product1 = results.find(product => product.masterVariant.sku === '1')
+    product2 = results.find(product => product.masterVariant.sku === '2')
   })
 
   after(() =>

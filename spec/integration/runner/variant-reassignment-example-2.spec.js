@@ -37,11 +37,9 @@ describe('Variant reassignment', () => {
 
   before(async () => {
     ctpClient = await utils.createClient()
-    const productType = await utils.ensureProductType(ctpClient)
-    const productDraft1 = utils.generateProduct(['1', '2'], productType.id)
-    product1 = await utils.ensureResource(ctpClient.products, productDraft1)
-    const productDraft2 = utils.generateProduct(['3', '4'], productType.id)
-    product2 = await utils.ensureResource(ctpClient.products, productDraft2)
+    const results = await utils.createCtpProducts([['1', '2'], ['3', '4']], ctpClient)
+    product1 = results.find(product => product.masterVariant.sku === '1')
+    product2 = results.find(product => product.masterVariant.sku === '3')
   })
 
   after(() =>
@@ -50,7 +48,8 @@ describe('Variant reassignment', () => {
 
   it('moving variant v3 + removing variant v2 + changing productType', async () => {
     productDraftProductType.name = 'product-draft-product-type'
-    const productType = await utils.ensureResource(ctpClient.productTypes, productDraftProductType)
+    const productType = await utils.ensureResource(ctpClient.productTypes,
+      productDraftProductType, 'name')
 
     const reassignment = new VariantReassignment([], logger, {})
     await reassignment.execute([{

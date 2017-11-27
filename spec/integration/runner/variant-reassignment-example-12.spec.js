@@ -21,19 +21,16 @@ const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
-  let originalProduct
+  let product1
   let productType2
 
   before(async () => {
     ctpClient = await utils.createClient()
-    const productType = await utils.ensureProductType(ctpClient)
-    const productDraft1 = utils.generateProduct(['1'], productType.id)
-    productDraft1.masterVariant.attributes = [{ name: 'brandId', value: '2' }]
-    originalProduct = await utils.ensureResource(ctpClient.products, productDraft1)
 
-    productTypeDraft2.name = 'product-type-2'
-    productType2 = await utils.ensureResource(ctpClient.productTypes,
-      productTypeDraft2)
+    const results = await utils.createCtpProducts([['1']], ctpClient, (pD) => {
+      pD.masterVariant.attributes = [{ name: 'brandId', value: '2' }]
+    })
+    product1 = results.find(product => product.masterVariant.sku === '1')
   })
 
   after(() =>
@@ -41,6 +38,10 @@ describe('Variant reassignment', () => {
   )
 
   it('product type changes', async () => {
+    productTypeDraft2.name = 'product-type-2'
+    productType2 = await utils.ensureResource(ctpClient.productTypes,
+      productTypeDraft2, 'name')
+
     const reassignment = new VariantReassignment([], logger, {})
     await reassignment.execute([{
       productType: {
@@ -56,14 +57,14 @@ describe('Variant reassignment', () => {
         sku: '1'
       },
       variants: []
-    }], [originalProduct])
+    }], [product1])
     const { body: { results } } = await utils.getProductsBySkus(['1'], ctpClient)
     expect(results).to.have.lengthOf(1)
     const updatedProduct = results[0]
-    expect(updatedProduct.version).to.be.above(originalProduct.version)
+    expect(updatedProduct.version).to.be.above(product1.version)
     expect(updatedProduct.productType.id).to.equal(productType2.id)
-    expect(updatedProduct.slug).to.deep.equal(originalProduct.slug)
-    expect(updatedProduct.masterVariant).to.deep.equal(originalProduct.masterVariant)
-    expect(updatedProduct.name).to.deep.equal(originalProduct.name)
+    expect(updatedProduct.slug).to.deep.equal(product1.slug)
+    expect(updatedProduct.masterVariant).to.deep.equal(product1.masterVariant)
+    expect(updatedProduct.name).to.deep.equal(product1.name)
   })
 })

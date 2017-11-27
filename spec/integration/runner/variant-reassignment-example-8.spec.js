@@ -29,9 +29,8 @@ describe('Variant reassignment', () => {
 
   before(async () => {
     ctpClient = await utils.createClient()
-    const productType = await utils.ensureProductType(ctpClient)
-    const productDraft1 = utils.generateProduct(['1', '2'], productType.id)
-    product1 = await utils.ensureResource(ctpClient.products, productDraft1)
+    const results = await utils.createCtpProducts([['1', '2']], ctpClient)
+    product1 = results.find(product => product.masterVariant.sku === '1')
   })
 
   after(() =>

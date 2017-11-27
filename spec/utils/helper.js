@@ -161,6 +161,21 @@ export function generateProduct (skus, productTypeId) {
   return product
 }
 
+export async function createCtpProducts (skuGroups, ctpClient, beforeProductCreateCb) {
+  const productType = await ensureProductType(ctpClient)
+  const masterVariantSkus = []
+  for (let i = 0; i < skuGroups.length; i++) {
+    const skus = skuGroups[i]
+    const productDraft = generateProduct(skus, productType.id)
+    if (beforeProductCreateCb)
+      beforeProductCreateCb(productDraft)
+    const product = await ensureResource(ctpClient.products, productDraft)
+    masterVariantSkus.push(product.masterData.current.masterVariant.sku)
+  }
+  const { body: { results } } = await getProductsBySkus(masterVariantSkus, ctpClient)
+  return results
+}
+
 /**
  * Delete all resources used in tests
  */
