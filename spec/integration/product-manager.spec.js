@@ -12,7 +12,7 @@ const mockProduct = {
     en: 'testProduct'
   },
   masterVariant: {
-    sku: '123'
+    sku: '1'
   },
   productType: {
     id: null,
@@ -31,7 +31,7 @@ function getProductMock () {
 describe('ProductManager', () => {
   before(async () => {
     ctpClient = await utils.createClient()
-    await utils.deleteResource(ctpClient.products)
+    await utils.deleteAllProducts(ctpClient)
     productType = await utils.ensureProductType(ctpClient)
     mockProduct.productType.id = productType.id
   })
@@ -41,7 +41,7 @@ describe('ProductManager', () => {
   )
 
   afterEach(() =>
-    utils.deleteResource(ctpClient.products)
+    utils.deleteAllProducts(ctpClient)
   )
 
   describe('Basic functions', () => {
@@ -96,19 +96,50 @@ describe('ProductManager', () => {
       expect(deletedProduct).to.be.an('undefined')
     })
   })
-  //
-  // describe('Remove variants from a product', () => {
-  //   it('should remove variants from a product', async () => {
-  //     const newProduct = getProductMock()
-  //
-  //     const createdProduct = await productService.createProduct(newProduct)
-  //     await productService.deleteProduct(createdProduct)
-  //
-  //     const deletedProduct = await productService.getProductById(
-  //       createdProduct.id
-  //     )
-  //
-  //     expect(deletedProduct).to.be.an('undefined')
-  //   })
-  // })
+
+  describe('Removing variants', () => {
+    it('should remove masterVariant from a product', async () => {
+      const newProduct = getProductMock()
+
+      newProduct.variants = [{
+        sku: '2'
+      }]
+
+      let product = await productService.createProduct(newProduct)
+      product = await productService.removeVariantsFromProduct(product, ['1'])
+      const { current, staged } = product.masterData
+
+      expect(current.masterVariant.sku).to.equal('2')
+      expect(current.variants).to.have.lengthOf(0)
+
+      expect(staged.masterVariant.sku).to.equal('2')
+      expect(staged.variants).to.have.lengthOf(0)
+    })
+
+    it('should remove masterVariant and add variant from staged', async () => {
+      const newProduct = getProductMock()
+      newProduct.variants = [{
+        sku: '2'
+      }]
+
+      // add product with two variants
+      let product = await productService.createProduct(newProduct)
+      // publish product
+      product = await productService.publishProduct(product)
+      // remove v2 from staged
+      product = await productService.updateProduct(product, [{
+        action: 'removeVariant',
+        sku: '2'
+      }])
+
+      product = await productService.removeVariantsFromProduct(product, ['1'])
+      const { current, staged } = product.masterData
+
+      expect(current.masterVariant.sku).to.equal('2')
+      expect(current.variants).to.have.lengthOf(0)
+
+      expect(staged.masterVariant.sku).to.equal('2')
+      expect(staged.variants).to.have.lengthOf(0)
+    })
+  })
 })
