@@ -106,7 +106,7 @@ describe('ProductManager', () => {
 
     it('should not remove anything when skus are not found', () => {
       const product = getMockProduct()
-      productService.removeVariantsFromProduct(product, '5')
+      productService.removeVariantsFromProduct(product, ['5'])
       expect(productService.updateProduct.called).to.equal(false)
     })
 

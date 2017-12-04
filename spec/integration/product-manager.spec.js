@@ -80,7 +80,7 @@ describe('ProductManager', () => {
       )
       expect(deletedProduct).to.be.an('undefined')
 
-      apiProducts = await productService.getProductsBySkus(sku)
+      apiProducts = await productService.getProductsBySkus([sku])
       expect(apiProducts).to.have.lengthOf(0)
     })
 
