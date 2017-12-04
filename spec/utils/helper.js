@@ -1,8 +1,9 @@
-import Promise from 'bluebird'
-import bunyan from 'bunyan'
 import _ from 'lodash'
 import path from 'path'
-import * as sphere from '../../lib/services/sphere'
+import Promise from 'bluebird'
+import bunyan from 'bunyan'
+import * as ctp from './ctp'
+
 import Logger from '../../lib/services/logger'
 
 const sampleProductType = require('../resources/productType.json')
@@ -18,26 +19,26 @@ export const logger = bunyan.createLogger({
 })
 
 /**
- * Will create a Sphere Client used for itegration tests
+ * Will create a ctp client used for itegration tests
  * @param key Project key
- * @returns {Promise} SphereClient
+ * @returns {Promise} ctpClient
  */
 export function createClient (key) {
   logger.debug(`Using project key '${key || projectKey}'`)
-  return sphere.getClient(logger, key || projectKey)
+  return ctp.getClient(logger, key || projectKey)
 }
 
 /**
  * Will delete all items in given resource
- * @param resource  Sphere client resource (eg. sphereClient.customObjects)
- * @param predicate Sphere predicate of items which should be deleted
+ * @param resource  ctp client resource (eg. ctpClient.customObjects)
+ * @param predicate ctp predicate of items which should be deleted
  */
-export function deleteResource (resource, predicate) {
-  logger.debug(`Deleting Sphere resource ${resource._currentEndpoint}`
+export function deleteResource (resource, predicate = '') {
+  logger.debug(`Deleting ctp resource ${resource._currentEndpoint}`
     + ` with predicate`, predicate)
 
   return resource
-    .where(predicate || '')
+    .where(predicate)
     .perPage(500)
     .process(res =>
         Promise.map(res.body.results, item =>
@@ -75,15 +76,14 @@ export function unpublishAllProducts (client) {
 /**
  * Delete all resources used in tests
  */
-export function deleteResources (client) {
-  return Promise.each([
-    client.products,
-    client.productTypes
-  ], resource => deleteResource(resource))
+export async function deleteResources (client) {
+  await deleteResource(client.products)
+  await deleteResource(client.productTypes)
 }
 
-export function ensureProductType (sphereClient) {
-  return ensureResource(sphereClient.productTypes, sampleProductType, 'name')
+export function ensureProductType (ctpClient, productType = sampleProductType) {
+  productType = _.cloneDeep(productType)
+  return ensureResource(ctpClient.productTypes, productType, 'name')
 }
 
 /**
@@ -98,8 +98,8 @@ export function createResources (resource, items) {
 }
 
 /**
- * Will create a resource on Sphere
- * @param resource Sphere client resource (eg. sphereClient.customObjects)
+ * Will create a resource on ctp
+ * @param resource ctp client resource (eg. ctpClient.customObjects)
  * @param item Item which should be created
  */
 export function createResource (resource, item) {
@@ -108,15 +108,15 @@ export function createResource (resource, item) {
 }
 
 /**
- * Will create a product on Sphere
+ * Will create a product on ctp
  */
-export function createProduct (sphereClient, product) {
-  return createResource(sphereClient.products, product)
+export function createProduct (ctpClient, product) {
+  return createResource(ctpClient.products, product)
 }
 
 /**
- * Will ensure resources on Sphere
- * @param resource Sphere client resource (eg. sphereClient.customObjects)
+ * Will ensure resources on ctp
+ * @param resource ctp client resource (eg. ctpClient.customObjects)
  * @param item Item which should be created
  * @param conditionKey Object property nameused in predicate
  */
