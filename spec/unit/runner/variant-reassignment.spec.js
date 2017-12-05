@@ -125,10 +125,30 @@ describe('Variant reassignment', () => {
       }
     ]
   }
+  const noMatchProduct = {
+    key: 'no-match-products',
+    productType: {
+      typeId: 'product-type',
+      id: 'productTypeId2'
+    },
+    name: {
+      en: 'New sample product'
+    },
+    slug: {
+      en: 'new-sample-product-4'
+    },
+    masterVariant: {
+      id: 1,
+      sku: '7',
+      prices: []
+    },
+    variants: []
+  }
   const productDrafts = [
     productDraft1,
     productDraft2,
-    productDraft3
+    productDraft3,
+    noMatchProduct
   ]
 
   it('should select only drafts that need reassignment', () => {
