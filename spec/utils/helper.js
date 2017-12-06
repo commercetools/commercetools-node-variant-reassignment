@@ -49,6 +49,13 @@ export function deleteResource (resource, predicate = '') {
       , { accumulate: false })
 }
 
+export async function deleteAllProducts (client) {
+  logger.debug(`Deleting ctp products`)
+
+  await unpublishAllProducts(client)
+  return deleteResource(client.products)
+}
+
 /**
  * Will unpublish all products on API
  * @param client    API client

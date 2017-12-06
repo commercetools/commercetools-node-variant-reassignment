@@ -5,3 +5,4 @@ node_modules
 logs
 coverage
 examples
+.nyc_output
