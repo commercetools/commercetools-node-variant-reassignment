@@ -160,70 +160,72 @@ describe('Variant reassignment', () => {
     expect(drafts.map(d => d.key)).to.include('different-product-type')
   })
 
-  it('should select matched product by variant SKUs', () => {
-    const variantReassignments = new VariantReassignment(null, logger)
-    const matchedProduct = variantReassignments
-      ._selectCtpProductToUpdate(productDraft3, [ctpProduct4])
-    expect(matchedProduct).to.deep.equal(ctpProduct4)
-  })
+  describe('select product to update', () => {
+    it('should select matched product by variant SKUs', () => {
+      const variantReassignments = new VariantReassignment(null, logger)
+      const matchedProduct = variantReassignments
+        ._selectCtpProductToUpdate(productDraft3, [ctpProduct4])
+      expect(matchedProduct).to.deep.equal(ctpProduct4)
+    })
 
-  it('should select matched product by slug', () => {
-    const variantReassignments = new VariantReassignment(null, logger)
-    const matchedProduct = variantReassignments
-      ._selectCtpProductToUpdate(productDraft2, [ctpProduct2, ctpProduct3])
-    expect(matchedProduct).to.deep.equal(ctpProduct2)
-  })
+    it('should select matched product by slug', () => {
+      const variantReassignments = new VariantReassignment(null, logger)
+      const matchedProduct = variantReassignments
+        ._selectCtpProductToUpdate(productDraft2, [ctpProduct2, ctpProduct3])
+      expect(matchedProduct).to.deep.equal(ctpProduct2)
+    })
 
-  it('should select matched product by master variant', () => {
-    const productTypeId = productDraft4.productType.id
-    const testCtpProduct1 = utils.generateProduct(productDraft4.variants[0].sku, productTypeId)
-    testCtpProduct1.slug = {
-      en: productDraft4.slug.de
-    }
-    const testCtpProduct2 = utils.generateProduct(productDraft4.masterVariant.sku, productTypeId)
-    testCtpProduct2.slug = {
-      de: productDraft4.slug.de
-    }
-
-    const variantReassignments = new VariantReassignment(null, logger)
-    const matchedProduct = variantReassignments
-      ._selectCtpProductToUpdate(productDraft4, [testCtpProduct1, testCtpProduct2])
-    expect(matchedProduct).to.deep.equal(testCtpProduct2)
-  })
-
-  it('when slugs match two products and master variant not match, select first matched product',
-    () => {
-      const productTypeId = productDraft5.productType.id
-      const testCtpProduct1 = utils.generateProduct(productDraft5.variants[0].sku, productTypeId)
+    it('should select matched product by master variant', () => {
+      const productTypeId = productDraft4.productType.id
+      const testCtpProduct1 = utils.generateProduct(productDraft4.variants[0].sku, productTypeId)
       testCtpProduct1.slug = {
-        en: productDraft5.slug.de
+        en: productDraft4.slug.de
       }
-      const testCtpProduct2 = utils.generateProduct(productDraft5.variants[1].sku, productTypeId)
+      const testCtpProduct2 = utils.generateProduct(productDraft4.masterVariant.sku, productTypeId)
       testCtpProduct2.slug = {
-        de: productDraft5.slug.de
+        de: productDraft4.slug.de
       }
 
       const variantReassignments = new VariantReassignment(null, logger)
       const matchedProduct = variantReassignments
-        ._selectCtpProductToUpdate(productDraft5, [testCtpProduct1, testCtpProduct2])
-      expect(matchedProduct).to.deep.equal(testCtpProduct1)
+        ._selectCtpProductToUpdate(productDraft4, [testCtpProduct1, testCtpProduct2])
+      expect(matchedProduct).to.deep.equal(testCtpProduct2)
     })
 
-  it('when slugs and master variant does not match any product, select first matched product',
-    () => {
-      const productTypeId = productDraft5.productType.id
-      const testCtpProduct1 = utils.generateProduct(productDraft5.variants[0].sku, productTypeId)
-      testCtpProduct1.slug = {
-        en: `${productDraft5.slug.de}-no-slug-match`
-      }
-      const testCtpProduct2 = utils.generateProduct(productDraft5.variants[1].sku, productTypeId)
-      testCtpProduct2.slug = {
-        de: `${productDraft5.slug.de}-no-slug-match`
-      }
+    it('when slugs match two products and master variant not match, select first matched product',
+      () => {
+        const productTypeId = productDraft5.productType.id
+        const testCtpProduct1 = utils.generateProduct(productDraft5.variants[0].sku, productTypeId)
+        testCtpProduct1.slug = {
+          en: productDraft5.slug.de
+        }
+        const testCtpProduct2 = utils.generateProduct(productDraft5.variants[1].sku, productTypeId)
+        testCtpProduct2.slug = {
+          de: productDraft5.slug.de
+        }
 
-      const variantReassignments = new VariantReassignment(null, logger)
-      const matchedProduct = variantReassignments
-        ._selectCtpProductToUpdate(productDraft5, [testCtpProduct1, testCtpProduct2])
-      expect(matchedProduct).to.deep.equal(testCtpProduct1)
-    })
+        const variantReassignments = new VariantReassignment(null, logger)
+        const matchedProduct = variantReassignments
+          ._selectCtpProductToUpdate(productDraft5, [testCtpProduct1, testCtpProduct2])
+        expect(matchedProduct).to.deep.equal(testCtpProduct1)
+      })
+
+    it('when slugs and master variant does not match any product, select first matched product',
+      () => {
+        const productTypeId = productDraft5.productType.id
+        const testCtpProduct1 = utils.generateProduct(productDraft5.variants[0].sku, productTypeId)
+        testCtpProduct1.slug = {
+          en: `${productDraft5.slug.de}-no-slug-match`
+        }
+        const testCtpProduct2 = utils.generateProduct(productDraft5.variants[1].sku, productTypeId)
+        testCtpProduct2.slug = {
+          de: `${productDraft5.slug.de}-no-slug-match`
+        }
+
+        const variantReassignments = new VariantReassignment(null, logger)
+        const matchedProduct = variantReassignments
+          ._selectCtpProductToUpdate(productDraft5, [testCtpProduct1, testCtpProduct2])
+        expect(matchedProduct).to.deep.equal(testCtpProduct1)
+      })
+  })
 })
