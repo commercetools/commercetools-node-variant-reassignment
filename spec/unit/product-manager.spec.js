@@ -130,4 +130,61 @@ describe('ProductManager', () => {
       ])
     })
   })
+
+  describe('anonymizing product', () => {
+    beforeEach(() => {
+      productService = new ProductManager(utils.logger, {})
+    })
+
+    it('should anonymize product', () => {
+      const productDraft = {
+        slug: {
+          en: 'slugEn',
+          de: 'slugDe'
+        },
+        name: {
+          en: 'nameEn',
+          de: 'nameDe'
+        },
+        key: 'productKey',
+        masterVariant: {},
+        variants: []
+      }
+
+      const anonymized = productService.getAnonymizedProduct(productDraft)
+
+      expect(anonymized.slug).to.have.property('_ctsd')
+      expect(parseInt(anonymized.slug._ctsd, 10)).to.be.above(0)
+      const timeout = anonymized.slug._ctsd
+
+      expect(anonymized.slug.en).to.contain(timeout)
+      expect(anonymized.slug.de).to.contain(timeout)
+      expect(anonymized.name.en).to.contain(timeout)
+      expect(anonymized.name.de).to.contain(timeout)
+      expect(anonymized.key).to.equal(`productKey-${timeout}`)
+    })
+
+    it('should anonymize product with missing key', () => {
+      const productDraft = {
+        slug: {
+          en: 'slugEn',
+        },
+        name: {
+          en: 'nameEn',
+        },
+        masterVariant: {},
+        variants: []
+      }
+
+      const anonymized = productService.getAnonymizedProduct(productDraft)
+
+      expect(anonymized.slug).to.have.property('_ctsd')
+      expect(parseInt(anonymized.slug._ctsd, 10)).to.be.above(0)
+      const timeout = anonymized.slug._ctsd
+
+      expect(anonymized.slug.en).to.contain(timeout)
+      expect(anonymized.name.en).to.contain(timeout)
+      expect(anonymized).to.not.have.property(`key`)
+    })
+  })
 })
