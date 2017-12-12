@@ -228,4 +228,80 @@ describe('Variant reassignment', () => {
         expect(matchedProduct).to.deep.equal(testCtpProduct1)
       })
   })
+
+  describe('get removed variants', () => {
+    /**
+     * Example 14
+     */
+    it('variants are the same for current and staged', () => {
+      const ctpProductToUpdate = {
+        masterData: {
+          current: {
+            masterVariant: { sku: 'v1' },
+            variants: []
+          },
+          staged: {
+            masterVariant: { sku: 'v1' },
+            variants: [{ sku: 'v3' }]
+          }
+        }
+      }
+      const matchingProducts = [
+        {
+          masterData: {
+            current: {
+              masterVariant: { sku: 'v2' },
+              variants: []
+            },
+            staged: {
+              masterVariant: { sku: 'v2' },
+              variants: []
+            }
+          }
+        },
+        ctpProductToUpdate
+      ]
+      const productDraft = {
+        masterVariant: { sku: 'v1' },
+        variants: [{ sku: 'v2' }]
+      }
+
+      const variantReassignments = new VariantReassignment(null, logger)
+      const removedVariants = variantReassignments
+        ._getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate)
+
+      expect(removedVariants.length).to.equal(2)
+      const skus = removedVariants.map(v => v.sku)
+      expect(skus).to.include.all.members(['v2', 'v3'])
+    })
+
+    /**
+     *  Example 15
+     */
+    it('current has a variant to be removed', () => {
+      const ctpProductToUpdate = {
+        masterData: {
+          current: {
+            masterVariant: { sku: 'v1' },
+            variants: []
+          },
+          staged: {
+            masterVariant: { sku: 'v5' },
+            variants: []
+          }
+        }
+      }
+      const matchingProducts = [ctpProductToUpdate]
+      const productDraft = {
+        masterVariant: { sku: 'v1' }
+      }
+
+      const variantReassignments = new VariantReassignment(null, logger)
+      const removedVariants = variantReassignments
+        ._getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate)
+
+      expect(removedVariants.length).to.equal(1)
+      expect(removedVariants[0].sku).to.deep.equal('v5')
+    })
+  })
 })
