@@ -159,8 +159,6 @@ describe('ProductManager', () => {
 
       expect(anonymized.slug.en).to.contain(timeout)
       expect(anonymized.slug.de).to.contain(timeout)
-      expect(anonymized.name.en).to.contain(timeout)
-      expect(anonymized.name.de).to.contain(timeout)
       expect(anonymized.key).to.equal(`productKey-${timeout}`)
     })
 
@@ -183,7 +181,6 @@ describe('ProductManager', () => {
       const timeout = anonymized.slug._ctsd
 
       expect(anonymized.slug.en).to.contain(timeout)
-      expect(anonymized.name.en).to.contain(timeout)
       expect(anonymized).to.not.have.property(`key`)
     })
   })
