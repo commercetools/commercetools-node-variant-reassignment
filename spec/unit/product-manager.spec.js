@@ -132,6 +132,51 @@ describe('ProductManager', () => {
   })
 
   describe('anonymizing product', () => {
+    const productMock = {
+      id: 'product-id',
+      version: 100,
+      productType: {
+        typeId: 'product-type',
+        id: 'product-type-id'
+      },
+      masterData: {
+        current: {
+          name: {
+            en: 'Product Name'
+          },
+          description: {
+            en: 'Product Description'
+          },
+          slug: {
+            en: 'product-slug',
+            de: 'product-slug-de'
+          },
+          masterVariant: {
+            id: 1,
+            sku: '2838301109'
+          },
+          variants: []
+        },
+        staged: {
+          name: {
+            en: 'Product Name'
+          },
+          description: {
+            en: 'Product Description'
+          },
+          slug: {
+            en: 'product-slug'
+          },
+          masterVariant: {
+            id: 1,
+            sku: '2838301109'
+          }
+        },
+        published: false,
+        hasStagedChanges: false
+      }
+    }
+
     beforeEach(() => {
       productService = new ProductManager(utils.logger, {})
     })
@@ -182,6 +227,78 @@ describe('ProductManager', () => {
 
       expect(anonymized.slug.en).to.contain(timeout)
       expect(anonymized).to.not.have.property(`key`)
+    })
+
+    it('should anonymize CTP product', async () => {
+      const product = _.cloneDeep(productMock)
+
+      product.key = 'product-key'
+      product.masterData.published = true
+
+      const spyTimestamp = sinon.spy(productService, '_getTimestamp')
+      const stub = sinon.stub(productService, 'updateProduct')
+        .callsFake(() => Promise.resolve())
+
+      await productService.anonymizeCtpProduct(product)
+
+      expect(stub.callCount).to.equal(1)
+      const actions = stub.firstCall.args[1]
+      const timestamp = spyTimestamp.returnValues[0]
+
+      expect(actions).to.deep.equal([
+        {
+          action: 'unpublish'
+        },
+        {
+          action: 'setKey',
+          key: `product-key-${timestamp}`
+        },
+        {
+          action: 'changeSlug',
+          slug: {
+            en: `product-slug-${timestamp}`,
+            de: `product-slug-de-${timestamp}`
+          },
+          staged: false
+        },
+        {
+          action: 'changeSlug',
+          slug: {
+            en: `product-slug-${timestamp}`
+          },
+          staged: true
+        }
+      ])
+    })
+
+    it('should anonymize unpublished CTP product without key', async () => {
+      const spyTimestamp = sinon.spy(productService, '_getTimestamp')
+      const stub = sinon.stub(productService, 'updateProduct')
+        .callsFake(() => Promise.resolve())
+
+      await productService.anonymizeCtpProduct(productMock)
+
+      expect(stub.callCount).to.equal(1)
+      const actions = stub.firstCall.args[1]
+      const timestamp = spyTimestamp.returnValues[0]
+
+      expect(actions).to.deep.equal([
+        {
+          action: 'changeSlug',
+          slug: {
+            en: `product-slug-${timestamp}`,
+            de: `product-slug-de-${timestamp}`
+          },
+          staged: false
+        },
+        {
+          action: 'changeSlug',
+          slug: {
+            en: `product-slug-${timestamp}`
+          },
+          staged: true
+        }
+      ])
     })
   })
 })
