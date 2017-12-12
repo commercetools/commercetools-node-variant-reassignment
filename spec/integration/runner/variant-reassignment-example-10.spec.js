@@ -46,7 +46,7 @@ describe('Variant reassignment', () => {
 
   it('merge variants with different sameForAll attributes without blacklist',
     async () => {
-      const reassignment = new VariantReassignment([], logger, {})
+      const reassignment = new VariantReassignment(['brandId'], logger, {})
       await reassignment.execute([{
         productType: {
           id: product1.productType.id

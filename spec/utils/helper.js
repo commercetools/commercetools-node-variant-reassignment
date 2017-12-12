@@ -192,7 +192,8 @@ export async function deleteResourcesAll (client, _logger) {
     client.productDiscounts,
     client.inventoryEntries,
     client.productTypes,
-    client.channels
+    client.channels,
+    client.customObjects
   ]
   for (const resource of resourcesToDelete)
     await deleteResource(resource, '', _logger)

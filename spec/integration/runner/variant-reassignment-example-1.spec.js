@@ -39,7 +39,7 @@ describe('Variant reassignment', () => {
   )
 
   it('move variant v3 to another product', async () => {
-    const reassignment = new VariantReassignment([], logger, {})
+    const reassignment = new VariantReassignment(ctpClient, logger, {}, [])
     const productDraft = {
       productType: {
         id: product1.productType.id

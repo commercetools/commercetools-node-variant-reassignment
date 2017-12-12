@@ -51,7 +51,7 @@ describe('Variant reassignment', () => {
     const productType = await utils.ensureResource(ctpClient.productTypes,
       productDraftProductType, 'name')
 
-    const reassignment = new VariantReassignment([], logger, {})
+    const reassignment = new VariantReassignment(ctpClient, logger, {}, [])
     await reassignment.execute([{
       productType: {
         id: productType.id

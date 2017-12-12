@@ -63,7 +63,7 @@ describe('TransactionManager', () => {
     }
 
     const createdTransaction = await transactionService.createTransaction(
-      productId, transaction
+      transaction, productId
     )
 
     expect(createdTransaction.container).to.equal(
@@ -81,10 +81,10 @@ describe('TransactionManager', () => {
   })
 
   it('should delete a transaction on API', async () => {
-    await transactionService.createTransaction('produtId1', {})
+    await transactionService.createTransaction({}, 'produtId1')
 
     const transaction = await transactionService.createTransaction(
-      'produtId2', {}
+      {}, 'produtId2'
     )
 
     const transactionsBefore = await transactionService.getTransactions()

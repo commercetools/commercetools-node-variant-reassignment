@@ -38,7 +38,7 @@ describe('Variant reassignment', () => {
   )
 
   it('change backup variant to valid variant', async () => {
-    const reassignment = new VariantReassignment([], logger, {})
+    const reassignment = new VariantReassignment(ctpClient, logger, {}, [])
     await reassignment.execute([{
       productType: {
         id: product1.productType.id
