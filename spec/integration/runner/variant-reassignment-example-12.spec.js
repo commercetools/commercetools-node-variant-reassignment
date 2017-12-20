@@ -58,13 +58,14 @@ describe('Variant reassignment', () => {
       },
       variants: []
     }], [product1])
+
     const { body: { results } } = await utils.getProductsBySkus(['1'], ctpClient)
     expect(results).to.have.lengthOf(1)
     const updatedProduct = results[0]
-    expect(updatedProduct.version).to.be.above(product1.version)
     expect(updatedProduct.productType.id).to.equal(productType2.id)
     expect(updatedProduct.slug).to.deep.equal(product1.slug)
     expect(updatedProduct.masterVariant).to.deep.equal(product1.masterVariant)
     expect(updatedProduct.name).to.deep.equal(product1.name)
+    expect(new Date(updatedProduct.createdAt)).to.be.above(new Date(product1.createdAt))
   })
 })

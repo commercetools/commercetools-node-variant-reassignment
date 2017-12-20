@@ -4,6 +4,8 @@ import { expect } from 'chai'
 import * as utils from '../utils/helper'
 import ProductManager from '../../lib/services/product-manager'
 
+const productTypeDraft2 = _.cloneDeep(require('../resources/productType2.json'))
+
 const mockProduct = {
   name: {
     en: 'Test Product'
@@ -23,6 +25,7 @@ const mockProduct = {
 let ctpClient = null
 let productService = null
 let productType = null
+let productType2 = null
 
 function getProductMock () {
   return _.cloneDeep(mockProduct)
@@ -33,6 +36,7 @@ describe('ProductManager', () => {
     ctpClient = await utils.createClient()
     await utils.deleteAllProducts(ctpClient)
     productType = await utils.ensureProductType(ctpClient)
+    productType2 = await utils.ensureProductType(ctpClient, productTypeDraft2)
     mockProduct.productType.id = productType.id
   })
 
@@ -42,6 +46,10 @@ describe('ProductManager', () => {
 
   afterEach(() =>
     utils.deleteAllProducts(ctpClient)
+  )
+
+  after(() =>
+    utils.deleteResourcesAll(ctpClient, utils.logger)
   )
 
   describe('Basic functions', () => {
@@ -140,6 +148,22 @@ describe('ProductManager', () => {
 
       expect(staged.masterVariant.sku).to.equal('2')
       expect(staged.variants).to.have.lengthOf(0)
+    })
+  })
+
+  describe('Change product type', () => {
+    it('should change product type for published product', async () => {
+      const productMock = getProductMock()
+      let product = await productService.createProduct(productMock)
+
+      product = await productService.publishProduct(product)
+      const newProduct = await productService.changeProductType(product, productType2.id)
+
+      expect(newProduct).to.be.an('object')
+      expect(newProduct.productType.id).to.equal(productType2.id)
+      expect(new Date(newProduct.createdAt)).to.be.above(new Date(product.createdAt))
+      expect(newProduct.masterData.staged).to.deep.equal(product.masterData.staged)
+      expect(newProduct.masterData.published).to.equal(false)
     })
   })
 })
