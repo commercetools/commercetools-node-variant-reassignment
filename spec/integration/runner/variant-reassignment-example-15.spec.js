@@ -20,6 +20,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  +---------+----------------------------+----------------------------+--------------------+----------------------------+------------------------------------------------------------+
  */
 /* eslint-enable max-len */
+// todo: this test is similar to test 13, maybe we need only 1 test
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
