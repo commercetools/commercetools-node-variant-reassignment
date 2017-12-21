@@ -84,5 +84,6 @@ describe('Variant reassignment', () => {
     expect(results).to.have.lengthOf(1)
     const updatedProductProjection = results[0]
     expect(updatedProductProjection.masterVariant.sku).to.equal('2')
+    expect(updatedProductProjection.slug._ctsd).to.be.a('string')
   })
 })
