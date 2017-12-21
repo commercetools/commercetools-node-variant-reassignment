@@ -45,25 +45,11 @@ describe('Variant reassignment', () => {
           {
             action: 'addVariant',
             sku: '1'
-          }
-        ]
-      })
-    product1Response = await ctpClient.products
-      .byId(product1.id)
-      .update({
-        version: product1Response.body.version,
-        actions: [
+          },
           {
             action: 'changeMasterVariant',
             sku: '1'
-          }
-        ]
-      })
-    product1Response = await ctpClient.products
-      .byId(product1.id)
-      .update({
-        version: product1Response.body.version,
-        actions: [
+          },
           {
             action: 'removeVariant',
             sku: '5'
