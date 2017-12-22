@@ -181,7 +181,7 @@ describe('ProductManager', () => {
       productService = new ProductManager(utils.logger, {})
     })
 
-    it('should anonymize product', () => {
+    it.only('should anonymize product', () => {
       const productDraft = {
         slug: {
           en: 'slugEn',
@@ -205,6 +205,11 @@ describe('ProductManager', () => {
       expect(anonymized.slug.en).to.contain(timeout)
       expect(anonymized.slug.de).to.contain(timeout)
       expect(anonymized.key).to.equal(`productKey-${timeout}`)
+
+      const anonymized2 = productService.getAnonymizedProduct(productDraft)
+      expect(parseInt(anonymized2.slug._ctsd, 10)).to.be.above(
+        parseInt(timeout, 10)
+      )
     })
 
     it('should anonymize product with missing key', () => {
