@@ -32,7 +32,7 @@ export function loadCredentials (logger, projectKey) {
 }
 
 /**
- * Will create SphereClient
+ * Will create ctp client
  * @param credentials JSON object with configuration
  */
 export function createClient (credentials) {
@@ -40,7 +40,7 @@ export function createClient (credentials) {
 }
 
 /**
- * Will load credentials and return SphereClient
+ * Will load credentials and return ctp client
  * @param logger
  * @param projectKey
  * @returns {Promise}
