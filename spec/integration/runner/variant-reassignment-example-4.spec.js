@@ -24,7 +24,7 @@ const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'
  * +---------------------------------------------+---------------------------+--------------------+---------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe('Variant reassignment', () => {
+describe.skip('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1

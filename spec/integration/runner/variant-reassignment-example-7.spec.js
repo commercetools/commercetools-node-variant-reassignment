@@ -30,7 +30,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  */
 /* eslint-enable max-len */
 // TODO: this test is similar to Example 6, check if we can remove this class
-describe('Variant reassignment', () => {
+describe.skip('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
