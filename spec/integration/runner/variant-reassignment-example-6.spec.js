@@ -59,7 +59,7 @@ describe.skip('Variant reassignment', () => {
   )
 
   it('merge products with duplicate slugs + remove variants v2 and v4', async () => {
-    const reassignment = new VariantReassignment(ctpClient, logger, {}, [])
+    const reassignment = new VariantReassignment(ctpClient, logger)
     const productDraft = {
       productType: {
         id: product1.productType.id
