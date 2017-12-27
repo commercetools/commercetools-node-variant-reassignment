@@ -4,16 +4,34 @@
     "typeId": "product-type",
     "id": "-- ProductType ID here --"
   },
-  "name": {
-    "en": "Sample product"
-  },
-  "slug": {
-    "en": "sample-product"
-  },
-  "masterVariant": {
-    "id": 1,
-    "sku": "1",
-    "prices": []
-  },
-  "variants": []
+  "masterData": {
+    "staged": {
+      "name": {
+        "en": "Sample product"
+      },
+      "slug": {
+        "en": "sample-product"
+      },
+      "masterVariant": {
+        "id": 1,
+        "sku": "1",
+        "prices": []
+      },
+      "variants": []
+    },
+    "current": {
+      "name": {
+        "en": "Sample product"
+      },
+      "slug": {
+        "en": "sample-product"
+      },
+      "masterVariant": {
+        "id": 1,
+        "sku": "1",
+        "prices": []
+      },
+      "variants": []
+    }
+  }
 }
