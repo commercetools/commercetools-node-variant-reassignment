@@ -56,20 +56,16 @@ describe('TransactionManager', () => {
   })
 
   it('should create a transaction on API', async () => {
-    const productId = 123
     const transaction = {
       info: 'transactionInfo',
       actions: []
     }
 
-    const createdTransaction = await transactionService.createTransaction(
-      transaction, productId
-    )
+    const createdTransaction = await transactionService.createTransaction(transaction)
 
     expect(createdTransaction.container).to.equal(
       constants.TRANSACTION_CONTAINER
     )
-    expect(createdTransaction.key.split('-')[0]).to.equal(String(productId))
     expect(createdTransaction.value).to.deep.equal(transaction)
 
     const { body: { results: transactions } } = await ctpClient
@@ -83,9 +79,7 @@ describe('TransactionManager', () => {
   it('should delete a transaction on API', async () => {
     await transactionService.createTransaction({}, 'produtId1')
 
-    const transaction = await transactionService.createTransaction(
-      {}, 'produtId2'
-    )
+    const transaction = await transactionService.createTransaction({})
 
     const transactionsBefore = await transactionService.getTransactions()
     expect(transactionsBefore).to.have.lengthOf(2)
@@ -93,6 +87,5 @@ describe('TransactionManager', () => {
     await transactionService.deleteTransaction(transaction.key)
     const transactionsAfter = await transactionService.getTransactions()
     expect(transactionsAfter).to.have.lengthOf(1)
-    expect(transactionsAfter[0].key).to.contain('produtId1')
   })
 })
