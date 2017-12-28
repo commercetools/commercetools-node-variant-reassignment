@@ -18,7 +18,7 @@ const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'
  * +---------------------------------------------+---------------------------+                    +---------------------------------------------------------------+
  * |                                             | Product:                  |                    | Product:                                                      |
  * |                                             | id: "2"                   |                    | id: "3"                                                       |
- * |                                             | slug: { en: "product-2" } |                    | slug: { en: "product-1_${timestamp}", _ctsd: "${timestamp}" } |
+ * |                                             | slug: { en: "product-2" } |                    | slug: { en: "product-1_${timestamp}", ctsd: "${timestamp}" }  |
  * |                                             | product-type: "pt1"       |                    | product-type: "pt2"                                           |
  * |                                             | variants: v3              |                    | variants: v2                                                  |
  * +---------------------------------------------+---------------------------+--------------------+---------------------------------------------------------------+

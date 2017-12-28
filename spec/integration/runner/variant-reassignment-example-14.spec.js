@@ -1,5 +1,7 @@
+import { expect } from 'chai'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
+import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
 
 /* eslint-disable max-len */
 /**
@@ -8,7 +10,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  +---------+----------------------------+----------------------------+----------------------------+                    +----------------------------+-------------------------------------------------------------+
  | Staged  | Product:                   | Product:                   | Product:                   |                    | Product:                   | Product:                                                    |
  |         | slug: { en: "product" }    | id: 1                      | id: 2                      |                    | id: 1                      | id: 3                                                       |
- |         | product-type: "pt2"        | slug: { en: "product" }    | slug: { en: "product-2" }  |                    | slug: { en: "product" }    | slug: { en: "product-${timestamp}", _ctsd: "${timestamp}" } |
+ |         | product-type: "pt2"        | slug: { en: "product" }    | slug: { en: "product-2" }  |                    | slug: { en: "product" }    | slug: { en: "product-${timestamp}", ctsd: "${timestamp}" }  |
  |         | masterVariant: { sku: v1 } | product-type: "pt2"        | product-type: "pt2"        |                    | product-type: "pt2"        | product-type: "pt2"                                         |
  |         | variants: { sku: v2 }      | masterVariant: { sku: v1 } | masterVariant: { sku: v2 } |                    | masterVariant: { sku: v1 } | masterVariant: { sku: v3 }                                  |
  |         |                            |                            |                            |                    | variants: { sku: v2 }      |                                                             |
@@ -85,7 +87,7 @@ describe.skip('Variant reassignment', () => {
 
       const { body: { newProduct } } = await utils.getProductsBySkus(['3'], ctpClient)
       expect(newProduct.masterData.staged.masterVariant.sku).to.equal('3')
-      expect(newProduct.masterData.staged.slug._ctsd).to.be.a('string')
+      expect(newProduct.masterData.staged.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
       expect(newProduct.masterData.staged.variants.length).to.equal(0)
       expect(newProduct.masterData.published).to.equal(false)
       expect(product1After.masterData.hasStagedChanges).to.equal(true)

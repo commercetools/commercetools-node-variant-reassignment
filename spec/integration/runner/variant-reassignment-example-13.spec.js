@@ -2,6 +2,7 @@ import { expect } from 'chai'
 
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
+import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
 
 /* eslint-disable max-len */
 /**
@@ -10,7 +11,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  +---------+----------------------------+---------------------------------------+                    +----------------------------+-------------------------------------------------------------+
  | Staged  | Product:                   | Product:                              |                    | Product:                   | Product:                                                    |
  |         | slug: { en: "product" }    | id: 1                                 |                    | id: 1                      | id: 2                                                       |
- |         | product-type: "pt2"        | slug: { en: "product" }               |                    | slug: { en: "product" }    | slug: { en: "product-${timestamp}", _ctsd: "${timestamp}" } |
+ |         | product-type: "pt2"        | slug: { en: "product" }               |                    | slug: { en: "product" }    | slug: { en: "product-${timestamp}", ctsd: "${timestamp}" }  |
  |         | masterVariant: { sku: v1 } | product-type: "pt2"                   |                    | product-type: "pt2"        | product-type: "pt2"                                         |
  |         |                            | masterVariant: { id: 1, sku: v1 }     |                    | masterVariant: { sku: v1 } | masterVariant: { sku: v2 }                                  |
  |         |                            | variants: [                           |                    |                            | variants: [                                                 |
@@ -28,7 +29,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  +---------+----------------------------+---------------------------------------+--------------------+----------------------------+-------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -84,6 +85,6 @@ describe.skip('Variant reassignment', () => {
     expect(results).to.have.lengthOf(1)
     const updatedProductProjection = results[0]
     expect(updatedProductProjection.masterVariant.sku).to.equal('2')
-    expect(updatedProductProjection.slug._ctsd).to.be.a('string')
+    expect(updatedProductProjection.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
   })
 })
