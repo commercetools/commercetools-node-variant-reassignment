@@ -42,7 +42,7 @@ describe.skip('Variant reassignment', () => {
     productType2 = await utils.ensureResource(ctpClient.productTypes,
       productTypeDraft2, 'name')
 
-    const reassignment = new VariantReassignment([], logger, {})
+    const reassignment = new VariantReassignment(ctpClient, logger)
     await reassignment.execute([{
       productType: {
         id: productType2.id

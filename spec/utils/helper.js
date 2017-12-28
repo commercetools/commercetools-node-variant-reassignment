@@ -7,6 +7,7 @@ import * as ctp from './ctp'
 import Logger from '../../lib/services/logger'
 
 const sampleProductType = require('../resources/productType.json')
+const sampleProductProjection = require('../resources/productProjection.json')
 const sampleProduct = require('../resources/product.json')
 
 export const projectKey = process.env.TEST_PROJECT_KEY
@@ -143,7 +144,7 @@ export async function ensureResource (resource, item, conditionKey = 'key') {
 
 /**
  * Will generate a product with variants based on given skus
- * @param sku products SKU
+ * @param skus products SKU
  * @param productTypeId ID of a productType
  */
 export function generateProduct (skus, productTypeId) {
@@ -154,18 +155,41 @@ export function generateProduct (skus, productTypeId) {
   const product = _.cloneDeep(sampleProduct)
   const sku = skus.shift()
   product.productType.id = productTypeId
-  product.masterVariant.sku = sku
-  product.slug.en += sku
-  product.name.en += sku
+  for (const productData of [product.masterData.staged, product.masterData.current]) {
+    productData.masterVariant.sku = sku
+    productData.slug.en += sku
+    productData.name.en += sku
+  }
   product.key += sku
+
+  for (const variantSku of skus) {
+    const variant = _.cloneDeep(product.masterData.staged.masterVariant)
+    variant.sku = variantSku
+    product.masterData.staged.variants.push(variant)
+  }
+  return product
+}
+
+export function generateProductProjection (skus, productTypeId) {
+  skus = _.isArray(skus)
+    ? _.cloneDeep(skus)
+    : [skus]
+
+  const productProjection = _.cloneDeep(sampleProductProjection)
+  const sku = skus.shift()
+  productProjection.productType.id = productTypeId
+  productProjection.masterVariant.sku = sku
+  productProjection.slug.en += sku
+  productProjection.name.en += sku
+  productProjection.key += sku
 
 
   for (const variantSku of skus) {
-    const variant = _.cloneDeep(product.masterVariant)
+    const variant = _.cloneDeep(productProjection.masterVariant)
     variant.sku = variantSku
-    product.variants.push(variant)
+    productProjection.variants.push(variant)
   }
-  return product
+  return productProjection
 }
 
 export async function createCtpProducts (skuGroups, ctpClient, beforeProductCreateCb) {
@@ -192,7 +216,8 @@ export async function deleteResourcesAll (client, _logger) {
     client.productDiscounts,
     client.inventoryEntries,
     client.productTypes,
-    client.channels
+    client.channels,
+    client.customObjects
   ]
   for (const resource of resourcesToDelete)
     await deleteResource(resource, '', _logger)

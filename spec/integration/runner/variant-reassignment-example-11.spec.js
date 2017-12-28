@@ -41,7 +41,7 @@ describe.skip('Variant reassignment', () => {
   )
 
   it('product draft does not contain correct sameForAll data', async () => {
-    const reassignment = new VariantReassignment(['brandId'], logger, {})
+    const reassignment = new VariantReassignment(ctpClient, logger, {}, ['brandId'])
     await reassignment.execute([{
       productType: {
         id: product1.productType.id

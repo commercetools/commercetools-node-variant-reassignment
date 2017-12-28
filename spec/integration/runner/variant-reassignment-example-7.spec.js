@@ -53,7 +53,7 @@ describe.skip('Variant reassignment', () => {
   )
 
   it('merge variants v1 and v3 + remove variants v2 and v4', async () => {
-    const reassignment = new VariantReassignment([], logger, {})
+    const reassignment = new VariantReassignment(ctpClient, logger)
     await reassignment.execute([{
       productType: {
         id: product1.productType.id
