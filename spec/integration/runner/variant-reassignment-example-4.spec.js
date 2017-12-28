@@ -24,7 +24,7 @@ const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'
  * +---------------------------------------------+---------------------------+--------------------+---------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -38,7 +38,7 @@ describe.skip('Variant reassignment', () => {
       productTypeDraft2, 'name')
 
     const results = await utils.createCtpProducts([['1', '2'], ['3']], ctpClient, (pD) => {
-      if (pD.masterVariant.sku === '3')
+      if (pD.masterVariant.sku === '1')
         pD.productType.id = productType2.id
     })
     product1 = results.find(product => product.masterVariant.sku === '1')
