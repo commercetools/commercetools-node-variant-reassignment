@@ -38,6 +38,7 @@
     "bluebird": "^3.4.7",
     "bunyan": "^1.8.12",
     "lodash": "^4.17.4",
+    "shortid": "^2.2.8",
     "sphere-node-sdk": "^1.20.0",
     "sphere-node-utils": "^0.9.1",
     "utils-error-to-json": "^1.0.0",

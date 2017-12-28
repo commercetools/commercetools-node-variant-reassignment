@@ -181,7 +181,7 @@ describe('ProductManager', () => {
       productService = new ProductManager(utils.logger, {})
     })
 
-    it.only('should anonymize product', () => {
+    it('should anonymize product', async () => {
       const productDraft = {
         slug: {
           en: 'slugEn',
@@ -196,20 +196,21 @@ describe('ProductManager', () => {
         variants: []
       }
 
-      const anonymized = productService.getAnonymizedProduct(productDraft)
+      const anonymized = await Promise.all([
+        productService.getAnonymizedProductDraft(_.cloneDeep(productDraft)),
+        productService.getAnonymizedProductDraft(_.cloneDeep(productDraft))
+      ])
 
-      expect(anonymized.slug).to.have.property('_ctsd')
-      expect(parseInt(anonymized.slug._ctsd, 10)).to.be.above(0)
-      const timeout = anonymized.slug._ctsd
+      const first = anonymized[0]
+      expect(first.slug).to.have.property('_ctsd')
+      const ctsd = first.slug._ctsd
 
-      expect(anonymized.slug.en).to.contain(timeout)
-      expect(anonymized.slug.de).to.contain(timeout)
-      expect(anonymized.key).to.equal(`productKey-${timeout}`)
+      expect(first.slug.en).to.contain(ctsd)
+      expect(first.slug.de).to.contain(ctsd)
+      expect(first.key).to.equal(`productKey-${ctsd}`)
 
-      const anonymized2 = productService.getAnonymizedProduct(productDraft)
-      expect(parseInt(anonymized2.slug._ctsd, 10)).to.be.above(
-        parseInt(timeout, 10)
-      )
+      const second = anonymized[1]
+      expect(second.slug._ctsd).to.not.equal(ctsd)
     })
 
     it('should anonymize product with missing key', () => {
@@ -224,13 +225,12 @@ describe('ProductManager', () => {
         variants: []
       }
 
-      const anonymized = productService.getAnonymizedProduct(productDraft)
+      const anonymized = productService.getAnonymizedProductDraft(productDraft)
 
       expect(anonymized.slug).to.have.property('_ctsd')
-      expect(parseInt(anonymized.slug._ctsd, 10)).to.be.above(0)
-      const timeout = anonymized.slug._ctsd
+      const ctsdSalt = anonymized.slug._ctsd
 
-      expect(anonymized.slug.en).to.contain(timeout)
+      expect(anonymized.slug.en).to.contain(ctsdSalt)
       expect(anonymized).to.not.have.property(`key`)
     })
 
@@ -240,7 +240,7 @@ describe('ProductManager', () => {
       product.key = 'product-key'
       product.masterData.published = true
 
-      const spyTimestamp = sinon.spy(productService, '_getTimestamp')
+      const spySalt = sinon.spy(productService, '_getSalt')
       const stub = sinon.stub(productService, 'updateProduct')
         .callsFake(() => Promise.resolve())
 
@@ -248,7 +248,7 @@ describe('ProductManager', () => {
 
       expect(stub.callCount).to.equal(1)
       const actions = stub.firstCall.args[1]
-      const timestamp = spyTimestamp.returnValues[0]
+      const ctsdSalt = spySalt.returnValues[0]
 
       expect(actions).to.deep.equal([
         {
@@ -256,20 +256,20 @@ describe('ProductManager', () => {
         },
         {
           action: 'setKey',
-          key: `product-key-${timestamp}`
+          key: `product-key-${ctsdSalt}`
         },
         {
           action: 'changeSlug',
           slug: {
-            en: `product-slug-${timestamp}`,
-            de: `product-slug-de-${timestamp}`
+            en: `product-slug-${ctsdSalt}`,
+            de: `product-slug-de-${ctsdSalt}`
           },
           staged: false
         },
         {
           action: 'changeSlug',
           slug: {
-            en: `product-slug-${timestamp}`
+            en: `product-slug-${ctsdSalt}`
           },
           staged: true
         }
@@ -277,7 +277,7 @@ describe('ProductManager', () => {
     })
 
     it('should anonymize unpublished CTP product without key', async () => {
-      const spyTimestamp = sinon.spy(productService, '_getTimestamp')
+      const spySalt = sinon.spy(productService, '_getSalt')
       const stub = sinon.stub(productService, 'updateProduct')
         .callsFake(() => Promise.resolve())
 
@@ -285,21 +285,21 @@ describe('ProductManager', () => {
 
       expect(stub.callCount).to.equal(1)
       const actions = stub.firstCall.args[1]
-      const timestamp = spyTimestamp.returnValues[0]
+      const ctsdSalt = spySalt.returnValues[0]
 
       expect(actions).to.deep.equal([
         {
           action: 'changeSlug',
           slug: {
-            en: `product-slug-${timestamp}`,
-            de: `product-slug-de-${timestamp}`
+            en: `product-slug-${ctsdSalt}`,
+            de: `product-slug-de-${ctsdSalt}`
           },
           staged: false
         },
         {
           action: 'changeSlug',
           slug: {
-            en: `product-slug-${timestamp}`
+            en: `product-slug-${ctsdSalt}`
           },
           staged: true
         }
