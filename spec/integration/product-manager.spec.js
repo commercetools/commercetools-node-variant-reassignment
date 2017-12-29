@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import sinon from 'sinon'
 import { expect } from 'chai'
 
 import * as utils from '../utils/helper'
@@ -140,6 +141,21 @@ describe('ProductManager', () => {
 
       expect(staged.masterVariant.sku).to.equal('2')
       expect(staged.variants).to.have.lengthOf(0)
+
+      const spyUnpublish = sinon.spy(productService, 'updateProduct')
+      await productService.deleteByProduct(product)
+
+      expect(spyUnpublish.args).to.have.lengthOf(1)
+      const updateArgs = spyUnpublish.args[0]
+
+      // we should unpublish before we delete product
+      expect(updateArgs[0]).to.be.an('object')
+      expect(updateArgs[1]).to.be.an('array')
+      expect(updateArgs[1][0]).to.be.an('object')
+      expect(updateArgs[1][0].action).to.equal('unpublish')
+
+      const products = await ctpClient.products.fetch()
+      expect(products.body.count).to.equal(0)
     })
   })
 })
