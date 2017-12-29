@@ -262,14 +262,16 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            de: `product-slug-de-${ctsdSalt}`
+            de: `product-slug-de-${ctsdSalt}`,
+            _ctsd: ctsdSalt
           },
           staged: false
         },
         {
           action: 'changeSlug',
           slug: {
-            en: `product-slug-${ctsdSalt}`
+            en: `product-slug-${ctsdSalt}`,
+            _ctsd: ctsdSalt
           },
           staged: true
         }
@@ -292,14 +294,16 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            de: `product-slug-de-${ctsdSalt}`
+            de: `product-slug-de-${ctsdSalt}`,
+            _ctsd: ctsdSalt
           },
           staged: false
         },
         {
           action: 'changeSlug',
           slug: {
-            en: `product-slug-${ctsdSalt}`
+            en: `product-slug-${ctsdSalt}`,
+            _ctsd: ctsdSalt
           },
           staged: true
         }
