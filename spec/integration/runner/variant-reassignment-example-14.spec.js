@@ -24,7 +24,7 @@ import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
  +---------+----------------------------+----------------------------+----------------------------+--------------------+----------------------------+-------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -85,11 +85,11 @@ describe.skip('Variant reassignment', () => {
       expect(product1After.masterData.published).to.equal(true)
       expect(product1After.masterData.hasStagedChanges).to.equal(true)
 
-      const { body: { newProduct } } = await utils.getProductsBySkus(['3'], ctpClient)
-      expect(newProduct.masterData.staged.masterVariant.sku).to.equal('3')
-      expect(newProduct.masterData.staged.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
-      expect(newProduct.masterData.staged.variants.length).to.equal(0)
-      expect(newProduct.masterData.published).to.equal(false)
-      expect(product1After.masterData.hasStagedChanges).to.equal(true)
+      const { body: { results: [newProduct] } } = await utils.getProductsBySkus(['3'], ctpClient)
+      expect(newProduct.masterVariant.sku).to.equal('3')
+      expect(newProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
+      expect(newProduct.variants.length).to.equal(0)
+      expect(newProduct.published).to.equal(false)
+      expect(newProduct.hasStagedChanges).to.equal(false)
     })
 })
