@@ -137,8 +137,11 @@ describe('ProductManager', () => {
   })
 
   describe('compare two products', () => {
-    it('should equal when product ids are equal', () => {
+    beforeEach(() => {
       productService = new ProductManager(utils.logger, {})
+    })
+
+    it('should equal when product ids are equal', () => {
       const productId = 'test-id'
       const mockProduct1 = getMockProduct()
       mockProduct1.id = productId
@@ -150,7 +153,6 @@ describe('ProductManager', () => {
     })
 
     it('should equal when product type and slugs are equal', () => {
-      productService = new ProductManager(utils.logger, {})
       const productTypeId = 'product-type-test-id'
       const productSlug = { en: 'test' }
       const mockProduct1 = getMockProduct()
@@ -165,7 +167,6 @@ describe('ProductManager', () => {
     })
 
     it('should not equal when product id and type are not equal', () => {
-      productService = new ProductManager(utils.logger, {})
       const mockProduct1 = getMockProduct()
       mockProduct1.id = 'product-id-1'
       mockProduct1.productType.id = 'product-type-1'
