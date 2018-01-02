@@ -8,12 +8,7 @@ describe('Variant reassignment', () => {
   const ctpProduct2 = utils.generateProduct(['2', '3'], 'productTypeId2')
   const ctpProduct3 = utils.generateProduct(['4', '5'], 'productTypeId2')
   const ctpProduct4 = utils.generateProduct(['6'], 'productTypeId2')
-  const ctpProducts = [
-    ctpProduct1,
-    ctpProduct2,
-    ctpProduct3,
-    ctpProduct4
-  ]
+
   const productDraft1 = {
     key: 'different-product-type',
     productType: {
@@ -153,8 +148,14 @@ describe('Variant reassignment', () => {
 
   it('should select only drafts that need reassignment', () => {
     const variantReassignments = new VariantReassignment(null, logger)
-    const drafts
-      = variantReassignments._selectProductDraftsForReassignment(productDrafts, ctpProducts)
+    const drafts = variantReassignments._selectProductDraftsForReassignment(productDrafts,
+      [
+        ctpProduct1,
+        ctpProduct2,
+        ctpProduct3,
+        ctpProduct4
+      ]
+    )
     expect(drafts).to.have.lengthOf(2)
     expect(drafts.map(d => d.key)).to.include('different-variants')
     expect(drafts.map(d => d.key)).to.include('different-product-type')
@@ -178,11 +179,11 @@ describe('Variant reassignment', () => {
     it('should select matched product by master variant', () => {
       const productTypeId = productDraft4.productType.id
       const testCtpProduct1 = utils.generateProduct(productDraft4.variants[0].sku, productTypeId)
-      testCtpProduct1.slug = {
+      testCtpProduct1.masterData.staged.slug = {
         en: productDraft4.slug.de
       }
       const testCtpProduct2 = utils.generateProduct(productDraft4.masterVariant.sku, productTypeId)
-      testCtpProduct2.slug = {
+      testCtpProduct2.masterData.staged.slug = {
         de: productDraft4.slug.de
       }
 
@@ -267,12 +268,13 @@ describe('Variant reassignment', () => {
       }
 
       const variantReassignments = new VariantReassignment(null, logger)
-      const removedVariants = variantReassignments
+      const { ctpProductToUpdateVars, matchingProductsVars } = variantReassignments
         ._getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate)
 
-      expect(removedVariants.length).to.equal(2)
-      const skus = removedVariants.map(v => v.sku)
-      expect(skus).to.include.all.members(['v2', 'v3'])
+      expect(ctpProductToUpdateVars.length).to.equal(1)
+      expect(ctpProductToUpdateVars[0].sku).to.equal('v3')
+      expect(matchingProductsVars.length).to.equal(1)
+      expect(matchingProductsVars[0].sku).to.equal('v2')
     })
 
     /**
@@ -297,11 +299,12 @@ describe('Variant reassignment', () => {
       }
 
       const variantReassignments = new VariantReassignment(null, logger)
-      const removedVariants = variantReassignments
+      const { ctpProductToUpdateVars, matchingProductsVars } = variantReassignments
         ._getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate)
 
-      expect(removedVariants.length).to.equal(1)
-      expect(removedVariants[0].sku).to.deep.equal('v5')
+      expect(ctpProductToUpdateVars.length).to.equal(1)
+      expect(ctpProductToUpdateVars[0].sku).to.deep.equal('v5')
+      expect(matchingProductsVars.length).to.equal(0)
     })
   })
 })

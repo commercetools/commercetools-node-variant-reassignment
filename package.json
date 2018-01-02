@@ -17,7 +17,7 @@
     "release:minor": "./node_modules/.bin/mversion minor -m",
     "release:major": "./node_modules/.bin/mversion major -m",
     "coverage": "npm run lint && node_modules/.bin/nyc --reporter=html --reporter=text npm test",
-    "test": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive spec/**/*.spec.js",
+    "test": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive ./spec",
     "test:unit": "LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 10000 --require babel-core/register --recursive spec/unit/*.spec.js",
     "test:integration": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive spec/integration/*.spec.js",
     "validate": "npm ls"
@@ -38,6 +38,7 @@
     "bluebird": "^3.4.7",
     "bunyan": "^1.8.12",
     "lodash": "^4.17.4",
+    "shortid": "^2.2.8",
     "sphere-node-sdk": "^1.20.0",
     "sphere-node-utils": "^0.9.1",
     "utils-error-to-json": "^1.0.0",

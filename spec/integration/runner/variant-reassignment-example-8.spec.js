@@ -9,14 +9,14 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  * +-------------------------+---------------------------------------------------------------+                    +---------------------------------------------------------------+
  * | Product:                | Product:                                                      |                    | Product:                                                      |
  * | slug: { en: "product" } | id: "1"                                                       |                    | id: "1"                                                       |
- * | product-type: "pt1"     | slug: { en: "product_${timestamp1}", _ctsd: "${timestamp1}" } |                    | slug: { en: "product_${timestamp1}", _ctsd: "${timestamp1}" } |
+ * | product-type: "pt1"     | slug: { en: "product_${timestamp1}", ctsd: "${timestamp1}" }  |                    | slug: { en: "product_${timestamp1}", ctsd: "${timestamp1}" }  |
  * | masterVariant: v1       | product-type: "pt1"                                           |                    | product-type: "pt1"                                           |
  * |                         | masterVariant: v1                                             |                    | masterVariant: v1                                             |
  * |                         | variant: v2                                                   |                    |                                                               |
  * +-------------------------+---------------------------------------------------------------+                    +---------------------------------------------------------------+
  * |                         |                                                               |                    | Product:                                                      |
  * |                         |                                                               |                    | id: "2"                                                       |
- * |                         |                                                               |                    | slug: { en: "product_${timestamp2}", _ctsd: "${timestamp2}" } |
+ * |                         |                                                               |                    | slug: { en: "product_${timestamp2}", ctsd: "${timestamp2}" }  |
  * |                         |                                                               |                    | product-type: "pt1"                                           |
  * |                         |                                                               |                    | masterVariant: v2                                             |
  * +-------------------------+---------------------------------------------------------------+--------------------+---------------------------------------------------------------+
@@ -38,7 +38,7 @@ describe('Variant reassignment', () => {
   )
 
   it('change backup variant to valid variant', async () => {
-    const reassignment = new VariantReassignment(ctpClient, logger, {}, [])
+    const reassignment = new VariantReassignment(ctpClient, logger)
     await reassignment.execute([{
       productType: {
         id: product1.productType.id

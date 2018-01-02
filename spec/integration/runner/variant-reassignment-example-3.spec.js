@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 import * as utils from '../../utils/helper'
+import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
 
 /* eslint-disable max-len */
 /**
@@ -16,7 +17,7 @@ import * as utils from '../../utils/helper'
  * |                                         |                         |                    | Product:                                                    |
  * |                                         |                         |                    | id: "2"                                                     |
  * |                                         |                         |                    | key: key + "-duplicate"                                     |
- * |                                         |                         |                    | slug: { en: "product_${timestamp}", _ctsd: "${timestamp}" } |
+ * |                                         |                         |                    | slug: { en: "product_${timestamp}", ctsd: "${timestamp}" }  |
  * |                                         |                         |                    | product-type: "pt1"                                         |
  * |                                         |                         |                    | variants: v2, v3                                            |
  * +-----------------------------------------+-------------------------+--------------------+-------------------------------------------------------------+
@@ -38,7 +39,7 @@ describe('Variant reassignment', () => {
   )
 
   it('remove variants v2 and v3 from product 1', async () => {
-    const reassignment = new VariantReassignment(ctpClient, logger, {}, [])
+    const reassignment = new VariantReassignment(ctpClient, logger)
     await reassignment.execute([{
       productType: {
         id: product1.productType.id
@@ -62,6 +63,6 @@ describe('Variant reassignment', () => {
 
     const newProduct = results.find(product => product.masterVariant.sku !== '1')
     expect(newProduct.variants).to.have.lengthOf(1)
-    expect(newProduct.slug._ctsd).to.be.a('string')
+    expect(newProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
   })
 })

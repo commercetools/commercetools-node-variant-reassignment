@@ -18,7 +18,7 @@ const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'
  * +---------------------------------------------+---------------------------+                    +---------------------------------------------------------------+
  * |                                             | Product:                  |                    | Product:                                                      |
  * |                                             | id: "2"                   |                    | id: "3"                                                       |
- * |                                             | slug: { en: "product-2" } |                    | slug: { en: "product-1_${timestamp}", _ctsd: "${timestamp}" } |
+ * |                                             | slug: { en: "product-2" } |                    | slug: { en: "product-1_${timestamp}", ctsd: "${timestamp}" }  |
  * |                                             | product-type: "pt1"       |                    | product-type: "pt2"                                           |
  * |                                             | variants: v3              |                    | variants: v2                                                  |
  * +---------------------------------------------+---------------------------+--------------------+---------------------------------------------------------------+
@@ -38,7 +38,7 @@ describe('Variant reassignment', () => {
       productTypeDraft2, 'name')
 
     const results = await utils.createCtpProducts([['1', '2'], ['3']], ctpClient, (pD) => {
-      if (pD.masterVariant.sku === '3')
+      if (pD.masterVariant.sku === '1')
         pD.productType.id = productType2.id
     })
     product1 = results.find(product => product.masterVariant.sku === '1')
@@ -51,7 +51,7 @@ describe('Variant reassignment', () => {
 
   it('removing variant v2 + moving variant v3 from a different productType + deleting product p2',
     async () => {
-      const reassignment = new VariantReassignment(ctpClient, logger, {}, [])
+      const reassignment = new VariantReassignment(ctpClient, logger)
       await reassignment.execute([{
         productType: {
           id: productType2.id

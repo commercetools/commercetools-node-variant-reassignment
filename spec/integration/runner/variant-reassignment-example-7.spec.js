@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
+import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
 
 /* eslint-disable max-len */
 /**
@@ -16,21 +17,21 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  * +-----------------------------------------+--------------------------+                    +--------------------------------------------------------------+
  * |                                         | Product:                 |                    | Product:                                                     |
  * |                                         | id: "2"                  |                    | id: "2"                                                      |
- * |                                         | slug: { de: "produkte" } |                    | slug: { de: "produkte_${timestamp}", _ctsd: "${timestamp}" } |
+ * |                                         | slug: { de: "produkte" } |                    | slug: { de: "produkte_${timestamp}", ctsd: "${timestamp}" }  |
  * |                                         | product-type: "pt1"      |                    | product-type: "pt1"                                          |
  * |                                         | masterVariant: v3        |                    | masterVariant: v4                                            |
  * |                                         | variants: v4             |                    |                                                              |
  * +-----------------------------------------+--------------------------+--------------------+--------------------------------------------------------------+
  * |                                         |                          |                    | Product:                                                     |
  * |                                         |                          |                    | id: "3"                                                      |
- * |                                         |                          |                    | slug: { en: "produkte_${timestamp}", _ctsd: "${timestamp}" } |
+ * |                                         |                          |                    | slug: { en: "produkte_${timestamp}", ctsd: "${timestamp}" }  |
  * |                                         |                          |                    | product-type: "pt1"                                          |
  * |                                         |                          |                    | variants: v2                                                 |
  * +-----------------------------------------+--------------------------+--------------------+--------------------------------------------------------------+
  */
 /* eslint-enable max-len */
 // TODO: this test is similar to Example 6, check if we can remove this class
-describe('Variant reassignment', () => {
+describe.skip('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -53,7 +54,7 @@ describe('Variant reassignment', () => {
   )
 
   it('merge variants v1 and v3 + remove variants v2 and v4', async () => {
-    const reassignment = new VariantReassignment(ctpClient, logger, {}, [])
+    const reassignment = new VariantReassignment(ctpClient, logger)
     await reassignment.execute([{
       productType: {
         id: product1.productType.id
@@ -85,11 +86,11 @@ describe('Variant reassignment', () => {
 
     const updatedProduct2 = results.find(product => product.masterVariant.sku === '4')
     expect(updatedProduct2.variants).to.have.lengthOf(0)
-    expect(updatedProduct2.slug._ctsd).to.be.a('string')
+    expect(updatedProduct2.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
     expect(updatedProduct2.id).to.equal(product2.id)
 
     const newProduct = results.find(product => product.masterVariant.sku === '2')
     expect(newProduct.variants).to.have.lengthOf(0)
-    expect(newProduct.slug._ctsd).to.be.a('string')
+    expect(newProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
   })
 })
