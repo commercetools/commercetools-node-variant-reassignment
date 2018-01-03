@@ -1,5 +1,7 @@
 import { expect } from 'chai'
+import sinon from 'sinon'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
+import ProductManager from '../../../lib/services/product-manager'
 import * as utils from '../../utils/helper'
 
 describe('Variant reassignment', () => {
@@ -305,6 +307,64 @@ describe('Variant reassignment', () => {
       expect(ctpProductToUpdateVars.length).to.equal(1)
       expect(ctpProductToUpdateVars[0].sku).to.deep.equal('v5')
       expect(matchingProductsVars.length).to.equal(0)
+    })
+  })
+
+  describe('ensure slug uniqueness', () => {
+    const testProductId = 'test-product-id'
+    let productsToAnonymize
+    let variantReassignments
+    beforeEach(() => {
+      productsToAnonymize = []
+      const productService = new ProductManager(utils.logger, {})
+      sinon.stub(productService, 'anonymizeCtpProduct').callsFake((product) => {
+        productsToAnonymize.push(product)
+        return Promise.resolve()
+      })
+
+      variantReassignments = new VariantReassignment(null, logger)
+      variantReassignments.productService = productService
+    })
+
+    it('product has same slug in current', async () => {
+      await variantReassignments._ensureSlugUniqueness({ slug: { de: 'test-slug-de' } },
+        [{
+          id: testProductId,
+          masterData: {
+            current: {
+              slug: {
+                de: 'test-slug-de'
+              }
+            },
+            staged: {
+              slug: {
+                en: 'test-slug-en'
+              }
+            }
+          }
+        }])
+      expect(productsToAnonymize.length).to.equal(1)
+      expect(productsToAnonymize[0].id).to.equal(testProductId)
+    })
+
+    it('product has different slug, should not anonymize', async () => {
+      await variantReassignments._ensureSlugUniqueness({ slug: { de: 'test-slug' } },
+        [{
+          id: testProductId,
+          masterData: {
+            current: {
+              slug: {
+                en: 'test-slug'
+              }
+            },
+            staged: {
+              slug: {
+                en: 'test-slug'
+              }
+            }
+          }
+        }])
+      expect(productsToAnonymize.length).to.equal(0)
     })
   })
 })

@@ -31,19 +31,21 @@ import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
  */
 /* eslint-enable max-len */
 // TODO: this test is similar to Example 6, check if we can remove this class
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
   let product2
+  const enSlug = 'product'
+  const deSlug = 'produkte'
 
   before(async () => {
     ctpClient = await utils.createClient()
     const results = await utils.createCtpProducts([['1', '2'], ['3', '4']], ctpClient, (pD) => {
       if (pD.masterVariant.sku === '1')
-        pD.slug.en = 'product'
+        pD.slug.en = enSlug
       else if (pD.masterVariant.sku === '3')
-        pD.slug.de = 'produkte'
+        pD.slug.de = deSlug
     })
     product1 = results.find(product => product.masterVariant.sku === '1')
     product2 = results.find(product => product.masterVariant.sku === '3')
@@ -63,8 +65,8 @@ describe.skip('Variant reassignment', () => {
         en: 'Sample product1'
       },
       slug: {
-        en: 'product',
-        de: 'produkte'
+        en: enSlug,
+        de: deSlug
       },
       masterVariant: {
         sku: '1'
@@ -82,7 +84,8 @@ describe.skip('Variant reassignment', () => {
       || product.masterVariant.sku === '3')
     expect(updatedProduct1.variants).to.have.lengthOf(1)
     expect(updatedProduct1.id).to.equal(product1.id)
-    expect(updatedProduct1.slug.de).to.be.an('object')
+    expect(updatedProduct1.slug.en).to.equal(enSlug)
+    expect(updatedProduct1.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.an('undefined')
 
     const updatedProduct2 = results.find(product => product.masterVariant.sku === '4')
     expect(updatedProduct2.variants).to.have.lengthOf(0)
