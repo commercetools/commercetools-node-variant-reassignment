@@ -22,6 +22,10 @@ function getMockProduct () {
 
   return {
     id: 'product-id',
+    productType: {
+      typeId: 'product-type',
+      id: 'product-type-id'
+    },
     version: 1,
     masterData: {
       current: _.cloneDeep(productVariants),
@@ -129,6 +133,49 @@ describe('ProductManager', () => {
         { action: 'removeVariant', staged: false, id: 3 },
         { action: 'removeVariant', staged: false, sku: '1' }
       ])
+    })
+  })
+
+  describe('compare two products', () => {
+    beforeEach(() => {
+      productService = new ProductManager(utils.logger, {})
+    })
+
+    it('should equal when product ids are equal', () => {
+      const productId = 'test-id'
+      const mockProduct1 = getMockProduct()
+      mockProduct1.id = productId
+      const mockProduct2 = getMockProduct()
+      mockProduct2.id = productId
+
+      const result = productService.isProductsSame(mockProduct1, mockProduct2)
+      expect(result).to.equal(true)
+    })
+
+    it('should equal when product type and slugs are equal', () => {
+      const productTypeId = 'product-type-test-id'
+      const productSlug = { en: 'test' }
+      const mockProduct1 = getMockProduct()
+      mockProduct1.productType.id = productTypeId
+      mockProduct1.slug = productSlug
+      const mockProduct2 = getMockProduct()
+      mockProduct2.productType.id = productTypeId
+      mockProduct2.slug = productSlug
+
+      const result = productService.isProductsSame(mockProduct1, mockProduct2)
+      expect(result).to.equal(true)
+    })
+
+    it('should not equal when product id and type are not equal', () => {
+      const mockProduct1 = getMockProduct()
+      mockProduct1.id = 'product-id-1'
+      mockProduct1.productType.id = 'product-type-1'
+      const mockProduct2 = getMockProduct()
+      mockProduct2.id = 'product-id-2'
+      mockProduct2.productType.id = 'product-type-2'
+
+      const result = productService.isProductsSame(mockProduct1, mockProduct2)
+      expect(result).to.equal(false)
     })
   })
 
@@ -264,7 +311,7 @@ describe('ProductManager', () => {
           slug: {
             en: `product-slug-${ctsdSalt}`,
             de: `product-slug-de-${ctsdSalt}`,
-            _ctsd: ctsdSalt
+            ctsd: ctsdSalt
           },
           staged: false
         },
@@ -272,7 +319,7 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            _ctsd: ctsdSalt
+            ctsd: ctsdSalt
           },
           staged: true
         }
@@ -296,7 +343,7 @@ describe('ProductManager', () => {
           slug: {
             en: `product-slug-${ctsdSalt}`,
             de: `product-slug-de-${ctsdSalt}`,
-            _ctsd: ctsdSalt
+            ctsd: ctsdSalt
           },
           staged: false
         },
@@ -304,7 +351,7 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            _ctsd: ctsdSalt
+            ctsd: ctsdSalt
           },
           staged: true
         }

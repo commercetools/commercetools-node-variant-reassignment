@@ -30,7 +30,7 @@ const productDraftProductType = require('../../resources/productType.json')
  * +---------------------------+---------------------------------------------+--------------------+---------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -73,16 +73,19 @@ describe.skip('Variant reassignment', () => {
       ]
     }], [product1, product2])
     const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
-    expect(results).to.have.lengthOf(2)
+    expect(results).to.have.lengthOf(3)
     const backupProduct = results.find(product => product.masterVariant.sku === '2')
     expect(backupProduct).to.be.an('object')
-    expect(backupProduct.variants).to.have.lengthOf(2)
+    expect(backupProduct.variants).to.have.lengthOf(0)
     expect(backupProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
 
     const newProduct = results.find(product => product.masterVariant.sku === '1')
     expect(newProduct.productType.id).to.not.equal(product1.productType.id)
+    expect(newProduct.variants).to.have.lengthOf(1)
+    expect(newProduct.variants[0].sku).to.equal('3')
 
     const updatedProduct = results.find(product => product.masterVariant.sku === '4')
     expect(updatedProduct).to.be.an('object')
+    expect(updatedProduct.variants).to.have.lengthOf(0)
   })
 })
