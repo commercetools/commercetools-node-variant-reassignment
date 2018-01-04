@@ -312,18 +312,16 @@ describe('Variant reassignment', () => {
 
   describe('ensure slug uniqueness', () => {
     const testProductId = 'test-product-id'
-    let productsToAnonymize
+    let productServiceMock
+    let testFunction
     let variantReassignments
     beforeEach(() => {
-      productsToAnonymize = []
-      const productService = new ProductManager(utils.logger, {})
-      sinon.stub(productService, 'anonymizeCtpProduct').callsFake((product) => {
-        productsToAnonymize.push(product)
-        return Promise.resolve()
-      })
+      productServiceMock = new ProductManager(utils.logger, {})
+      testFunction = sinon.stub(productServiceMock, 'anonymizeCtpProduct')
+        .resolves(null)
 
       variantReassignments = new VariantReassignment(null, logger)
-      variantReassignments.productService = productService
+      variantReassignments.productService = productServiceMock
     })
 
     it('product has same slug in current', async () => {
@@ -343,8 +341,8 @@ describe('Variant reassignment', () => {
             }
           }
         }])
-      expect(productsToAnonymize.length).to.equal(1)
-      expect(productsToAnonymize[0].id).to.equal(testProductId)
+      expect(testFunction.callCount).to.equal(1)
+      expect(testFunction.getCall(0).args[0].id).to.equal(testProductId)
     })
 
     it('product has different slug, should not anonymize', async () => {
@@ -364,7 +362,7 @@ describe('Variant reassignment', () => {
             }
           }
         }])
-      expect(productsToAnonymize.length).to.equal(0)
+      expect(testFunction.callCount).to.equal(0)
     })
   })
 })
