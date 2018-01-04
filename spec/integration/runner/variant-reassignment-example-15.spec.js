@@ -22,8 +22,7 @@ import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
  +---------+----------------------------+----------------------------+--------------------+----------------------------+------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-// todo: this test is similar to test 13, maybe we need only 1 test
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -79,10 +78,14 @@ describe.skip('Variant reassignment', () => {
     }], [product1])
     const { body: product1After } = await ctpClient.products.byId(product1.id).fetch()
     expect(product1After.masterData.staged.masterVariant.sku).to.equal('1')
+    expect(product1After.masterData.staged.variants.length).to.equal(0)
     expect(product1After.masterData.current.masterVariant.sku).to.equal('1')
+    expect(product1After.masterData.current.variants.length).to.equal(0)
+    expect(product1After.masterData.published).to.equal(false)
 
-    const { body: { backupProduct } } = await utils.getProductsBySkus(['5'], ctpClient)
+    const { body: { results: [backupProduct] } } = await utils.getProductsBySkus(['5'], ctpClient)
     expect(backupProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
-    expect(backupProduct.masterData.staged.variants.length).to.equal(0)
+    expect(backupProduct.variants.length).to.equal(0)
+    expect(backupProduct.published).to.equal(false)
   })
 })
