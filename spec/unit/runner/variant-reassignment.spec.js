@@ -4,14 +4,11 @@ import * as utils from '../../utils/helper'
 
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
+  const ctpProduct1 = utils.generateProduct(['1'], 'productTypeId1')
   const ctpProduct2 = utils.generateProduct(['2', '3'], 'productTypeId2')
   const ctpProduct3 = utils.generateProduct(['4', '5'], 'productTypeId2')
   const ctpProduct4 = utils.generateProduct(['6'], 'productTypeId2')
 
-  const ctpProductProjection1 = utils.generateProductProjection(['1'], 'productTypeId1')
-  const ctpProductProjection2 = utils.generateProductProjection(['2', '3'], 'productTypeId2')
-  const ctpProductProjection3 = utils.generateProductProjection(['4', '5'], 'productTypeId2')
-  const ctpProductProjection4 = utils.generateProductProjection(['6'], 'productTypeId2')
   const productDraft1 = {
     key: 'different-product-type',
     productType: {
@@ -153,10 +150,10 @@ describe('Variant reassignment', () => {
     const variantReassignments = new VariantReassignment(null, logger)
     const drafts = variantReassignments._selectProductDraftsForReassignment(productDrafts,
       [
-        ctpProductProjection1,
-        ctpProductProjection2,
-        ctpProductProjection3,
-        ctpProductProjection4
+        ctpProduct1,
+        ctpProduct2,
+        ctpProduct3,
+        ctpProduct4
       ]
     )
     expect(drafts).to.have.lengthOf(2)

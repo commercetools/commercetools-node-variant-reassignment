@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import _ from 'lodash'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
+import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
 
 const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'))
 
@@ -18,13 +19,13 @@ const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'
  * +-----------------------------------------+--------------------------+                    +----------------------------------------------------------------+
  * |                                         | Product:                 |                    | Product:                                                       |
  * |                                         | id: "2"                  |                    | id: "2"                                                        |
- * |                                         | slug: { de: "produkte" } |                    | slug: { de: "produkte_${timestamp1}", _ctsd: "${timestamp1}" } |
+ * |                                         | slug: { de: "produkte" } |                    | slug: { de: "produkte_${timestamp1}", ctsd: "${timestamp1}" }  |
  * |                                         | product-type: "pt2"      |                    | product-type: "pt2"                                            |
  * |                                         | variants: v3, v4         |                    | variants: v4                                                   |
  * +-----------------------------------------+--------------------------+--------------------+----------------------------------------------------------------+
  * |                                         |                          |                    | Product:                                                       |
  * |                                         |                          |                    | id: "3"                                                        |
- * |                                         |                          |                    | slug: { en: "product_${timestamp2}", _ctsd: "${timestamp2}" }  |
+ * |                                         |                          |                    | slug: { en: "product_${timestamp2}", ctsd: "${timestamp2}" }   |
  * |                                         |                          |                    | product-type: "pt1"                                            |
  * |                                         |                          |                    | variants: v2                                                   |
  * +-----------------------------------------+--------------------------+--------------------+----------------------------------------------------------------+
@@ -92,13 +93,13 @@ describe.skip('Variant reassignment', () => {
 
     const updatedProduct2 = results.find(product => product.masterVariant.sku === '4')
     expect(updatedProduct2.variants).to.have.lengthOf(0)
-    expect(updatedProduct2.slug._ctsd).to.be.a('string')
+    expect(updatedProduct2.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
     expect(updatedProduct2.id).to.equal(product2.id)
     expect(updatedProduct2.productType.id).to.equal(product2.productType.id)
 
     const newProduct = results.find(product => product.masterVariant.sku === '2')
     expect(newProduct.variants).to.have.lengthOf(0)
-    expect(newProduct.slug._ctsd).to.be.a('string')
+    expect(newProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
     expect(newProduct.productType.id).to.be.a(product1.productType.id)
   })
 })

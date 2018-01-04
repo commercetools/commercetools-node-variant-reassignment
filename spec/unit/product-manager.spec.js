@@ -4,6 +4,7 @@ import sinon from 'sinon'
 
 import * as utils from '../utils/helper'
 import ProductManager from '../../lib/services/product-manager'
+import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../lib/constants'
 
 let productService = null
 
@@ -201,15 +202,15 @@ describe('ProductManager', () => {
       ])
 
       const first = anonymized[0]
-      expect(first.slug).to.have.property('_ctsd')
-      const ctsd = first.slug._ctsd
+      expect(first.slug).to.have.property(PRODUCT_ANONYMIZE_SLUG_KEY)
+      const ctsd = first.slug[PRODUCT_ANONYMIZE_SLUG_KEY]
 
       expect(first.slug.en).to.contain(ctsd)
       expect(first.slug.de).to.contain(ctsd)
       expect(first.key).to.equal(`productKey-${ctsd}`)
 
       const second = anonymized[1]
-      expect(second.slug._ctsd).to.not.equal(ctsd)
+      expect(second.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.not.equal(ctsd)
     })
 
     it('should anonymize product with missing key', () => {
@@ -226,8 +227,8 @@ describe('ProductManager', () => {
 
       const anonymized = productService.getAnonymizedProductDraft(productDraft)
 
-      expect(anonymized.slug).to.have.property('_ctsd')
-      const ctsdSalt = anonymized.slug._ctsd
+      expect(anonymized.slug).to.have.property(PRODUCT_ANONYMIZE_SLUG_KEY)
+      const ctsdSalt = anonymized.slug[PRODUCT_ANONYMIZE_SLUG_KEY]
 
       expect(anonymized.slug.en).to.contain(ctsdSalt)
       expect(anonymized).to.not.have.property(`key`)
@@ -262,7 +263,7 @@ describe('ProductManager', () => {
           slug: {
             en: `product-slug-${ctsdSalt}`,
             de: `product-slug-de-${ctsdSalt}`,
-            _ctsd: ctsdSalt
+            ctsd: ctsdSalt
           },
           staged: false
         },
@@ -270,7 +271,7 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            _ctsd: ctsdSalt
+            ctsd: ctsdSalt
           },
           staged: true
         }
@@ -294,7 +295,7 @@ describe('ProductManager', () => {
           slug: {
             en: `product-slug-${ctsdSalt}`,
             de: `product-slug-de-${ctsdSalt}`,
-            _ctsd: ctsdSalt
+            ctsd: ctsdSalt
           },
           staged: false
         },
@@ -302,7 +303,7 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            _ctsd: ctsdSalt
+            ctsd: ctsdSalt
           },
           staged: true
         }
