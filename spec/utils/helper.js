@@ -197,7 +197,7 @@ export async function createCtpProducts (skuGroups, ctpClient, beforeProductCrea
   const masterVariantSkus = []
   for (let i = 0; i < skuGroups.length; i++) {
     const skus = skuGroups[i]
-    const productDraft = generateProduct(skus, productType.id)
+    const productDraft = generateProductProjection(skus, productType.id)
     if (beforeProductCreateCb)
       beforeProductCreateCb(productDraft)
     const product = await ensureResource(ctpClient.products, productDraft)
