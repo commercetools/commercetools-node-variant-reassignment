@@ -58,9 +58,9 @@ describe('ProductManager', () => {
       const product = getMockProduct()
       const actions = productService.removeVariantsFromProduct(product, ['1'])
       expect(actions).to.deep.equal([
-        { action: 'changeMasterVariant', staged: false, sku: '2' },
         { action: 'changeMasterVariant', staged: true, sku: '2' },
         { action: 'removeVariant', staged: true, sku: '1' },
+        { action: 'changeMasterVariant', staged: false, sku: '2' },
         { action: 'removeVariant', staged: false, sku: '1' }
       ])
     })
@@ -80,13 +80,12 @@ describe('ProductManager', () => {
       const actions = productService.removeVariantsFromProduct(product, ['1'])
 
       expect(actions).to.deep.equal([
-        { action: 'unpublish' },
-        { action: 'addVariant', staged: false, sku: '2' },
-        { action: 'addVariant', staged: false, sku: '3' },
-        { action: 'changeMasterVariant', staged: false, sku: '2' },
+        { action: 'publish' },
         { action: 'changeMasterVariant', staged: true, sku: '2' },
         { action: 'removeVariant', staged: true, sku: '1' },
-        { action: 'removeVariant', staged: false, sku: '1' }
+        { action: 'changeMasterVariant', staged: false, sku: '2' },
+        { action: 'removeVariant', staged: false, sku: '1' },
+        { action: 'unpublish' }
       ])
     })
 
@@ -100,10 +99,10 @@ describe('ProductManager', () => {
 
       expect(actions).to.deep.equal([
         { action: 'addVariant', staged: true, sku: '2' },
-        { action: 'changeMasterVariant', staged: false, sku: '2' },
         { action: 'changeMasterVariant', staged: true, sku: '2' },
         { action: 'removeVariant', staged: true, sku: '1' },
         { action: 'removeVariant', staged: true, sku: '3' },
+        { action: 'changeMasterVariant', staged: false, sku: '2' },
         { action: 'removeVariant', staged: false, sku: '1' },
         { action: 'removeVariant', staged: false, sku: '3' }
       ])
@@ -126,10 +125,10 @@ describe('ProductManager', () => {
       )
 
       expect(actions).to.deep.equal([
-        { action: 'changeMasterVariant', staged: false, sku: '2' },
         { action: 'changeMasterVariant', staged: true, variantId: 2 },
         { action: 'removeVariant', staged: true, sku: '3' },
         { action: 'removeVariant', staged: true, id: 1 },
+        { action: 'changeMasterVariant', staged: false, sku: '2' },
         { action: 'removeVariant', staged: false, id: 3 },
         { action: 'removeVariant', staged: false, sku: '1' }
       ])

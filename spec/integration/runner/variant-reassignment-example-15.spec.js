@@ -39,7 +39,8 @@ describe.skip('Variant reassignment', () => {
         version: product1.version,
         actions: [{ action: 'publish' }]
       })
-    product1Response = await ctpClient.products
+
+    await ctpClient.products
       .byId(product1.id)
       .update({
         version: product1Response.body.version,
