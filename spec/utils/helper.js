@@ -219,6 +219,8 @@ export async function deleteResourcesAll (client, _logger) {
     client.channels,
     client.customObjects
   ]
+
+  await unpublishAllProducts(client)
   for (const resource of resourcesToDelete)
     await deleteResource(resource, '', _logger)
 }

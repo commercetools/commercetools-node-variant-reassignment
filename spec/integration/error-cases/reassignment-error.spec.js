@@ -3,6 +3,9 @@ import _ from 'lodash'
 import sinon from 'sinon'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
+import * as constants from '../../../lib/constants'
+
+const productTypeDraft = _.cloneDeep(require('../../resources/productType2.json'))
 
 describe('Reassignment error', () => {
   let ctpClient
@@ -13,18 +16,32 @@ describe('Reassignment error', () => {
   let logger
   let spyError
 
-  const checkResult = async () => {
-    const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
-    expect(results).to.have.lengthOf(3)
+  const checkResult = async (results = null) => {
+    if (!results) {
+      const res = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
+      results = res.body.results
+    }
+
+    expect(results).to.have.lengthOf(3, 'There should be 3 products on API')
+
     const backupProduct = results.find(product => product.masterVariant.sku === '4')
-    expect(backupProduct).to.be.an('object')
-    expect(backupProduct.variants).to.have.lengthOf(0)
+    expect(backupProduct).to.be.an('object', 'Backup product should be an object')
+    expect(backupProduct.variants).to.have.lengthOf(0, 'Backup product should have 0 variants')
+
     const updatedProduct = results.find(product => product.masterVariant.sku === '1')
-    expect(updatedProduct.variants[0].sku).to.equal(productDraft.variants[0].sku)
+    expect(updatedProduct.variants[0].sku).to.equal(
+      productDraft.variants[0].sku,
+      'Updated product should have variant from productDraft'
+    )
 
     const anonymizedProduct = results.find(product => product.masterVariant.sku === '2')
-    expect(anonymizedProduct).to.be.an('object')
+    expect(anonymizedProduct).to.be.an('object', 'Anonymized product should be an object')
     expect(anonymizedProduct.slug).to.haveOwnProperty('ctsd')
+
+    const { body: { results: transactions } } = await ctpClient.customObjects
+      .where(`container = "${constants.TRANSACTION_CONTAINER}"`)
+      .fetch()
+    expect(transactions).to.have.lengthOf(0, 'There should be no unfinished transaction')
   }
 
   before(async () => {
@@ -66,7 +83,7 @@ describe('Reassignment error', () => {
     utils.deleteResourcesAll(ctpClient, logger)
   )
 
-  it('should fail when process unfinished transaction fails', async () => {
+  it('fail when process unfinished transaction fails', async () => {
     sinon.stub(reassignment.transactionService, 'getTransactions')
       .rejects('test error')
 
@@ -82,7 +99,7 @@ describe('Reassignment error', () => {
     }
   })
 
-  it('should fail when process can\'t load existing products', async () => {
+  it('fail when process can\'t load existing products', async () => {
     sinon.stub(reassignment.productService, 'fetchProductsFromProductProjections')
       .rejects('test error')
 
@@ -98,7 +115,7 @@ describe('Reassignment error', () => {
     }
   })
 
-  it('should retry when reassignment fails before creating transaction', async () => {
+  it('retry when reassignment fails before creating transaction', async () => {
     const spyUnfinished = sinon.spy(reassignment, '_processUnfinishedTransactions')
     const spyProductDraft = sinon.spy(reassignment, '_processProductDraft')
 
@@ -120,7 +137,7 @@ describe('Reassignment error', () => {
     return checkResult()
   })
 
-  it('should retry only once when reassignment fails before creating transaction', async () => {
+  it('retry only once when reassignment fails before creating transaction', async () => {
     sinon.stub(reassignment, '_selectMatchingProducts').rejects('test error')
 
     try {
@@ -133,7 +150,7 @@ describe('Reassignment error', () => {
     }
   })
 
-  it('should retry reassignment when it fails after creating transaction', async () => {
+  it('retry when it fails after creating transaction', async () => {
     sinon.stub(reassignment, '_createAndExecuteActions')
       .onFirstCall().rejects('test error')
       .callThrough()
@@ -147,5 +164,54 @@ describe('Reassignment error', () => {
       .to.contain('test error')
 
     return checkResult()
+  })
+
+  it('retry after failed backup of ctpProductToUpdate when changing productType', async () => {
+    const customProductDraft = _.cloneDeep(productDraft)
+    const customProductType = await utils.ensureProductType(ctpClient, productTypeDraft)
+    customProductDraft.productType.id = customProductType.id
+    await reassignment.productService.publishProduct(product1)
+
+    sinon.stub(reassignment.productService, 'changeProductType')
+      .onFirstCall().rejects('test error')
+      .callThrough()
+
+    await reassignment.execute([customProductDraft], [product1, product2])
+
+    expect(spyError.callCount).to.equal(1)
+    expect(spyError.firstCall.args[0])
+      .to.contain('Error while processing productDraft')
+    expect(spyError.firstCall.args[2])
+      .to.contain('test error')
+
+    const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
+    const updatedProduct = results.find(product => product.masterVariant.sku === '1')
+    expect(updatedProduct.productType.id).to.equal(customProductType.id)
+
+    return checkResult(results)
+  })
+
+  it('retry when it fails after deleting product when changing productType', async () => {
+    const customProductDraft = _.cloneDeep(productDraft)
+    const customProductType = await utils.ensureProductType(ctpClient, productTypeDraft)
+    customProductDraft.productType.id = customProductType.id
+
+    sinon.stub(reassignment.productService, 'createProduct')
+      .onFirstCall().rejects('test error')
+      .callThrough()
+
+    await reassignment.execute([customProductDraft], [product1, product2])
+
+    expect(spyError.callCount).to.equal(1)
+    expect(spyError.firstCall.args[0])
+      .to.contain('Error while processing productDraft')
+    expect(spyError.firstCall.args[2])
+      .to.contain('test error')
+
+    const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
+    const updatedProduct = results.find(product => product.masterVariant.sku === '1')
+    expect(updatedProduct.productType.id).to.equal(customProductType.id)
+
+    return checkResult(results)
   })
 })
