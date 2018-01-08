@@ -13,6 +13,20 @@ describe('Reassignment error', () => {
   let logger
   let spyError
 
+  const checkResult = async () => {
+    const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
+    expect(results).to.have.lengthOf(3)
+    const backupProduct = results.find(product => product.masterVariant.sku === '4')
+    expect(backupProduct).to.be.an('object')
+    expect(backupProduct.variants).to.have.lengthOf(0)
+    const updatedProduct = results.find(product => product.masterVariant.sku === '1')
+    expect(updatedProduct.variants[0].sku).to.equal(productDraft.variants[0].sku)
+
+    const anonymizedProduct = results.find(product => product.masterVariant.sku === '2')
+    expect(anonymizedProduct).to.be.an('object')
+    expect(anonymizedProduct.slug).to.haveOwnProperty('ctsd')
+  }
+
   before(async () => {
     ctpClient = await utils.createClient()
   })
@@ -103,17 +117,7 @@ describe('Reassignment error', () => {
     expect(spyUnfinished.callCount).to.equal(1)
     expect(spyProductDraft.callCount).to.equal(2)
 
-    const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
-    expect(results).to.have.lengthOf(3)
-    const backupProduct = results.find(product => product.masterVariant.sku === '4')
-    expect(backupProduct).to.be.an('object')
-    expect(backupProduct.variants).to.have.lengthOf(0)
-    const updatedProduct = results.find(product => product.masterVariant.sku === '1')
-    expect(updatedProduct.variants[0].sku).to.equal(productDraft.variants[0].sku)
-
-    const anonymizedProduct = results.find(product => product.masterVariant.sku === '2')
-    expect(anonymizedProduct).to.be.an('object')
-    expect(anonymizedProduct.slug).to.haveOwnProperty('ctsd')
+    return checkResult()
   })
 
   it('should retry only once when reassignment fails before creating transaction', async () => {
@@ -127,5 +131,21 @@ describe('Reassignment error', () => {
       expect(spyError.callCount).to.equal(1)
       return Promise.resolve()
     }
+  })
+
+  it('should retry reassignment when it fails after creating transaction', async () => {
+    sinon.stub(reassignment, '_createAndExecuteActions')
+      .onFirstCall().rejects('test error')
+      .callThrough()
+
+    await reassignment.execute([productDraft], [product1, product2])
+
+    expect(spyError.callCount).to.equal(1)
+    expect(spyError.firstCall.args[0])
+      .to.contain('Error while processing productDraft')
+    expect(spyError.firstCall.args[2])
+      .to.contain('test error')
+
+    return checkResult()
   })
 })
