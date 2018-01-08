@@ -1,5 +1,7 @@
 import { expect } from 'chai'
+import sinon from 'sinon'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
+import ProductManager from '../../../lib/services/product-manager'
 import * as utils from '../../utils/helper'
 
 describe('Variant reassignment', () => {
@@ -305,6 +307,62 @@ describe('Variant reassignment', () => {
       expect(ctpProductToUpdateVars.length).to.equal(1)
       expect(ctpProductToUpdateVars[0].sku).to.deep.equal('v5')
       expect(matchingProductsVars.length).to.equal(0)
+    })
+  })
+
+  describe('ensure slug uniqueness', () => {
+    const testProductId = 'test-product-id'
+    let productServiceMock
+    let testFunction
+    let variantReassignments
+    beforeEach(() => {
+      productServiceMock = new ProductManager(utils.logger, {})
+      testFunction = sinon.stub(productServiceMock, 'anonymizeCtpProduct')
+        .resolves(null)
+
+      variantReassignments = new VariantReassignment(null, logger)
+      variantReassignments.productService = productServiceMock
+    })
+
+    it('product has same slug in current', async () => {
+      await variantReassignments._ensureSlugUniqueness({ slug: { de: 'test-slug-de' } },
+        [{
+          id: testProductId,
+          masterData: {
+            current: {
+              slug: {
+                de: 'test-slug-de'
+              }
+            },
+            staged: {
+              slug: {
+                en: 'test-slug-en'
+              }
+            }
+          }
+        }])
+      expect(testFunction.callCount).to.equal(1)
+      expect(testFunction.getCall(0).args[0].id).to.equal(testProductId)
+    })
+
+    it('product has different slug, should not anonymize', async () => {
+      await variantReassignments._ensureSlugUniqueness({ slug: { de: 'test-slug' } },
+        [{
+          id: testProductId,
+          masterData: {
+            current: {
+              slug: {
+                en: 'test-slug'
+              }
+            },
+            staged: {
+              slug: {
+                en: 'test-slug'
+              }
+            }
+          }
+        }])
+      expect(testFunction.callCount).to.equal(0)
     })
   })
 })

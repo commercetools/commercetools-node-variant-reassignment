@@ -31,7 +31,7 @@ const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'
  * +-----------------------------------------+--------------------------+--------------------+----------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -47,6 +47,7 @@ describe.skip('Variant reassignment', () => {
       if (pD.masterVariant.sku === '1')
         pD.slug.en = 'product'
       else if (pD.masterVariant.sku === '3') {
+        delete pD.slug.en
         pD.slug.de = 'produkte'
         pD.productType.id = productType2.id
       }
@@ -100,6 +101,6 @@ describe.skip('Variant reassignment', () => {
     const newProduct = results.find(product => product.masterVariant.sku === '2')
     expect(newProduct.variants).to.have.lengthOf(0)
     expect(newProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
-    expect(newProduct.productType.id).to.be.a(product1.productType.id)
+    expect(newProduct.productType.id).to.equal(product1.productType.id)
   })
 })
