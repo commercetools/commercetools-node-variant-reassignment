@@ -6,7 +6,9 @@ import * as utils from '../utils/helper'
 import ProductManager from '../../lib/services/product-manager'
 import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../lib/constants'
 
-let productService = null
+const productType = _.cloneDeep(require('../resources/productType2.json'))
+
+let pM = null
 
 function getMockProduct () {
   const productVariants = {
@@ -37,17 +39,17 @@ function getMockProduct () {
 describe('ProductManager', () => {
   describe('removing variant', () => {
     beforeEach(() => {
-      productService = new ProductManager(utils.logger, {})
-      sinon.stub(productService, 'updateProduct')
+      pM = new ProductManager(utils.logger, {})
+      sinon.stub(pM, 'updateProduct')
         .callsFake((product, actions) => actions)
 
-      sinon.stub(productService, 'deleteByProduct')
+      sinon.stub(pM, 'deleteByProduct')
         .callsFake(product => product)
     })
 
     it('should remove variant v2', () => {
       const product = getMockProduct()
-      const actions = productService.removeVariantsFromProduct(product, ['2'])
+      const actions = pM.removeVariantsFromProduct(product, ['2'])
       expect(actions).to.deep.equal([
         { action: 'removeVariant', staged: true, sku: '2' },
         { action: 'removeVariant', staged: false, sku: '2' }
@@ -56,7 +58,7 @@ describe('ProductManager', () => {
 
     it('should remove masterVariant', () => {
       const product = getMockProduct()
-      const actions = productService.removeVariantsFromProduct(product, ['1'])
+      const actions = pM.removeVariantsFromProduct(product, ['1'])
       expect(actions).to.deep.equal([
         { action: 'changeMasterVariant', staged: true, sku: '2' },
         { action: 'removeVariant', staged: true, sku: '1' },
@@ -67,17 +69,17 @@ describe('ProductManager', () => {
 
     it('should delete product when removing all variants', () => {
       const product = getMockProduct()
-      productService.removeVariantsFromProduct(
+      pM.removeVariantsFromProduct(
         product, ['1', '2', '3']
       )
 
-      expect(productService.deleteByProduct.called).to.equal(true)
+      expect(pM.deleteByProduct.called).to.equal(true)
     })
 
     it('should unpublish product when removing all current variants', () => {
       const product = getMockProduct()
       delete product.masterData.current.variants
-      const actions = productService.removeVariantsFromProduct(product, ['1'])
+      const actions = pM.removeVariantsFromProduct(product, ['1'])
 
       expect(actions).to.deep.equal([
         { action: 'publish' },
@@ -93,7 +95,7 @@ describe('ProductManager', () => {
       const product = getMockProduct()
       // remove staged variant with sku 2
       product.masterData.staged.variants.shift()
-      const actions = productService.removeVariantsFromProduct(
+      const actions = pM.removeVariantsFromProduct(
         product, ['1', '3']
       )
 
@@ -110,8 +112,8 @@ describe('ProductManager', () => {
 
     it('should not remove anything when skus are not found', () => {
       const product = getMockProduct()
-      productService.removeVariantsFromProduct(product, ['5'])
-      expect(productService.updateProduct.called).to.equal(false)
+      pM.removeVariantsFromProduct(product, ['5'])
+      expect(pM.updateProduct.called).to.equal(false)
     })
 
     it('should remove variants using variantId if exists', () => {
@@ -120,7 +122,7 @@ describe('ProductManager', () => {
       product.masterData.staged.variants[0].variantId = 2
       product.masterData.staged.masterVariant.variantId = 1
 
-      const actions = productService.removeVariantsFromProduct(
+      const actions = pM.removeVariantsFromProduct(
         product, ['3', '1']
       )
 
@@ -137,7 +139,7 @@ describe('ProductManager', () => {
 
   describe('compare two products', () => {
     beforeEach(() => {
-      productService = new ProductManager(utils.logger, {})
+      pM = new ProductManager(utils.logger, {})
     })
 
     it('should equal when product ids are equal', () => {
@@ -147,7 +149,7 @@ describe('ProductManager', () => {
       const mockProduct2 = getMockProduct()
       mockProduct2.id = productId
 
-      const result = productService.isProductsSame(mockProduct1, mockProduct2)
+      const result = pM.isProductsSame(mockProduct1, mockProduct2)
       expect(result).to.equal(true)
     })
 
@@ -161,7 +163,7 @@ describe('ProductManager', () => {
       mockProduct2.productType.id = productTypeId
       mockProduct2.slug = productSlug
 
-      const result = productService.isProductsSame(mockProduct1, mockProduct2)
+      const result = pM.isProductsSame(mockProduct1, mockProduct2)
       expect(result).to.equal(true)
     })
 
@@ -173,7 +175,7 @@ describe('ProductManager', () => {
       mockProduct2.id = 'product-id-2'
       mockProduct2.productType.id = 'product-type-2'
 
-      const result = productService.isProductsSame(mockProduct1, mockProduct2)
+      const result = pM.isProductsSame(mockProduct1, mockProduct2)
       expect(result).to.equal(false)
     })
   })
@@ -225,7 +227,7 @@ describe('ProductManager', () => {
     }
 
     beforeEach(() => {
-      productService = new ProductManager(utils.logger, {})
+      pM = new ProductManager(utils.logger, {})
     })
 
     it('should anonymize product', async () => {
@@ -244,8 +246,8 @@ describe('ProductManager', () => {
       }
 
       const anonymized = await Promise.all([
-        productService.getAnonymizedProductDraft(_.cloneDeep(productDraft)),
-        productService.getAnonymizedProductDraft(_.cloneDeep(productDraft))
+        pM.getAnonymizedProductDraft(_.cloneDeep(productDraft)),
+        pM.getAnonymizedProductDraft(_.cloneDeep(productDraft))
       ])
 
       const first = anonymized[0]
@@ -272,7 +274,7 @@ describe('ProductManager', () => {
         variants: []
       }
 
-      const anonymized = productService.getAnonymizedProductDraft(productDraft)
+      const anonymized = pM.getAnonymizedProductDraft(productDraft)
 
       expect(anonymized.slug).to.have.property(PRODUCT_ANONYMIZE_SLUG_KEY)
       const ctsdSalt = anonymized.slug[PRODUCT_ANONYMIZE_SLUG_KEY]
@@ -287,11 +289,11 @@ describe('ProductManager', () => {
       product.key = 'product-key'
       product.masterData.published = true
 
-      const spySalt = sinon.spy(productService, '_getSalt')
-      const stub = sinon.stub(productService, 'updateProduct')
+      const spySalt = sinon.spy(pM, '_getSalt')
+      const stub = sinon.stub(pM, 'updateProduct')
         .callsFake(() => Promise.resolve())
 
-      await productService.anonymizeCtpProduct(product)
+      await pM.anonymizeCtpProduct(product)
 
       expect(stub.callCount).to.equal(1)
       const actions = stub.firstCall.args[1]
@@ -326,11 +328,11 @@ describe('ProductManager', () => {
     })
 
     it('should anonymize unpublished CTP product without key', async () => {
-      const spySalt = sinon.spy(productService, '_getSalt')
-      const stub = sinon.stub(productService, 'updateProduct')
+      const spySalt = sinon.spy(pM, '_getSalt')
+      const stub = sinon.stub(pM, 'updateProduct')
         .callsFake(() => Promise.resolve())
 
-      await productService.anonymizeCtpProduct(productMock)
+      await pM.anonymizeCtpProduct(productMock)
 
       expect(stub.callCount).to.equal(1)
       const actions = stub.firstCall.args[1]
@@ -355,6 +357,82 @@ describe('ProductManager', () => {
           staged: true
         }
       ])
+    })
+  })
+
+  describe('ensure sameForAll constraint', () => {
+    const variants = [
+      {
+        sku: '1',
+        attributes: [
+          {
+            name: 'brandId',
+            value: '123'
+          },
+          {
+            name: 'isAvailable',
+            value: false
+          },
+          {
+            name: 'color',
+            value: 'red'
+          }
+        ]
+      },
+      {
+        sku: '2',
+        attributes: [
+          {
+            name: 'brandId',
+            value: '456'
+          },
+          {
+            name: 'isAvailable',
+            value: false
+          },
+          {
+            name: 'color',
+            value: 'green'
+          }
+        ]
+      }
+    ]
+
+    beforeEach(() => {
+      pM = new ProductManager(utils.logger, {})
+      pM.productTypeCache.set(productType.id, productType)
+    })
+
+    it('should select all sameForAll attributes from product type', () => {
+      const sameForAllAttrs = pM._selectSameForAllAttrs(productType)
+      expect(sameForAllAttrs.length).to.equal(2)
+      expect(sameForAllAttrs[0].attributeConstraint).to.equal('SameForAll')
+      expect(sameForAllAttrs[1].attributeConstraint).to.equal('SameForAll')
+    })
+
+    it('should select attrs that violates sameForAll from variants', () => {
+      const violatedAttrs = pM._selectViolatedAttrs(variants,
+        [{ name: 'brandId' }, { name: 'isAvailable' }])
+      expect(violatedAttrs.length).to.equal(1)
+    })
+
+    it('should remove violated attr from variant AND return update action', async () => {
+      const variantsClone = _.cloneDeep(variants)
+      const updateActions = await pM.ensureSameForAllAttributes(variantsClone, productType.id,
+        {
+          masterVariant: {
+            attributes: [{
+              name: 'isAvailable',
+              value: true
+            }]
+          }
+        })
+      expect(updateActions.length).to.equal(1)
+      const updateAction = updateActions[0]
+      expect(updateAction.action).to.equal('setAttributeInAllVariants')
+      expect(updateAction.name).to.equal('brandId')
+      expect(updateAction.value).to.equal(null)
+      expect(variantsClone.every(v => v.attributes.length === 2)).to.equal(true)
     })
   })
 })
