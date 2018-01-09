@@ -24,9 +24,9 @@ describe('Reassignment error', () => {
 
     expect(results).to.have.lengthOf(3, 'There should be 3 products on API')
 
-    const backupProduct = results.find(product => product.masterVariant.sku === '4')
-    expect(backupProduct).to.be.an('object', 'Backup product should be an object')
-    expect(backupProduct.variants).to.have.lengthOf(0, 'Backup product should have 0 variants')
+    const matchingProduct = results.find(product => product.masterVariant.sku === '4')
+    expect(matchingProduct).to.be.an('object', 'Backup product should be an object')
+    expect(matchingProduct.variants).to.have.lengthOf(0, 'Backup product should have 0 variants')
 
     const updatedProduct = results.find(product => product.masterVariant.sku === '1')
     expect(updatedProduct.variants[0].sku).to.equal(
@@ -214,4 +214,62 @@ describe('Reassignment error', () => {
 
     return checkResult(results)
   })
+
+  it('retry when it fails after creating product when changing productType', async () => {
+    const customProductDraft = _.cloneDeep(productDraft)
+    const customProductType = await utils.ensureProductType(ctpClient, productTypeDraft)
+    customProductDraft.productType.id = customProductType.id
+
+    sinon.stub(reassignment, '_removeVariantsFromMatchingProducts')
+      .onFirstCall().rejects('test error')
+      .callThrough()
+
+    await reassignment.execute([customProductDraft], [product1, product2])
+
+    expect(spyError.callCount).to.equal(1)
+    expect(spyError.firstCall.args[0])
+      .to.contain('Error while processing productDraft')
+    expect(spyError.firstCall.args[2])
+      .to.contain('test error')
+
+    const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
+    const updatedProduct = results.find(product => product.masterVariant.sku === '1')
+    expect(updatedProduct.productType.id).to.equal(customProductType.id)
+
+    return checkResult(results)
+  })
+
+  it('retry when it fails after removing variants from matching products', async () => {
+    sinon.stub(reassignment, '_createVariantsInCtpProductToUpdate')
+      .onFirstCall().rejects('test error')
+      .callThrough()
+
+    await reassignment.execute([productDraft], [product1, product2])
+
+    expect(spyError.callCount).to.equal(1)
+    expect(spyError.firstCall.args[0])
+      .to.contain('Error while processing productDraft')
+    expect(spyError.firstCall.args[2])
+      .to.contain('test error')
+
+    return checkResult()
+  })
+
+  it('retry when it fails after creating variants in ctpProductToUpdate', async () => {
+    sinon.stub(reassignment, '_removeVariantsFromCtpProductToUpdate')
+      .onFirstCall().rejects('test error')
+      .callThrough()
+
+    await reassignment.execute([productDraft], [product1, product2])
+
+    expect(spyError.callCount).to.equal(1)
+    expect(spyError.firstCall.args[0])
+      .to.contain('Error while processing productDraft')
+    expect(spyError.firstCall.args[2])
+      .to.contain('test error')
+
+    return checkResult()
+  })
+
+  // TODO test error case when there is a new variant comming from productDraft
 })
