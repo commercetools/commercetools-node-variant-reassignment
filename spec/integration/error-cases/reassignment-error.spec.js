@@ -31,7 +31,11 @@ describe('Reassignment error', () => {
     const updatedProduct = results.find(product => product.masterVariant.sku === '1')
     expect(updatedProduct.variants[0].sku).to.equal(
       productDraft.variants[0].sku,
-      'Updated product should have variant from productDraft'
+      'Updated product should have variant from P2'
+    )
+    expect(updatedProduct.variants[1].sku).to.equal(
+      productDraft.variants[1].sku,
+      'Updated product should have a new variant from productDraft'
     )
 
     const anonymizedProduct = results.find(product => product.masterVariant.sku === '2')
@@ -74,6 +78,9 @@ describe('Reassignment error', () => {
       variants: [
         {
           sku: '3'
+        },
+        {
+          sku: '5'
         }
       ]
     }
@@ -255,7 +262,7 @@ describe('Reassignment error', () => {
     return checkResult()
   })
 
-  it('retry when it fails after creating variants in ctpProductToUpdate', async () => {
+  it('retry when it fails after moving variants into ctpProductToUpdate', async () => {
     sinon.stub(reassignment, '_removeVariantsFromCtpProductToUpdate')
       .onFirstCall().rejects('test error')
       .callThrough()
@@ -271,5 +278,35 @@ describe('Reassignment error', () => {
     return checkResult()
   })
 
-  // TODO test error case when there is a new variant comming from productDraft
+  it('retry when it fails after removing variants from ctpProductToUpdate', async () => {
+    sinon.stub(reassignment.productService, 'createProduct')
+      .onFirstCall().rejects('test error')
+      .callThrough()
+
+    await reassignment.execute([productDraft], [product1, product2])
+
+    expect(spyError.callCount).to.equal(1)
+    expect(spyError.firstCall.args[0])
+      .to.contain('Error while processing productDraft')
+    expect(spyError.firstCall.args[2])
+      .to.contain('test error')
+
+    return checkResult()
+  })
+
+  it('retry when it fails after anonymizing old variants from ctpProductToUpdate', async () => {
+    sinon.stub(reassignment, '_ensureSlugUniqueness')
+      .onFirstCall().rejects('test error')
+      .callThrough()
+
+    await reassignment.execute([productDraft], [product1, product2])
+
+    expect(spyError.callCount).to.equal(1)
+    expect(spyError.firstCall.args[0])
+      .to.contain('Error while processing productDraft')
+    expect(spyError.firstCall.args[2])
+      .to.contain('test error')
+
+    return checkResult()
+  })
 })
