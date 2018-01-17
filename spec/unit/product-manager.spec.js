@@ -463,7 +463,8 @@ describe('ProductManager', () => {
 
       /* eslint-disable max-len */
       expect(productsQuerySpy.getCall(0).args[0])
-        .is.equal(`masterData(current(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}"))) `
+        .is.equal(`masterData(current(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}")) `
+        + `or slug(${testSlugLang1}="${testSlugValue1}" or ${testSlugLang2}="${testSlugValue2}")) `
         + `or staged(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}")) `
         + `or slug(${testSlugLang1}="${testSlugValue1}" or ${testSlugLang2}="${testSlugValue2}")))`)
       expect(productsQuerySpy.getCall(1).args[0])
