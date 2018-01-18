@@ -5,7 +5,7 @@ import { expect } from 'chai'
 import * as utils from '../utils/helper'
 import ProductManager from '../../lib/services/product-manager'
 
-const productTypeDraft2 = _.cloneDeep(require('../resources/productType2.json'))
+const productTypeDraft2 = _.cloneDeep(require('../resources/productType.json'))
 
 const mockProduct = {
   name: {
