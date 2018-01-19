@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "npm run clean && ./node_modules/.bin/babel --optional runtime lib --out-dir dist",
-    "clean": "./node_modules/rimraf/bin.js dist",
+    "clean": "./node_modules/.bin/rimraf dist",
     "coverage": "npm run lint && ./node_modules/.bin/nyc --reporter=html --reporter=text npm test",
     "lint": "./node_modules/.bin/eslint lib spec",
     "postinstall": "npm run build",
