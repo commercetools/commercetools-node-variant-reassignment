@@ -23,6 +23,7 @@
       "exports": "never",
       "functions": "ignore"
     }],
+    "import/no-extraneous-dependencies": ["off", {"devDependencies": ["spec"]}],
     "no-restricted-syntax": ["error", "WithStatement"],
     "no-await-in-loop": 0,
     "max-len": ["error", 100]
