@@ -8,19 +8,20 @@
     "url": "https://github.com/commercetools/commercetools-node-variant-reassignment/issues"
   },
   "scripts": {
-    "clean": "./node_modules/rimraf/bin.js dist",
     "build": "npm run clean && ./node_modules/.bin/babel --optional runtime lib --out-dir dist",
-    "watch": "./node_modules/.bin/babel --optional runtime lib --out-dir dist --watch",
+    "clean": "./node_modules/rimraf/bin.js dist",
+    "coverage": "npm run lint && ./node_modules/.bin/nyc --reporter=html --reporter=text npm test",
     "lint": "./node_modules/.bin/eslint lib spec",
+    "postinstall": "npm run build",
     "release": "./node_modules/.bin/mversion patch -m",
     "release:patch": "npm run release",
     "release:minor": "./node_modules/.bin/mversion minor -m",
     "release:major": "./node_modules/.bin/mversion major -m",
-    "coverage": "npm run lint && node_modules/.bin/nyc --reporter=html --reporter=text npm test",
     "test": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive ./spec",
     "test:unit": "LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 10000 --require babel-core/register --recursive spec/unit/*.spec.js",
     "test:integration": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive spec/integration/*.spec.js",
-    "validate": "npm ls"
+    "validate": "npm ls",
+    "watch": "./node_modules/.bin/babel --optional runtime lib --out-dir dist --watch"
   },
   "pre-commit": [
     "lint"
