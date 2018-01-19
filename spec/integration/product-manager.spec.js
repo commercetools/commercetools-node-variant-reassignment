@@ -174,7 +174,6 @@ describe('ProductManager', () => {
 
       product = await productService.publishProduct(product)
       const newProduct = await productService.changeProductType(product, productType2.id)
-
       expect(newProduct).to.be.an('object')
       expect(newProduct.productType.id).to.equal(productType2.id)
       expect(new Date(newProduct.createdAt)).to.be.above(new Date(product.createdAt))
