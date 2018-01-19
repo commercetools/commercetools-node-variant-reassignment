@@ -1,6 +1,6 @@
 {
   "name": "commercetools-node-variant-reassignment",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Node.js utility which complements product sync/import process by automatic conflicts resolution and reassignment of variants from one product to another",
   "license": "MIT",
   "homepage": "https://github.com/commercetools/commercetools-node-variant-reassignment",
@@ -8,7 +8,7 @@
     "url": "https://github.com/commercetools/commercetools-node-variant-reassignment/issues"
   },
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "./node_modules/rimraf/bin.js dist",
     "build": "npm run clean && ./node_modules/.bin/babel --optional runtime lib --out-dir dist",
     "watch": "./node_modules/.bin/babel --optional runtime lib --out-dir dist --watch",
     "lint": "./node_modules/.bin/eslint lib spec",
@@ -25,8 +25,9 @@
   "pre-commit": [
     "lint"
   ],
+  "main": "./dist/runner/variant-reassignment.js",
   "engines": {
-    "node": ">=8.9",
+    "node": ">=4",
     "npm": ">=3.10.8"
   },
   "keywords": [
