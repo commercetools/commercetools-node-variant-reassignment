@@ -5,7 +5,10 @@ import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 import * as constants from '../../../lib/constants'
 
-const productTypeDraft = _.cloneDeep(require('../../resources/productType2.json'))
+const productTypeDraft = _.cloneDeep(require('../../resources/productType.json'))
+
+productTypeDraft.name += '-2'
+productTypeDraft.description += '-2'
 
 describe('Reassignment error', () => {
   let ctpClient

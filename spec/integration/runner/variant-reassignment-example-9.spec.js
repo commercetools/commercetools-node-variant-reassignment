@@ -4,25 +4,25 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
 /* eslint-disable max-len */
 /**
- * +-------------+------------------------------------------------------------+-------------------------------------------------------------------------+--------------------+--------------------------------------------+
- * | Blacklist   | Product draft                                              | CTP product                                                             | After reassignment | CTP product                                |
- * +-------------+------------------------------------------------------------+-------------------------------------------------------------------------+                    +--------------------------------------------+
- * | [ brandId ] | Product:                                                   | Product:                                                                |                    | Product:                                   |
- * |             | slug: { en: "product" }                                    | id: 1                                                                   |                    | id: "1"                                    |
- * |             | product-type: "pt1"                                        | slug: { en: "product-1" }                                               |                    | slug: { en: "product" }                    |
- * |             | masterVariant: { sku: v1, attributes: [ { brandId: 1 } ] } | product-type: "pt1"                                                     |                    | product-type: "pt1"                        |
- * |             | variants: { sku: v2, attributes: [ { brandId: 2 } ] }      | masterVariant: { sku: v1, attributes: [ { brandId (sameForAll): 2 } ] } |                    | masterVariant: { sku: v1, attributes: [] } |
- * |             |                                                            |                                                                         |                    | variants: { sku: v2, attributes: [] }      |
- * +-------------+------------------------------------------------------------+-------------------------------------------------------------------------+                    +--------------------------------------------+
- * |             |                                                            | Product:                                                                |                    |                                            |
- * |             |                                                            | id: 2                                                                   |                    |                                            |
- * |             |                                                            | slug: { en: "product-2" }                                               |                    |                                            |
- * |             |                                                            | product-type: "pt1"                                                     |                    |                                            |
- * |             |                                                            | masterVariant: { sku: v2, attributes: [ { brandId (sameForAll): 3 } ] } |                    |                                            |
- * +-------------+------------------------------------------------------------+-------------------------------------------------------------------------+--------------------+--------------------------------------------+
+ * +------------------------------------------------------------+-------------------------------------------------------------------------+--------------------+------------------------------------------------------------+
+ * | Product draft                                              | CTP product                                                             | After reassignment | CTP product                                                |
+ * +------------------------------------------------------------+-------------------------------------------------------------------------+                    +------------------------------------------------------------+
+ * | Product:                                                   | Product:                                                                |                    | Product:                                                   |
+ * | slug: { en: "product" }                                    | id: 1                                                                   |                    | id: "1"                                                    |
+ * | product-type: "pt1"                                        | slug: { en: "product-1" }                                               |                    | slug: { en: "product" }                                    |
+ * | masterVariant: { sku: v1, attributes: [ { brandId: 1 } ] } | product-type: "pt1"                                                     |                    | product-type: "pt1"                                        |
+ * | variants: { sku: v2, attributes: [ { brandId: 1 } ] }      | masterVariant: { sku: v1, attributes: [ { brandId (sameForAll): 2 } ] } |                    | masterVariant: { sku: v1, attributes: [ { brandId: 1 } ] } |
+ * |                                                            |                                                                         |                    | variants: { sku: v2, attributes: [ { brandId: 1 } ] }      |
+ * +------------------------------------------------------------+-------------------------------------------------------------------------+                    +------------------------------------------------------------+
+ * |                                                            | Product:                                                                |                    |                                                            |
+ * |                                                            | id: 2                                                                   |                    |                                                            |
+ * |                                                            | slug: { en: "product-2" }                                               |                    |                                                            |
+ * |                                                            | product-type: "pt1"                                                     |                    |                                                            |
+ * |                                                            | masterVariant: { sku: v2, attributes: [ { brandId (sameForAll): 3 } ] } |                    |                                                            |
+ * +------------------------------------------------------------+-------------------------------------------------------------------------+--------------------+------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -73,7 +73,7 @@ describe.skip('Variant reassignment', () => {
             attributes: [
               {
                 name: 'brandId',
-                value: '2'
+                value: '1'
               }
             ]
           }
@@ -83,8 +83,11 @@ describe.skip('Variant reassignment', () => {
       const { body: { results } } = await utils.getProductsBySkus(['1', '2'], ctpClient)
       expect(results).to.have.lengthOf(1)
       const product = results[0]
-      expect(product.masterVariant.attributes).to.have.lengthOf(0)
+      expect(product.masterVariant.attributes).to.have.lengthOf(1)
       expect(product.variants).to.have.lengthOf(1)
-      expect(product.variants[0].attributes).to.have.lengthOf(0)
+      expect(product.variants[0].attributes).to.have.lengthOf(1)
+
+      const brandIdAttr = product.masterVariant.attributes.find(a => a.name === 'brandId')
+      expect(brandIdAttr.value).to.equal('1')
     })
 })
