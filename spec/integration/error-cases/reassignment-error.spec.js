@@ -110,7 +110,7 @@ describe('Reassignment error', () => {
   })
 
   it('fail when process can\'t load existing products', async () => {
-    sinon.stub(reassignment.productService, 'fetchProductsFromProductProjections')
+    sinon.stub(reassignment.productService, 'fetchProductsFromProductDrafts')
       .rejects('test error')
 
     try {
