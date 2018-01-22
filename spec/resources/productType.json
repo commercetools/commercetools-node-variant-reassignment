@@ -1,4 +1,5 @@
 {
+  "id": "product-type-id",
   "name": "test-product-type",
   "description": "Test product type",
   "attributes": [

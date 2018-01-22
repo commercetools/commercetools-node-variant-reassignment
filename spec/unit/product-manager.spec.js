@@ -6,7 +6,7 @@ import * as utils from '../utils/helper'
 import ProductManager from '../../lib/services/product-manager'
 import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../lib/constants'
 
-const productType = _.cloneDeep(require('../resources/productType2.json'))
+const productType = _.cloneDeep(require('../resources/productType.json'))
 
 let pM = null
 
@@ -405,9 +405,8 @@ describe('ProductManager', () => {
 
     it('should select all sameForAll attributes from product type', () => {
       const sameForAllAttrs = pM._selectSameForAllAttrs(productType)
-      expect(sameForAllAttrs.length).to.equal(2)
+      expect(sameForAllAttrs.length).to.equal(1)
       expect(sameForAllAttrs[0].attributeConstraint).to.equal('SameForAll')
-      expect(sameForAllAttrs[1].attributeConstraint).to.equal('SameForAll')
     })
 
     it('should select attrs that violates sameForAll from variants', () => {
