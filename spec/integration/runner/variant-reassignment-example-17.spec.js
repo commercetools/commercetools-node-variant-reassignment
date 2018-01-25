@@ -72,8 +72,7 @@ describe('Variant reassignment', () => {
     expect(anonymizedProduct.variants.length).to.equal(2)
     const anonymizedProductSkus = [anonymizedProduct.masterVariant.sku,
       ...anonymizedProduct.variants.map(v => v.sku)]
-    expect(anonymizedProductSkus).to.include(product1Sku2)
-    expect(anonymizedProductSkus).to.include(product1Sku3)
+    expect(anonymizedProductSkus).to.include.members([product1Sku2, product1Sku3])
 
     const updatedProduct = results.find(product => product.masterVariant.sku === productDraftSku)
     expect(updatedProduct.variants).to.have.lengthOf(0)

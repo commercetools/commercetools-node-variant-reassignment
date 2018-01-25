@@ -161,9 +161,8 @@ describe('Variant reassignment', () => {
 
     expect(drafts).to.have.lengthOf(3)
     const draftKeys = drafts.map(d => d.key)
-    expect(draftKeys).to.include('different-variants')
-    expect(draftKeys).to.include('different-slug-and-attributes')
-    expect(draftKeys).to.include('different-product-type')
+    expect(draftKeys).to.include.members(['different-variants', 'different-slug-and-attributes',
+      'different-product-type'])
   })
 
   describe('select product to update', () => {
