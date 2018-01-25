@@ -56,7 +56,7 @@ describe('Variant reassignment', () => {
       name: product1.name,
       slug: product1.slug,
       masterVariant: product2.masterVariant
-    }], [product2])
+    }])
     const { body: { results } } = await utils.getProductsBySkus([product1Sku, product2Sku],
       ctpClient)
     expect(results).to.have.lengthOf(2)
