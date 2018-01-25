@@ -460,16 +460,24 @@ describe('ProductManager', () => {
       const result = await pM.getProductsBySkusOrSlugs([testSku1, testSku2, testSku3],
         [{ [testSlugLang1]: testSlugValue1, [testSlugLang2]: testSlugValue2 }])
 
+      const productQueries = productsQuerySpy.getCalls().map(call => call.args[0])
+
       /* eslint-disable max-len */
-      expect(productsQuerySpy.getCall(0).args[0])
-        .is.equal(`masterData(current(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}")) `
-        + `or slug(${testSlugLang1}="${testSlugValue1}" or ${testSlugLang2}="${testSlugValue2}")) `
-        + `or staged(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}")) `
-        + `or slug(${testSlugLang1}="${testSlugValue1}" or ${testSlugLang2}="${testSlugValue2}")))`)
-      expect(productsQuerySpy.getCall(1).args[0])
-        .is.equal(`masterData(current(masterVariant(sku IN("${testSku3}")) or variants(sku IN("${testSku3}"))) `
-        + `or staged(masterVariant(sku IN("${testSku3}")) or variants(sku IN("${testSku3}"))))`)
+      expect(productQueries).to.include(
+        `masterData(current(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}"))) `
+        + `or staged(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}"))))`
+      )
+      expect(productQueries).to.include(
+        `masterData(current(masterVariant(sku IN("${testSku3}")) or variants(sku IN("${testSku3}"))) `
+        + `or staged(masterVariant(sku IN("${testSku3}")) or variants(sku IN("${testSku3}"))))`
+      )
+
+      expect(productQueries).to.include(
+        `masterData(current(slug(${testSlugLang1}="${testSlugValue1}" or ${testSlugLang2}="${testSlugValue2}")) `
+        + `or staged(slug(${testSlugLang1}="${testSlugValue1}" or ${testSlugLang2}="${testSlugValue2}")))`
+      )
       /* eslint-enable max-len */
+
       expect(result.length).to.equal(1)
     })
   })
