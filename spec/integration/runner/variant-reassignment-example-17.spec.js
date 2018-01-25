@@ -70,8 +70,8 @@ describe('Variant reassignment', () => {
     expect(anonymizedProduct.slug.en).to.be.a('string')
     expect(anonymizedProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
     expect(anonymizedProduct.variants.length).to.equal(2)
-    const anonymizedProductSkus = [anonymizedProduct.masterVariant.sku]
-      .concat(anonymizedProduct.variants.map(v => v.sku))
+    const anonymizedProductSkus = [anonymizedProduct.masterVariant.sku,
+      ...anonymizedProduct.variants.map(v => v.sku)]
     expect(anonymizedProductSkus).to.include(product1Sku2)
     expect(anonymizedProductSkus).to.include(product1Sku3)
 
