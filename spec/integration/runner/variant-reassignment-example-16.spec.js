@@ -47,7 +47,7 @@ describe('Variant reassignment', () => {
   )
 
   it('only anonymize product', async () => {
-    const testStartTstp = new Date()
+    const product2BeforeVersion = product2.version
     const reassignment = new VariantReassignment(ctpClient, logger, {}, ['brandId'])
     await reassignment.execute([{
       productType: {
@@ -57,11 +57,12 @@ describe('Variant reassignment', () => {
       slug: product1.slug,
       masterVariant: product2.masterVariant
     }])
+
     const { body: { results } } = await utils.getProductsBySkus([product1Sku, product2Sku],
       ctpClient)
     expect(results).to.have.lengthOf(2)
     const notUpdatedProduct = results.find(product => product.masterVariant.sku === product2Sku)
-    expect(new Date(notUpdatedProduct.lastModifiedAt)).to.be.below(testStartTstp)
+    expect(notUpdatedProduct.version).to.equal(product2BeforeVersion)
     const anonymizedProduct = results.find(product => product.masterVariant.sku === product1Sku)
     expect(anonymizedProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
     expect(anonymizedProduct.masterVariant.sku).to.equal(product1Sku)
