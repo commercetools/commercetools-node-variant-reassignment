@@ -158,10 +158,12 @@ describe('Variant reassignment', () => {
         ctpProduct4
       ]
     )
+
     expect(drafts).to.have.lengthOf(3)
-    expect(drafts.map(d => d.key)).to.include('different-variants')
-    expect(drafts.map(d => d.key)).to.include('different-slug-and-attributes')
-    expect(drafts.map(d => d.key)).to.include('different-product-type')
+    const draftKeys = drafts.map(d => d.key)
+    expect(draftKeys).to.include('different-variants')
+    expect(draftKeys).to.include('different-slug-and-attributes')
+    expect(draftKeys).to.include('different-product-type')
   })
 
   describe('select product to update', () => {
