@@ -5,7 +5,7 @@ import { expect } from 'chai'
 import * as utils from '../utils/helper'
 import ProductManager from '../../lib/services/product-manager'
 
-const productTypeDraft2 = _.cloneDeep(require('../resources/productType2.json'))
+const productTypeDraft2 = _.cloneDeep(require('../resources/productType.json'))
 
 const mockProduct = {
   name: {
@@ -174,7 +174,6 @@ describe('ProductManager', () => {
 
       product = await productService.publishProduct(product)
       const newProduct = await productService.changeProductType(product, productType2.id)
-
       expect(newProduct).to.be.an('object')
       expect(newProduct.productType.id).to.equal(productType2.id)
       expect(new Date(newProduct.createdAt)).to.be.above(new Date(product.createdAt))

@@ -30,7 +30,6 @@ import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
  * +-----------------------------------------+--------------------------+--------------------+--------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-// TODO: this test is similar to Example 6, check if we can remove this class
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
