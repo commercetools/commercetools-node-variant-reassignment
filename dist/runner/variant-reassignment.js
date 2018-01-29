@@ -52,6 +52,10 @@ var _bluebird = require('bluebird');
 
 var _bluebird2 = _interopRequireDefault(_bluebird);
 
+var _utilsErrorToJson = require('utils-error-to-json');
+
+var _utilsErrorToJson2 = _interopRequireDefault(_utilsErrorToJson);
+
 var _productManager = require('../services/product-manager');
 
 var _productManager2 = _interopRequireDefault(_productManager);
@@ -122,7 +126,8 @@ var VariantReassignment = function () {
             try {
               await this._processProductDraft(productDraft, products);
             } catch (e) {
-              this.logger.error('Error while processing productDraft %j, retrying.', productDraft.name, e.stack);
+              var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
+              this.logger.error('Error while processing productDraft %j, retrying.', productDraft.name, error);
               await this._handleProcessingError(productDraft, products);
             } finally {
               this.logger.debug('Finished processing of productDraft with name %j', productDraft.name);
@@ -174,7 +179,7 @@ var VariantReassignment = function () {
   }, {
     key: '_error',
     value: function _error(msg, e) {
-      var error = e && e.message || String(e);
+      var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
       this.logger.error(msg, e);
       return _bluebird2.default.reject(new Error(msg + ' - ' + error));
     }
@@ -210,7 +215,8 @@ var VariantReassignment = function () {
             await this._createAndExecuteActions(transaction.newProductDraft, transaction.backupProductDraft, transaction.variants, transaction.ctpProductToUpdate, transactionObject);
             await this.transactionService.deleteTransaction(key);
           } catch (e) {
-            this.logger.error('Could not process unfinished transaction', e);
+            var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
+            this.logger.error('Could not process unfinished transaction', error);
             throw e;
           }
         }
