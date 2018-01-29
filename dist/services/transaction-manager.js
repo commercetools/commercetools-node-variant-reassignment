@@ -35,7 +35,7 @@ var TransactionManager = function () {
     (0, _classCallCheck3.default)(this, TransactionManager);
 
     this.client = client;
-    this.logger = logger.child({ service: 'transactionManager' });
+    if (logger.child) this.logger = logger.child({ service: 'transactionManager' });else this.logger = logger;
   }
 
   (0, _createClass3.default)(TransactionManager, [{
@@ -45,11 +45,11 @@ var TransactionManager = function () {
     }
   }, {
     key: 'upsertTransactionByKey',
-    value: function upsertTransactionByKey(transaction, key) {
+    value: function upsertTransactionByKey(value, key) {
       var customObject = {
         container: constants.TRANSACTION_CONTAINER,
         key: key,
-        value: transaction
+        value: value
       };
 
       return this.client.customObjects.create(customObject).then(function (res) {
@@ -58,7 +58,13 @@ var TransactionManager = function () {
     }
   }, {
     key: 'getTransaction',
-    value: function getTransaction(key) {
+    value: async function getTransaction(key) {
+      var transactionObject = await this.getTransactionObject(key);
+      return transactionObject && transactionObject.value;
+    }
+  }, {
+    key: 'getTransactionObject',
+    value: function getTransactionObject(key) {
       var predicate = 'container = "' + constants.TRANSACTION_CONTAINER + '"' + (' AND key = "' + key + '"');
 
       return this.client.customObjects.where(predicate).fetch().then(function (res) {
@@ -77,7 +83,8 @@ var TransactionManager = function () {
   }, {
     key: 'deleteTransaction',
     value: async function deleteTransaction(key) {
-      var transaction = await this.getTransaction(key);
+      this.logger.debug('Removing transaction with key "%s"', key);
+      var transaction = await this.getTransactionObject(key);
 
       if (transaction) return this.client.customObjects.byId(transaction.id).delete(transaction.version);
 

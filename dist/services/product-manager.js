@@ -8,10 +8,6 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
-var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
-
-var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
-
 var _values = require('babel-runtime/core-js/object/values');
 
 var _values2 = _interopRequireDefault(_values);
@@ -19,6 +15,26 @@ var _values2 = _interopRequireDefault(_values);
 var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
+var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
+
+var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
+
+var _entries = require('babel-runtime/core-js/object/entries');
+
+var _entries2 = _interopRequireDefault(_entries);
+
+var _map = require('babel-runtime/core-js/map');
+
+var _map2 = _interopRequireDefault(_map);
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -53,7 +69,8 @@ var ProductManager = function () {
     (0, _classCallCheck3.default)(this, ProductManager);
 
     this.client = client;
-    this.logger = logger.child({ service: 'productManager' });
+    if (logger.child) this.logger = logger.child({ service: 'productManager' });else this.logger = logger;
+    this.productTypeCache = new _map2.default();
 
     this.loadBatchCount = 20;
     this.loadConcurrency = 2;
@@ -62,7 +79,7 @@ var ProductManager = function () {
   (0, _createClass3.default)(ProductManager, [{
     key: 'createProduct',
     value: function createProduct(product) {
-      this.logger.debug('Creating product', product);
+      this.logger.debug('Creating product: %j', product);
 
       return this.client.products.create(product).then(function (res) {
         return res.body;
@@ -92,18 +109,53 @@ var ProductManager = function () {
       });
     }
   }, {
+    key: 'transformProductToProjection',
+    value: function transformProductToProjection(product) {
+      var staged = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+      var productLevelFields = ['id', 'key', 'version', 'createdAt', 'catalogData', 'lastModifiedAt', 'productType', 'taxCategory', 'state', 'reviewRatingStatistics'];
+
+      var masterLevelFields = ['published', 'hasStagedChanges'];
+
+      var projection = _lodash2.default.cloneDeep(product.masterData[staged ? 'staged' : 'current']);
+      _lodash2.default.merge(projection, _lodash2.default.pick(product, productLevelFields));
+      _lodash2.default.merge(projection, _lodash2.default.pick(product.masterData, masterLevelFields));
+      return _lodash2.default.cloneDeep(projection);
+    }
+  }, {
     key: 'getProductsBySkus',
     value: async function getProductsBySkus(skus) {
       var _this = this;
 
       // filter out duplicates and divide skus into chunks
-      var skuChunks = (0, _lodash2.default)(skus).uniq().chunk(this.loadBatchCount).value();
+      var skuChunks = this._createChunks(skus);
 
       var productBatches = await _bluebird2.default.map(skuChunks, function (skuChunk) {
         return _this._getProductsBySkuChunk(skuChunk);
       }, { concurrency: this.loadConcurrency // load products with concurrency
       });
       return this._filterOutDuplicateProducts(_lodash2.default.flatten(productBatches));
+    }
+  }, {
+    key: 'getProductsBySkusOrSlugs',
+    value: async function getProductsBySkusOrSlugs(skus, slugs) {
+      var _this2 = this;
+
+      // filter out duplicates and divide skus into chunks
+      var skuChunks = this._createChunks(skus);
+      var slugChunks = this._createChunks(slugs);
+
+      var productBatches = await _bluebird2.default.map(skuChunks, function (skuChunk, i) {
+        var slugChunk = slugChunks[i];
+        return _this2._getProductsBySkuOrSlugChunk(skuChunk, slugChunk);
+      }, { concurrency: this.loadConcurrency // load products with concurrency
+      });
+      return this._filterOutDuplicateProducts(_lodash2.default.flatten(productBatches));
+    }
+  }, {
+    key: '_createChunks',
+    value: function _createChunks(value) {
+      return (0, _lodash2.default)(value).uniq().chunk(this.loadBatchCount).value();
     }
   }, {
     key: '_filterOutDuplicateProducts',
@@ -113,10 +165,45 @@ var ProductManager = function () {
   }, {
     key: '_getProductsBySkuChunk',
     value: function _getProductsBySkuChunk(skus) {
-      var skuPredicate = skus.join('","');
-      var variantsPredicate = 'masterVariant(sku IN("' + skuPredicate + '"))' + ('or variants(sku IN("' + skuPredicate + '"))');
-      var predicate = 'masterData(current(' + variantsPredicate + ') or staged(' + variantsPredicate + '))';
+      var skusPredicate = this._getSkusPredicate(skus);
+      var predicate = 'masterData(current(' + skusPredicate + ') or staged(' + skusPredicate + '))';
 
+      return this._fetchProductsByPredicate(predicate);
+    }
+  }, {
+    key: '_getProductsBySkuOrSlugChunk',
+    value: async function _getProductsBySkuOrSlugChunk(skus) {
+      var _this3 = this;
+
+      var slugs = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+
+      var fetchBySlugPromise = _bluebird2.default.resolve([]);
+      if (slugs.length) {
+        var slugPredicate = slugs.map(function (slug) {
+          return (0, _entries2.default)(slug).map(function (_ref) {
+            var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
+                locale = _ref2[0],
+                value = _ref2[1];
+
+            return locale + '=' + _this3._escapeValue(value);
+          }).join(' or ');
+        }).join(' or ');
+        fetchBySlugPromise = this._fetchProductsByPredicate('masterData(current(slug(' + slugPredicate + ')) or staged(slug(' + slugPredicate + ')))');
+      }
+
+      var skusPredicate = 'masterData(current(' + this._getSkusPredicate(skus) + ') ' + ('or staged(' + this._getSkusPredicate(skus) + '))');
+      var fetchBySkusPromise = this._fetchProductsByPredicate(skusPredicate);
+
+      var _ref3 = await _bluebird2.default.all([fetchBySkusPromise, fetchBySlugPromise]),
+          _ref4 = (0, _slicedToArray3.default)(_ref3, 2),
+          productsBySkus = _ref4[0],
+          productsBySlug = _ref4[1];
+
+      return this._filterOutDuplicateProducts([].concat((0, _toConsumableArray3.default)(_lodash2.default.compact(productsBySkus)), (0, _toConsumableArray3.default)(_lodash2.default.compact(productsBySlug))));
+    }
+  }, {
+    key: '_fetchProductsByPredicate',
+    value: function _fetchProductsByPredicate(predicate) {
       return this.client.products.where(predicate).fetch().then(function (res) {
         return res.body.results;
       });
@@ -125,6 +212,30 @@ var ProductManager = function () {
     key: 'getProductById',
     value: function getProductById(id) {
       return this.client.products.byId(id).fetch().then(function (res) {
+        return res.body;
+      }).catch(function (err) {
+        return err && err.body && err.body.statusCode === 404 ? _bluebird2.default.resolve(undefined) : _bluebird2.default.reject(err);
+      });
+    }
+  }, {
+    key: '_getSkusPredicate',
+    value: function _getSkusPredicate(skus) {
+      var _this4 = this;
+
+      var skuPredicate = skus.map(function (sku) {
+        return _this4._escapeValue(sku);
+      }).join(',');
+      return 'masterVariant(sku IN(' + skuPredicate + ')) ' + ('or variants(sku IN(' + skuPredicate + '))');
+    }
+  }, {
+    key: '_escapeValue',
+    value: function _escapeValue(value) {
+      return (0, _stringify2.default)(value);
+    }
+  }, {
+    key: 'getProductProjectionById',
+    value: function getProductProjectionById(id) {
+      return this.client.productProjections.staged(true).byId(id).fetch().then(function (res) {
         return res.body;
       }).catch(function (err) {
         return err && err.body && err.body.statusCode === 404 ? _bluebird2.default.resolve(undefined) : _bluebird2.default.reject(err);
@@ -162,7 +273,7 @@ var ProductManager = function () {
   }, {
     key: 'removeVariantsFromProduct',
     value: function removeVariantsFromProduct(product, skus) {
-      var _this2 = this;
+      var _this5 = this;
 
       var masterData = product.masterData;
       var actions = [];
@@ -220,26 +331,26 @@ var ProductManager = function () {
         productVersions.staged = _lodash2.default.cloneDeep(productVersions.current);
 
         retainedSkus.staged.forEach(function (sku) {
-          return actions.push(_this2._getAddVariantAction(productVersions.current[sku], true));
+          return actions.push(_this5._getAddVariantAction(productVersions.current[sku], true));
         });
       }
 
       // run through both variants (staged and current)
       // first change masterVariants if needed and then remove variants
       ['staged', 'current'].forEach(function (version) {
-        var variantMap = _this2._getVariantsBySkuMap(masterData[version]);
+        var variantMap = _this5._getVariantsBySkuMap(masterData[version]);
 
         // if we deleted a masterVariant, set another variant as new masterVariant
-        if (_this2._isMasterVariantRemoved(masterData[version], retainedSkus[version])) {
+        if (_this5._isMasterVariantRemoved(masterData[version], retainedSkus[version])) {
           var firstExistingVariant = (0, _values2.default)(productVersions[version])[0];
 
-          actions.push(_this2._getChangeMasterVariantAction(firstExistingVariant, version === 'staged'));
+          actions.push(_this5._getChangeMasterVariantAction(firstExistingVariant, version === 'staged'));
         }
 
         // remove variants specified in skus param
         // but only if product has this variant
         deletedSkus[version].forEach(function (sku) {
-          if (variantMap[sku]) actions.push(_this2._getRemoveVariantAction(variantMap[sku], version === 'staged'));
+          if (variantMap[sku]) actions.push(_this5._getRemoveVariantAction(variantMap[sku], version === 'staged'));
         });
       });
 
@@ -436,28 +547,25 @@ var ProductManager = function () {
       return (0, _extends3.default)({}, _lodash2.default.keyBy(current.variants.concat(current.masterVariant), 'sku'), _lodash2.default.keyBy(staged.variants.concat(staged.masterVariant), 'sku'));
     }
   }, {
-    key: 'fetchProductsFromProductProjections',
-    value: function fetchProductsFromProductProjections(productProjections) {
-      var _this3 = this;
+    key: 'fetchProductsFromProductDrafts',
+    value: function fetchProductsFromProductDrafts(productDrafts) {
+      var _this6 = this;
 
-      var skus = _lodash2.default.flatten(productProjections.map(function (pP) {
-        return _this3.getProductDraftSkus(pP);
+      var skus = _lodash2.default.flatten(productDrafts.map(function (pP) {
+        return _this6.getProductDraftSkus(pP);
       }));
-      return this.getProductsBySkus(skus);
+      var slugs = productDrafts.map(function (pP) {
+        return pP.slug;
+      });
+      return this.getProductsBySkusOrSlugs(skus, slugs);
     }
   }, {
     key: 'changeProductType',
     value: async function changeProductType(product, newProductTypeId) {
-      if (product.masterData.published) await this._unpublishProduct(product);
-
-      // fetch from product projection because it has same structure
-      // as product draft. It's easier for product creation later in the process
-
-      var _ref = await this.client.productProjections.staged(true).byId(product.id).fetch(),
-          productProjection = _ref.body;
+      this.logger.debug('Changing productType', product.id);
+      var productProjection = this.transformProductToProjection(product);
 
       await this.deleteByProduct(productProjection);
-
       productProjection.productType.id = newProductTypeId;
       return this.createProduct(productProjection);
     }
@@ -472,12 +580,115 @@ var ProductManager = function () {
     key: 'isProductsSame',
     value: function isProductsSame(ctpProduct1, ctpProduct2) {
       if (ctpProduct1.id === ctpProduct2.id) return true;
-      return ctpProduct1.productType.id === ctpProduct2.productType.id && _lodash2.default.deepEqual(ctpProduct1.masterData.staged.slug, ctpProduct2.masterData.staged.slug);
+
+      return ctpProduct1.productType.id === ctpProduct2.productType.id && _lodash2.default.isEqual(ctpProduct1.masterData.staged.slug, ctpProduct2.masterData.staged.slug);
     }
   }, {
     key: '_unpublishProduct',
     value: async function _unpublishProduct(product) {
       return this.updateProduct(product, [this._getUnpublishAction()]);
+    }
+
+    /**
+     * Ensure that all attributes that have sameForAll constraint will have same value after
+     * the reassignment process. The same value is taken either from product draft OR set to null
+     * (attr is removed) if attr is not available in product draft.
+     * It's necessary to have same attribute values for:
+     *
+     * 1) variants that will be added to ctpProductToUpdate - done by removing the attribute
+     * from the new variants
+     *
+     * 2) existing variants from ctpProductToUpdate - done by `setAttributeInAllVariants` action
+     *
+     * @param variants - checks if the values for sameForAll attributes are correct in the variants
+     * @param productTypeId - fetch the product type by ID and get all sameForAll attrs for checking
+     * @param productDraft - get sameForAll value from the productDraft
+     * in case of sameForAll constraint violation
+     * @returns {Promise.<Array>} setAttributeInAllVariants actions
+     */
+
+  }, {
+    key: 'ensureSameForAllAttributes',
+    value: async function ensureSameForAllAttributes(variants, productTypeId, productDraft) {
+      var _this7 = this;
+
+      var actions = [];
+      var productType = await this._getProductTypeById(productTypeId);
+      var sameForAllAttrs = this._selectSameForAllAttrs(productType);
+      var violatedAttrs = this._selectViolatedAttrs(variants, sameForAllAttrs);
+      violatedAttrs.forEach(function (attribute) {
+        var value = _this7._getAttributeValue(attribute.name, productDraft);
+        variants.forEach(function (variant) {
+          var attrFromVariant = variant.attributes.find(function (a) {
+            return a.name === attribute.name;
+          });
+          if (value) attrFromVariant.value = value;else _lodash2.default.remove(variant.attributes, function (a) {
+            return a.name === attribute.name;
+          });
+        });
+        actions.push({ action: 'setAttributeInAllVariants', name: attribute.name, value: value });
+      });
+      return actions;
+    }
+  }, {
+    key: '_getProductTypeById',
+    value: async function _getProductTypeById(productTypeId) {
+      var productType = this.productTypeCache.get(productTypeId);
+      if (!productType) {
+        productType = await this._fetchCtpProductType(productTypeId);
+        this.productTypeCache.set(productTypeId, productType);
+      }
+      return productType;
+    }
+  }, {
+    key: '_getAttributeValue',
+    value: function _getAttributeValue(attributeName, productDraft) {
+      var value = null;
+      if (productDraft) {
+        var draftAttr = productDraft.masterVariant.attributes.find(function (a) {
+          return a.name === attributeName;
+        });
+        if (draftAttr) value = draftAttr.value;
+      }
+      return value;
+    }
+  }, {
+    key: '_selectViolatedAttrs',
+    value: function _selectViolatedAttrs(variants, sameForAllAttrs) {
+      var _this8 = this;
+
+      return sameForAllAttrs.filter(function (attr) {
+        return !_this8._areAttributeValuesSameForAll(attr, variants);
+      });
+    }
+  }, {
+    key: '_selectSameForAllAttrs',
+    value: function _selectSameForAllAttrs(productType) {
+      return productType.attributes.filter(function (a) {
+        return a.attributeConstraint === 'SameForAll';
+      });
+    }
+  }, {
+    key: '_areAttributeValuesSameForAll',
+    value: function _areAttributeValuesSameForAll(attribute, variants) {
+      var attrValues = variants.map(function (variant) {
+        var value = null;
+        if (variant.attributes) {
+          var attr = variant.attributes.find(function (a) {
+            return a.name === attribute.name;
+          });
+          value = attr ? attr.value : null;
+        }
+        return value;
+      });
+      return _lodash2.default.uniq(attrValues).length <= 1;
+    }
+  }, {
+    key: '_fetchCtpProductType',
+    value: function _fetchCtpProductType(productTypeId) {
+      return this.client.productTypes.byId(productTypeId).fetch().then(function (res) {
+        return res.body;
+      });
     }
   }]);
   return ProductManager;
