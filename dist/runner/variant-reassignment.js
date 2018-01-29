@@ -87,13 +87,15 @@ var VariantReassignment = function () {
    *  - for every productDraft check if reassignment is needed
    *  - if yes, create and process actions which will move variants across products
    * @param productDrafts List of productDrafts
+   * @param productTypeCache List of resolved product drafts - in some cases, product type ID
+   * in product draft is name and not ID - in this case, we use the cache to get ID
    * @returns {Promise<boolean>} true if reassignment has been executed
    */
 
 
   (0, _createClass3.default)(VariantReassignment, [{
     key: 'execute',
-    value: async function execute(productDrafts) {
+    value: async function execute(productDrafts, productTypeCache) {
       var products = void 0;
 
       try {
@@ -124,6 +126,7 @@ var VariantReassignment = function () {
             var productDraft = _step.value;
 
             try {
+              if (productTypeCache) productDraft.productType.id = productTypeCache[productDraft.productType.id].id;
               await this._processProductDraft(productDraft, products);
             } catch (e) {
               var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
