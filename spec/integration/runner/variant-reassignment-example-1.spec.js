@@ -24,14 +24,12 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
 describe('Variant reassignment', () => {
   let ctpClient
   let product1
-  let product2
   const logger = utils.createLogger(__filename)
 
   before(async () => {
     ctpClient = await utils.createClient()
     const products = await utils.createCtpProducts([['1'], ['3', '4']], ctpClient)
     product1 = products.find(product => product.masterVariant.sku === '1')
-    product2 = products.find(product => product.masterVariant.sku === '3')
   })
 
   after(() =>
@@ -59,7 +57,7 @@ describe('Variant reassignment', () => {
         }
       ]
     }
-    await reassignment.execute([productDraft], [product1, product2])
+    await reassignment.execute([productDraft])
     const { body: { results } } = await utils.getProductsBySkus(['1', '3', '4'], ctpClient)
     expect(results).to.have.lengthOf(2)
     const backupProduct = results.find(product => product.masterVariant.sku === '4')

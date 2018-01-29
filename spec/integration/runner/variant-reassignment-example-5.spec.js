@@ -70,7 +70,7 @@ describe('Variant reassignment', () => {
           }
         ]
       }
-      await reassignment.execute([productDraft], [product1, product2])
+      await reassignment.execute([productDraft])
 
       const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
       expect(results).to.have.lengthOf(3)

@@ -76,7 +76,7 @@ describe('Variant reassignment', () => {
         variants: [{
           sku: '2'
         }]
-      }], [product1, product2])
+      }])
       const { body: product1After } = await ctpClient.products.byId(product1.id).fetch()
       expect(product1After.masterData.current.masterVariant.sku).to.equal('1')
       expect(product1After.masterData.staged.masterVariant.sku).to.equal('1')
