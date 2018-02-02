@@ -8,6 +8,10 @@ var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
 
 var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
 
+var _typeof2 = require('babel-runtime/helpers/typeof');
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
@@ -757,8 +761,8 @@ var VariantReassignment = function () {
     }
 
     /**
-     * The slugs from product and product draft are conflicting
-     * when at least one language from product's slug is the same as in product draft slug
+     * The slugs from product and product draft are conflicting when at least one language value
+     * from product's slug is the same as in product draft slug
      * @param product
      * @param productDraftSlug
      * @returns {boolean}
@@ -772,14 +776,27 @@ var VariantReassignment = function () {
 
       // if at least one version has conflict in slugs, return true
       var _arr2 = ['staged', 'current'];
-      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+
+      var _loop = function _loop() {
         var version = _arr2[_i2];
         var slug = product.masterData[version].slug;
         var slugLength = (0, _keys2.default)(slug).length;
         var stagedDraftSlugs = _lodash2.default.merge({}, productDraftSlug, slug);
         var stagedDraftSlugsLength = (0, _keys2.default)(stagedDraftSlugs).length;
 
-        if (slugLength + productDraftSlugLength !== stagedDraftSlugsLength) return true;
+        var hasSameSlugLang = slugLength + productDraftSlugLength !== stagedDraftSlugsLength;
+        var hasAnySameSlugValue = (0, _keys2.default)(slug).some(function (lang) {
+          return productDraftSlug[lang] === slug[lang];
+        });
+        if (hasSameSlugLang && hasAnySameSlugValue) return {
+            v: true
+          };
+      };
+
+      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+        var _ret = _loop();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object") return _ret.v;
       }
       return false;
     }
