@@ -366,5 +366,25 @@ describe('Variant reassignment', () => {
         }])
       expect(testFunction.callCount).to.equal(0)
     })
+
+    it('product has different slug with same lang, should not anonymize', async () => {
+      await variantReassignments._ensureSlugUniqueness({ slug: { en: 'test-slug-1' } },
+        [{
+          id: testProductId,
+          masterData: {
+            current: {
+              slug: {
+                en: 'test-slug-2'
+              }
+            },
+            staged: {
+              slug: {
+                en: 'test-slug-2'
+              }
+            }
+          }
+        }])
+      expect(testFunction.callCount).to.equal(0)
+    })
   })
 })
