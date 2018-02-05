@@ -12,6 +12,7 @@
     "clean": "./node_modules/.bin/rimraf dist",
     "coverage": "npm run lint && ./node_modules/.bin/nyc --reporter=html --reporter=text npm test",
     "lint": "./node_modules/.bin/eslint lib spec",
+    "prepublish": "npm run build",
     "release": "./node_modules/.bin/mversion patch -m",
     "release:patch": "npm run release",
     "release:minor": "./node_modules/.bin/mversion minor -m",
