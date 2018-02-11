@@ -68,8 +68,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var VariantReassignment = function () {
   function VariantReassignment(client, logger) {
-    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    var retainExistingData = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+    var retainExistingData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
     (0, _classCallCheck3.default)(this, VariantReassignment);
 
     // When we run execute method it also fetch and process all unfinished transactions

@@ -48,7 +48,7 @@ describe('Variant reassignment', () => {
 
   it('only anonymize product', async () => {
     const product2BeforeVersion = product2.version
-    const reassignment = new VariantReassignment(ctpClient, logger, {}, ['brandId'])
+    const reassignment = new VariantReassignment(ctpClient, logger, ['brandId'])
     await reassignment.execute([{
       productType: {
         id: product1.productType.id
