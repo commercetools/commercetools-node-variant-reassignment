@@ -87,7 +87,7 @@ var ProductManager = function () {
   (0, _createClass3.default)(ProductManager, [{
     key: 'createProduct',
     value: function createProduct(product) {
-      this.logger.debug('Creating product: %j', product);
+      this.logger.debug('Creating product: ' + product);
 
       return this.client.products.create(product).then(function (res) {
         return res.body;
