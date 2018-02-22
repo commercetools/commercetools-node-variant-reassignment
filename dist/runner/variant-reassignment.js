@@ -1080,7 +1080,7 @@ var VariantReassignment = function () {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                this.logger.debug('Changing productType of product ' + +((0, _stringify2.default)(ctpProductToUpdate.masterData.current.name) + ' with id ') + ('"' + ctpProductToUpdate.id + '" to productType "' + productTypeId + '"'));
+                this.logger.debug('Changing productType of product ' + ((0, _stringify2.default)(ctpProductToUpdate.masterData.current.name) + ' with id ') + ('"' + ctpProductToUpdate.id + '" to productType "' + productTypeId + '"'));
 
                 _context8.next = 3;
                 return this._backupProductForProductTypeChange(transaction, ctpProductToUpdate);
