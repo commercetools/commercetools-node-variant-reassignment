@@ -509,8 +509,8 @@ export default class VariantReassignment {
   }
 
   /**
-   * The slugs from product and product draft are conflicting
-   * when at least one language from product's slug is the same as in product draft slug
+   * The slugs from product and product draft are conflicting when at least one language value
+   * from product's slug is the same as in product draft slug
    * @param product
    * @param productDraftSlug
    * @returns {boolean}
@@ -526,7 +526,9 @@ export default class VariantReassignment {
       const stagedDraftSlugs = _.merge({}, productDraftSlug, slug);
       const stagedDraftSlugsLength = _Object$keys(stagedDraftSlugs).length;
 
-      if (slugLength + productDraftSlugLength !== stagedDraftSlugsLength) return true;
+      const hasSameSlugLang = slugLength + productDraftSlugLength !== stagedDraftSlugsLength;
+      const hasAnySameSlugValue = _Object$keys(slug).some(lang => productDraftSlug[lang] === slug[lang]);
+      if (hasSameSlugLang && hasAnySameSlugValue) return true;
     }
     return false;
   }
