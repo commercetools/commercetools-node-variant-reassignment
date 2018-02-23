@@ -36,6 +36,10 @@ var _entries = require('babel-runtime/core-js/object/entries');
 
 var _entries2 = _interopRequireDefault(_entries);
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -314,7 +318,7 @@ var VariantReassignment = function () {
     value: function _error(msg, e) {
       var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
       this.logger.error(msg, e);
-      return _bluebird2.default.reject(new Error(msg + ' - ' + error));
+      return _bluebird2.default.reject(new Error(msg + ' - ' + (0, _stringify2.default)(error)));
     }
 
     /**
