@@ -805,6 +805,13 @@ var ProductManager = function () {
                     var attrFromVariant = variant.attributes.find(function (a) {
                       return a.name === attribute.name;
                     });
+
+                    // if variant does not have sameForAll attribute, insert it
+                    if (!attrFromVariant) {
+                      attrFromVariant = _lodash2.default.cloneDeep(attribute);
+                      variant.attributes.push(attrFromVariant);
+                    }
+
                     if (value) attrFromVariant.value = value;else _lodash2.default.remove(variant.attributes, function (a) {
                       return a.name === attribute.name;
                     });

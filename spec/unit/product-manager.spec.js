@@ -433,6 +433,27 @@ describe('ProductManager', () => {
       expect(updateAction.value).to.equal(null)
       expect(variantsClone.every(v => v.attributes.length === 2)).to.equal(true)
     })
+
+    it('should ensure sameForAll even when variants do not have attribute', async () => {
+      const variantsClone = _.cloneDeep(variants)
+      variantsClone[1].attributes = []
+
+      const productDraft = {
+        masterVariant: {
+          attributes: _.cloneDeep(variantsClone[0].attributes)
+        }
+      }
+      productDraft.masterVariant.attributes[0].value = '222'
+      const updateActions = await pM.ensureSameForAllAttributes(
+        variantsClone, productType.id, productDraft
+      )
+      expect(updateActions.length).to.equal(1)
+      const updateAction = updateActions[0]
+      expect(updateAction.action).to.equal('setAttributeInAllVariants')
+      expect(updateAction.name).to.equal('brandId')
+      expect(updateAction.value).to.equal('222')
+      expect(variantsClone.every(v => _.find(v.attributes, ['name', 'brandId']))).to.equal(true)
+    })
   })
 
   describe('get product by skus or slugs', () => {
