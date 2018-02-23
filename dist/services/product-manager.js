@@ -812,7 +812,7 @@ var ProductManager = function () {
                       variant.attributes.push(attrFromVariant);
                     }
 
-                    if (value) attrFromVariant.value = value;else _lodash2.default.remove(variant.attributes, function (a) {
+                    if (!_lodash2.default.isUndefined(value)) attrFromVariant.value = value;else _lodash2.default.remove(variant.attributes, function (a) {
                       return a.name === attribute.name;
                     });
                   });
