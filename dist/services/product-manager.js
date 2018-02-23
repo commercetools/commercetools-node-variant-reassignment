@@ -605,7 +605,7 @@ var ProductManager = function () {
   }, {
     key: '_isMasterVariantRemoved',
     value: function _isMasterVariantRemoved(product, existingSkus) {
-      return !existingSkus.includes(product.masterVariant.sku);
+      return !(existingSkus.indexOf(product.masterVariant.sku) !== -1);
     }
   }, {
     key: '_getRemoveVariantAction',

@@ -846,13 +846,13 @@ var VariantReassignment = function () {
       // variants that needs to be moved from matching product
       var matchingProductsVariants = productsToRemoveVariants.map(function (product) {
         return _this4._selectVariantsWithCondition(product, function (variant) {
-          return skus.includes(variant.sku);
+          return skus.indexOf(variant.sku) !== -1;
         });
       });
 
       // variants that needs to be removed from CTP product to update
       var ctpProductToUpdateVariants = this._selectVariantsWithCondition(ctpProductToUpdate, function (variant) {
-        return !skus.includes(variant.sku);
+        return !(skus.indexOf(variant.sku) !== -1);
       });
 
       return {
@@ -1278,7 +1278,7 @@ var VariantReassignment = function () {
                 variants = productDraft.variants || [];
 
                 variants.concat(productDraft.masterVariant).forEach(function (v) {
-                  if (!existingSkus.includes(v.sku)) skuToVariant.set(v.sku, v);
+                  if (!(existingSkus.indexOf(v.sku) !== -1)) skuToVariant.set(v.sku, v);
                 });
                 // preserve existing attribute data
                 if (!_lodash2.default.isEmpty(this.retainExistingData)) backupVariants.forEach(function (backupVariant) {
