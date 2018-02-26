@@ -23,7 +23,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  */
 /* eslint-enable max-len */
 // todo: https://github.com/commercetools/commercetools-node-variant-reassignment/issues/43
-describe.only('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
@@ -31,6 +31,7 @@ describe.only('Variant reassignment', () => {
   before(async () => {
     ctpClient = await utils.createClient()
     const results = await utils.createCtpProducts([['1'], ['2']], ctpClient, (pD, ind) => {
+      // create brandId attribute only on second product (index = 1)
       if (ind)
         pD.masterVariant.attributes = [{ name: 'brandId', value: '1' }]
     })

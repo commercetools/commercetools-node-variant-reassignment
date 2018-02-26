@@ -767,8 +767,7 @@ var ProductManager = function () {
      * (attr is removed) if attr is not available in product draft.
      * It's necessary to have same attribute values for:
      *
-     * 1) variants that will be added to ctpProductToUpdate - done by removing the attribute
-     * from the new variants
+     * 1) variants that will be added to ctpProductToUpdate
      *
      * 2) existing variants from ctpProductToUpdate - done by `setAttributeInAllVariants` action
      *
@@ -783,8 +782,6 @@ var ProductManager = function () {
     key: 'ensureSameForAllAttributes',
     value: function () {
       var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(variants, productTypeId, productDraft) {
-        var _this7 = this;
-
         var actions, productType, sameForAllAttrs, violatedAttrs;
         return _regenerator2.default.wrap(function _callee8$(_context8) {
           while (1) {
@@ -800,23 +797,26 @@ var ProductManager = function () {
                 violatedAttrs = this._selectViolatedAttrs(variants, sameForAllAttrs);
 
                 violatedAttrs.forEach(function (attribute) {
-                  var value = _this7._getAttributeValue(attribute.name, productDraft);
+                  var prodDraftAttr = _lodash2.default.find(productDraft.masterVariant.attributes, ['name', attribute.name]);
+
                   variants.forEach(function (variant) {
-                    var attrFromVariant = variant.attributes.find(function (a) {
-                      return a.name === attribute.name;
-                    });
+                    var attrFromVariant = _lodash2.default.find(variant.attributes, ['name', attribute.name]);
 
-                    // if variant does not have sameForAll attribute, insert it
-                    if (!attrFromVariant) {
-                      attrFromVariant = _lodash2.default.cloneDeep(attribute);
-                      variant.attributes.push(attrFromVariant);
-                    }
+                    // if productDraft does not have attribute, remove it also from variants
+                    if (!prodDraftAttr) _lodash2.default.remove(variant.attributes, ['name', attribute.name]);
 
-                    if (!_lodash2.default.isUndefined(value)) attrFromVariant.value = value;else _lodash2.default.remove(variant.attributes, function (a) {
-                      return a.name === attribute.name;
-                    });
+                    // if variant does not have sameForAll attribute, insert it from productDraft
+                    else if (!attrFromVariant) variant.attributes.push(prodDraftAttr);
+
+                      // else set productDraft value to attribute
+                      else attrFromVariant.value = prodDraftAttr.value;
                   });
-                  actions.push({ action: 'setAttributeInAllVariants', name: attribute.name, value: value });
+
+                  actions.push({
+                    action: 'setAttributeInAllVariants',
+                    name: attribute.name,
+                    value: prodDraftAttr ? prodDraftAttr.value : null
+                  });
                 });
                 return _context8.abrupt('return', actions);
 
@@ -890,10 +890,10 @@ var ProductManager = function () {
   }, {
     key: '_selectViolatedAttrs',
     value: function _selectViolatedAttrs(variants, sameForAllAttrs) {
-      var _this8 = this;
+      var _this7 = this;
 
       return sameForAllAttrs.filter(function (attr) {
-        return !_this8._areAttributeValuesSameForAll(attr, variants);
+        return !_this7._areAttributeValuesSameForAll(attr, variants);
       });
     }
   }, {

@@ -453,6 +453,30 @@ describe('ProductManager', () => {
       expect(updateAction.name).to.equal('brandId')
       expect(updateAction.value).to.equal('222')
       expect(variantsClone.every(v => _.find(v.attributes, ['name', 'brandId']))).to.equal(true)
+      // second variant should have now brandId == 222
+      expect(variantsClone[1].attributes.length).to.equal(1)
+      expect(variantsClone[1].attributes[0].name).to.equal('brandId')
+      expect(variantsClone[1].attributes[0].value).to.equal('222')
+    })
+
+    it('should remove sameForAll when it is missing in productDraft', async () => {
+      const variantsClone = _.cloneDeep(variants)
+      variantsClone[1].attributes = []
+
+      const productDraft = {
+        masterVariant: {
+          attributes: []
+        }
+      }
+      const updateActions = await pM.ensureSameForAllAttributes(
+        variantsClone, productType.id, productDraft
+      )
+      expect(updateActions.length).to.equal(1)
+      const updateAction = updateActions[0]
+      expect(updateAction.action).to.equal('setAttributeInAllVariants')
+      expect(updateAction.name).to.equal('brandId')
+      expect(updateAction.value).to.equal(null)
+      expect(variantsClone.every(v => _.find(v.attributes, ['name', 'brandId']))).to.equal(false)
     })
   })
 

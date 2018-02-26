@@ -66,6 +66,7 @@
     "eslint-config-airbnb": "^15.0.0",
     "eslint-config-commercetools": "^6.0.0",
     "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-no-only-tests": "^2.0.0",
     "istanbul": "^0.4.5",
     "mocha": "^4.1.0",
     "mversion": "^1.10.1",
