@@ -367,4 +367,32 @@ describe('Variant reassignment', () => {
       expect(testFunction.callCount).to.equal(0)
     })
   })
+
+  describe('resolve product type references', () => {
+    it('should resolve product type references', async () => {
+      const productServiceMock = new ProductManager(utils.logger, {})
+      sinon.stub(productServiceMock, 'fetchProductsFromProductDrafts')
+        .resolves(null)
+      const variantReassignments = new VariantReassignment(null, logger)
+      sinon.stub(variantReassignments, '_processUnfinishedTransactions')
+        .resolves(null)
+      const testFunction = sinon.stub(variantReassignments, '_selectProductDraftsForReassignment')
+        .returns([])
+      variantReassignments.productService = productServiceMock
+
+      const productTypeKey = 'productTypeKey'
+      const productTypeId = 'productTypeId'
+      await variantReassignments.execute(
+        [{ id: 'product-id', productType: { id: productTypeKey } }],
+        {
+          [productTypeKey]: {
+            id: productTypeId
+          }
+        })
+
+      expect(testFunction.callCount).to.equal(1)
+      const productDraftsToVerify = testFunction.firstCall.args[0]
+      expect(productDraftsToVerify[0].productType.id).to.equal(productTypeId)
+    })
+  })
 })
