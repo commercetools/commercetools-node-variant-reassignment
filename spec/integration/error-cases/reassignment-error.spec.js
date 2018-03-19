@@ -13,7 +13,6 @@ productTypeDraft.description += '-2'
 describe('Reassignment error', () => {
   let ctpClient
   let product1
-  let product2
   let productDraft
   let reassignment
   let logger
@@ -63,7 +62,6 @@ describe('Reassignment error', () => {
     await utils.deleteResourcesAll(ctpClient, logger)
     const products = await utils.createCtpProducts([['1', '2'], ['3', '4']], ctpClient)
     product1 = _.find(products, ['masterVariant.sku', '1'])
-    product2 = _.find(products, ['masterVariant.sku', '3'])
 
     productDraft = {
       productType: {
@@ -98,7 +96,7 @@ describe('Reassignment error', () => {
       .rejects('test error')
 
     try {
-      await reassignment.execute([productDraft], [product1, product2])
+      await reassignment.execute([productDraft])
       return Promise.reject('Should throw an error')
     } catch (e) {
       expect(e.toString()).to.contain('Could not process unfinished transactions')
@@ -110,11 +108,11 @@ describe('Reassignment error', () => {
   })
 
   it('fail when process can\'t load existing products', async () => {
-    sinon.stub(reassignment.productService, 'fetchProductsFromProductProjections')
+    sinon.stub(reassignment.productService, 'fetchProductsFromProductDrafts')
       .rejects('test error')
 
     try {
-      await reassignment.execute([productDraft], [product1, product2])
+      await reassignment.execute([productDraft])
       return Promise.reject('Should throw an error')
     } catch (e) {
       expect(e.toString()).to.contain('Error while fetching products for reassignment')
@@ -133,7 +131,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([productDraft], [product1, product2])
+    await reassignment.execute([productDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
@@ -151,7 +149,7 @@ describe('Reassignment error', () => {
     sinon.stub(reassignment, '_selectMatchingProducts').rejects('test error')
 
     try {
-      await reassignment.execute([productDraft], [product1, product2])
+      await reassignment.execute([productDraft])
       return Promise.reject('Should throw an error')
     } catch (e) {
       expect(e.toString()).to.contain('test error')
@@ -165,7 +163,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([productDraft], [product1, product2])
+    await reassignment.execute([productDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
@@ -186,7 +184,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([customProductDraft], [product1, product2])
+    await reassignment.execute([customProductDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
@@ -210,7 +208,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([customProductDraft], [product1, product2])
+    await reassignment.execute([customProductDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
@@ -234,7 +232,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([customProductDraft], [product1, product2])
+    await reassignment.execute([customProductDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
@@ -254,7 +252,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([productDraft], [product1, product2])
+    await reassignment.execute([productDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
@@ -270,7 +268,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([productDraft], [product1, product2])
+    await reassignment.execute([productDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
@@ -286,7 +284,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([productDraft], [product1, product2])
+    await reassignment.execute([productDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
@@ -302,7 +300,7 @@ describe('Reassignment error', () => {
       .onFirstCall().rejects('test error')
       .callThrough()
 
-    await reassignment.execute([productDraft], [product1, product2])
+    await reassignment.execute([productDraft])
 
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])

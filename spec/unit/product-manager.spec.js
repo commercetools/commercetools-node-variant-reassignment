@@ -434,4 +434,51 @@ describe('ProductManager', () => {
       expect(variantsClone.every(v => v.attributes.length === 2)).to.equal(true)
     })
   })
+
+  describe('get product by skus or slugs', () => {
+    let productsQuerySpy
+
+    beforeEach(async () => {
+      pM = new ProductManager(utils.logger, {})
+      const client = await utils.createClient()
+      productsQuerySpy = sinon.spy(client.products, 'where')
+      sinon.stub(client.products, 'fetch').callsFake(() =>
+        Promise.resolve({ body: { results: [getMockProduct()] } })
+      )
+      pM.loadBatchCount = 2
+      pM.client = client
+    })
+
+    it('should fetch products with correct query', async () => {
+      const testSku1 = '1'
+      const testSku2 = '2'
+      const testSku3 = '3'
+      const testSlugValue1 = 'test_slug_1'
+      const testSlugLang1 = 'de'
+      const testSlugValue2 = 'test_slug_2'
+      const testSlugLang2 = 'en'
+      const result = await pM.getProductsBySkusOrSlugs([testSku1, testSku2, testSku3],
+        [{ [testSlugLang1]: testSlugValue1, [testSlugLang2]: testSlugValue2 }])
+
+      const productQueries = productsQuerySpy.getCalls().map(call => call.args[0])
+
+      /* eslint-disable max-len */
+      expect(productQueries).to.include(
+        `masterData(current(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}"))) `
+        + `or staged(masterVariant(sku IN("${testSku1}","${testSku2}")) or variants(sku IN("${testSku1}","${testSku2}"))))`
+      )
+      expect(productQueries).to.include(
+        `masterData(current(masterVariant(sku IN("${testSku3}")) or variants(sku IN("${testSku3}"))) `
+        + `or staged(masterVariant(sku IN("${testSku3}")) or variants(sku IN("${testSku3}"))))`
+      )
+
+      expect(productQueries).to.include(
+        `masterData(current(slug(${testSlugLang1}="${testSlugValue1}" or ${testSlugLang2}="${testSlugValue2}")) `
+        + `or staged(slug(${testSlugLang1}="${testSlugValue1}" or ${testSlugLang2}="${testSlugValue2}")))`
+      )
+      /* eslint-enable max-len */
+
+      expect(result.length).to.equal(1)
+    })
+  })
 })

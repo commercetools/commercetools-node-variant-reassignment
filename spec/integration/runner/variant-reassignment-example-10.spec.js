@@ -26,7 +26,6 @@ describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
-  let product2
 
   before(async () => {
     ctpClient = await utils.createClient()
@@ -37,7 +36,6 @@ describe('Variant reassignment', () => {
         pD.masterVariant.attributes = [{ name: 'brandId', value: '3' }]
     })
     product1 = results.find(product => product.masterVariant.sku === '1')
-    product2 = results.find(product => product.masterVariant.sku === '2')
   })
 
   after(() =>
@@ -67,7 +65,7 @@ describe('Variant reassignment', () => {
             attributes: []
           }
         ]
-      }], [product1, product2])
+      }])
 
       const { body: { results } } = await utils.getProductsBySkus(['1', '2'], ctpClient)
       expect(results).to.have.lengthOf(1)

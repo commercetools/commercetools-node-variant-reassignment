@@ -57,7 +57,7 @@ describe('Variant reassignment', () => {
         sku: '1'
       },
       variants: []
-    }], [product1])
+    }])
 
     const { body: { results } } = await utils.getProductsBySkus(['1'], ctpClient)
     expect(results).to.have.lengthOf(1)

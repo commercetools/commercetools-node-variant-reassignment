@@ -49,7 +49,7 @@ describe('Variant reassignment', () => {
     }]
   }
   const productDraft3 = {
-    key: 'different-attributes',
+    key: 'different-slug-and-attributes',
     productType: {
       typeId: 'product-type',
       id: 'productTypeId2'
@@ -158,9 +158,11 @@ describe('Variant reassignment', () => {
         ctpProduct4
       ]
     )
-    expect(drafts).to.have.lengthOf(2)
-    expect(drafts.map(d => d.key)).to.include('different-variants')
-    expect(drafts.map(d => d.key)).to.include('different-product-type')
+
+    expect(drafts).to.have.lengthOf(3)
+    const draftKeys = drafts.map(d => d.key)
+    expect(draftKeys).to.include.members(['different-variants', 'different-slug-and-attributes',
+      'different-product-type'])
   })
 
   describe('select product to update', () => {

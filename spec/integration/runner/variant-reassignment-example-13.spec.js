@@ -75,7 +75,7 @@ describe('Variant reassignment', () => {
       name: product1.name,
       slug: product1.slug,
       masterVariant: product1.masterVariant
-    }], [product1])
+    }])
     const { body: product } = await ctpClient.products.byId(product1.id).fetch()
     expect(product.masterData.current.masterVariant.sku).to.equal('1')
     expect(product.masterData.current.variants.length).to.equal(0)

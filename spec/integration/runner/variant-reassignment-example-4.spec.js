@@ -27,8 +27,6 @@ const productTypeDraft2 = _.cloneDeep(require('../../resources/productType.json'
 describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
-  let product1
-  let product2
   let productType2
 
   before(async () => {
@@ -37,12 +35,10 @@ describe('Variant reassignment', () => {
     productType2 = await utils.ensureResource(ctpClient.productTypes,
       productTypeDraft2, 'name')
 
-    const results = await utils.createCtpProducts([['1', '2'], ['3']], ctpClient, (pD) => {
+    await utils.createCtpProducts([['1', '2'], ['3']], ctpClient, (pD) => {
       if (pD.masterVariant.sku === '1')
         pD.productType.id = productType2.id
     })
-    product1 = results.find(product => product.masterVariant.sku === '1')
-    product2 = results.find(product => product.masterVariant.sku === '3')
   })
 
   after(() =>
@@ -70,7 +66,7 @@ describe('Variant reassignment', () => {
             sku: '3'
           }
         ]
-      }], [product1, product2])
+      }])
       const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3'], ctpClient)
       expect(results).to.have.lengthOf(2)
       const updatedProduct = results.find(product => product.masterVariant.sku === '1')
