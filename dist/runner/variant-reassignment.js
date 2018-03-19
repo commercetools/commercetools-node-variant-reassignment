@@ -102,8 +102,7 @@ var VariantReassignment = function () {
    *  - for every productDraft check if reassignment is needed
    *  - if yes, create and process actions which will move variants across products
    * @param productDrafts List of productDrafts
-   * @param productTypeCache List of resolved product types - in some cases, product type ID
-   * in product draft is name and not ID - in this case, we use the cache to get ID
+   * @param productTypeIdToTypeObj product type cache to resolve product type references
    * @returns {Promise<boolean>} true if reassignment has been executed
    */
 
@@ -111,7 +110,9 @@ var VariantReassignment = function () {
   (0, _createClass3.default)(VariantReassignment, [{
     key: 'execute',
     value: function () {
-      var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(productDrafts, productTypeCache) {
+      var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(productDrafts) {
+        var productTypeIdToTypeObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
         var products, productDraftsForReassignment, isReassignmentRequired, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft, error;
 
         return _regenerator2.default.wrap(function _callee$(_context) {
@@ -156,6 +157,9 @@ var VariantReassignment = function () {
                 return _context.abrupt('return', this._error('Error while fetching products for reassignment', _context.t1));
 
               case 20:
+
+                productDrafts = this._resolveProductTypeReferences(productDrafts, productTypeIdToTypeObj);
+
                 productDraftsForReassignment = this._selectProductDraftsForReassignment(productDrafts, products);
 
 
@@ -171,19 +175,17 @@ var VariantReassignment = function () {
                 _iteratorNormalCompletion = true;
                 _didIteratorError = false;
                 _iteratorError = undefined;
-                _context.prev = 27;
+                _context.prev = 28;
                 _iterator = (0, _getIterator3.default)(productDraftsForReassignment);
 
-              case 29:
+              case 30:
                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
                   _context.next = 49;
                   break;
                 }
 
                 productDraft = _step.value;
-                _context.prev = 31;
-
-                if (productTypeCache) productDraft.productType.id = productTypeCache[productDraft.productType.id].id;
+                _context.prev = 32;
                 _context.next = 35;
                 return this._processProductDraft(productDraft, products);
 
@@ -193,7 +195,7 @@ var VariantReassignment = function () {
 
               case 37:
                 _context.prev = 37;
-                _context.t2 = _context['catch'](31);
+                _context.t2 = _context['catch'](32);
                 error = _context.t2 instanceof Error ? (0, _utilsErrorToJson2.default)(_context.t2) : _context.t2;
 
                 this.logger.error('Error while processing productDraft ' + (0, _stringify2.default)(productDraft.name) + ', retrying.', error);
@@ -208,7 +210,7 @@ var VariantReassignment = function () {
 
               case 46:
                 _iteratorNormalCompletion = true;
-                _context.next = 29;
+                _context.next = 30;
                 break;
 
               case 49:
@@ -217,7 +219,7 @@ var VariantReassignment = function () {
 
               case 51:
                 _context.prev = 51;
-                _context.t3 = _context['catch'](27);
+                _context.t3 = _context['catch'](28);
                 _didIteratorError = true;
                 _iteratorError = _context.t3;
 
@@ -256,10 +258,10 @@ var VariantReassignment = function () {
                 return _context.stop();
             }
           }
-        }, _callee, this, [[1, 7], [11, 17], [27, 51, 55, 63], [31, 37, 43, 46], [56,, 58, 62]]);
+        }, _callee, this, [[1, 7], [11, 17], [28, 51, 55, 63], [32, 37, 43, 46], [56,, 58, 62]]);
       }));
 
-      function execute(_x2, _x3) {
+      function execute(_x2) {
         return _ref.apply(this, arguments);
       }
 
@@ -745,6 +747,22 @@ var VariantReassignment = function () {
       return productDrafts.filter(function (productDraft) {
         return _this._isReassignmentNeeded(productDraft, skuToProductMap);
       });
+    }
+
+    /**
+     * In productDrafts from external systems, there's no productTypeId, but instead the name is used.
+     * However, productTypeId is needed for reassignment. This method replaces the productTypeName
+     * with productTypeId if such ID exists.
+     */
+
+  }, {
+    key: '_resolveProductTypeReferences',
+    value: function _resolveProductTypeReferences(productDrafts, productTypeIdToTypeObj) {
+      productDrafts.forEach(function (productDraft) {
+        var productType = productTypeIdToTypeObj[productDraft.productType.id];
+        if (productType) productDraft.productType.id = productType.id;
+      });
+      return productDrafts;
     }
   }, {
     key: '_createSkuToProductMap',
