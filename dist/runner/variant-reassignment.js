@@ -36,10 +36,6 @@ var _entries = require('babel-runtime/core-js/object/entries');
 
 var _entries2 = _interopRequireDefault(_entries);
 
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -905,7 +901,7 @@ var VariantReassignment = function () {
         var matchingProductsBySlug = this._selectMatchingProductsBySlug(products, productDraft);
         // select products that matches by at least one variant with productDraft
         var matchingProductsBySku = this._selectMatchingProductsBySkus(products, productDraftSkus);
-        return _lodash2.default.compact(_lodash2.default.uniqWith(matchingProductsBySku.concat(matchingProductsBySlug), _lodash2.default.isEqual));
+        return this.productService.filterOutDuplicateProducts(_lodash2.default.compact(matchingProductsBySku.concat(matchingProductsBySlug)));
       }
       return this.productService.getProductsBySkusOrSlugs(productDraftSkus, productDraftSlugs);
     }

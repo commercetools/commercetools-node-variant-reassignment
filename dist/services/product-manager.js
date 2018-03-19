@@ -151,7 +151,7 @@ var ProductManager = function () {
 
               case 3:
                 productBatches = _context.sent;
-                return _context.abrupt('return', this._filterOutDuplicateProducts(_lodash2.default.flatten(productBatches)));
+                return _context.abrupt('return', this.filterOutDuplicateProducts(_lodash2.default.flatten(productBatches)));
 
               case 5:
               case 'end':
@@ -190,7 +190,7 @@ var ProductManager = function () {
 
               case 4:
                 productBatches = _context2.sent;
-                return _context2.abrupt('return', this._filterOutDuplicateProducts(_lodash2.default.flatten(productBatches)));
+                return _context2.abrupt('return', this.filterOutDuplicateProducts(_lodash2.default.flatten(productBatches)));
 
               case 6:
               case 'end':
@@ -212,8 +212,8 @@ var ProductManager = function () {
       return (0, _lodash2.default)(value).uniq().chunk(this.loadBatchCount).value();
     }
   }, {
-    key: '_filterOutDuplicateProducts',
-    value: function _filterOutDuplicateProducts(products) {
+    key: 'filterOutDuplicateProducts',
+    value: function filterOutDuplicateProducts(products) {
       return _lodash2.default.uniqBy(products, 'id');
     }
   }, {
@@ -264,7 +264,7 @@ var ProductManager = function () {
                 _ref7 = (0, _slicedToArray3.default)(_ref6, 2);
                 productsBySkus = _ref7[0];
                 productsBySlug = _ref7[1];
-                return _context3.abrupt('return', this._filterOutDuplicateProducts([].concat((0, _toConsumableArray3.default)(productsBySkus), (0, _toConsumableArray3.default)(productsBySlug))));
+                return _context3.abrupt('return', this.filterOutDuplicateProducts([].concat((0, _toConsumableArray3.default)(productsBySkus), (0, _toConsumableArray3.default)(productsBySlug))));
 
               case 11:
               case 'end':
