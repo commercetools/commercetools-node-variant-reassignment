@@ -8,6 +8,10 @@ var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
 
 var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
 
+var _typeof2 = require('babel-runtime/helpers/typeof');
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
@@ -32,9 +36,21 @@ var _entries = require('babel-runtime/core-js/object/entries');
 
 var _entries2 = _interopRequireDefault(_entries);
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
 var _getIterator2 = require('babel-runtime/core-js/get-iterator');
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -94,81 +110,199 @@ var VariantReassignment = function () {
 
   (0, _createClass3.default)(VariantReassignment, [{
     key: 'execute',
-    value: async function execute(productDrafts, productTypeCache) {
-      var products = void 0;
+    value: function () {
+      var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(productDrafts, productTypeCache) {
+        var products, productDraftsForReassignment, isReassignmentRequired, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft, error;
 
-      try {
-        if (this.firstRun) await this._processUnfinishedTransactions();
-      } catch (e) {
-        return this._error('Could not process unfinished transactions', e);
-      }
-      this.firstRun = false;
+        return _regenerator2.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                products = void 0;
+                _context.prev = 1;
 
-      try {
-        products = await this.productService.fetchProductsFromProductDrafts(productDrafts);
-      } catch (e) {
-        return this._error('Error while fetching products for reassignment', e);
-      }
+                if (!this.firstRun) {
+                  _context.next = 5;
+                  break;
+                }
 
-      var productDraftsForReassignment = this._selectProductDraftsForReassignment(productDrafts, products);
+                _context.next = 5;
+                return this._processUnfinishedTransactions();
 
-      this.logger.debug('Filtered %d productDrafts for reassignment', productDraftsForReassignment.length);
+              case 5:
+                _context.next = 10;
+                break;
 
-      var isReassignmentRequired = productDraftsForReassignment.length;
-      if (isReassignmentRequired) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
+              case 7:
+                _context.prev = 7;
+                _context.t0 = _context['catch'](1);
+                return _context.abrupt('return', this._error('Could not process unfinished transactions', _context.t0));
 
-        try {
-          for (var _iterator = (0, _getIterator3.default)(productDraftsForReassignment), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var productDraft = _step.value;
+              case 10:
+                this.firstRun = false;
 
-            try {
-              if (productTypeCache) productDraft.productType.id = productTypeCache[productDraft.productType.id].id;
-              await this._processProductDraft(productDraft, products);
-            } catch (e) {
-              var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
-              this.logger.error('Error while processing productDraft %j, retrying.', productDraft.name, error);
-              await this._handleProcessingError(productDraft, products);
-            } finally {
-              this.logger.debug('Finished processing of productDraft with name %j', productDraft.name);
+                _context.prev = 11;
+                _context.next = 14;
+                return this.productService.fetchProductsFromProductDrafts(productDrafts);
+
+              case 14:
+                products = _context.sent;
+                _context.next = 20;
+                break;
+
+              case 17:
+                _context.prev = 17;
+                _context.t1 = _context['catch'](11);
+                return _context.abrupt('return', this._error('Error while fetching products for reassignment', _context.t1));
+
+              case 20:
+                productDraftsForReassignment = this._selectProductDraftsForReassignment(productDrafts, products);
+
+
+                this.logger.debug('Filtered %d productDrafts for reassignment', productDraftsForReassignment.length);
+
+                isReassignmentRequired = productDraftsForReassignment.length;
+
+                if (!isReassignmentRequired) {
+                  _context.next = 64;
+                  break;
+                }
+
+                _iteratorNormalCompletion = true;
+                _didIteratorError = false;
+                _iteratorError = undefined;
+                _context.prev = 27;
+                _iterator = (0, _getIterator3.default)(productDraftsForReassignment);
+
+              case 29:
+                if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+                  _context.next = 49;
+                  break;
+                }
+
+                productDraft = _step.value;
+                _context.prev = 31;
+
+                if (productTypeCache) productDraft.productType.id = productTypeCache[productDraft.productType.id].id;
+                _context.next = 35;
+                return this._processProductDraft(productDraft, products);
+
+              case 35:
+                _context.next = 43;
+                break;
+
+              case 37:
+                _context.prev = 37;
+                _context.t2 = _context['catch'](31);
+                error = _context.t2 instanceof Error ? (0, _utilsErrorToJson2.default)(_context.t2) : _context.t2;
+
+                this.logger.error('Error while processing productDraft %j, retrying.', productDraft.name, error);
+                _context.next = 43;
+                return this._handleProcessingError(productDraft, products);
+
+              case 43:
+                _context.prev = 43;
+
+                this.logger.debug('Finished processing of productDraft with name %j', productDraft.name);
+                return _context.finish(43);
+
+              case 46:
+                _iteratorNormalCompletion = true;
+                _context.next = 29;
+                break;
+
+              case 49:
+                _context.next = 55;
+                break;
+
+              case 51:
+                _context.prev = 51;
+                _context.t3 = _context['catch'](27);
+                _didIteratorError = true;
+                _iteratorError = _context.t3;
+
+              case 55:
+                _context.prev = 55;
+                _context.prev = 56;
+
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                  _iterator.return();
+                }
+
+              case 58:
+                _context.prev = 58;
+
+                if (!_didIteratorError) {
+                  _context.next = 61;
+                  break;
+                }
+
+                throw _iteratorError;
+
+              case 61:
+                return _context.finish(58);
+
+              case 62:
+                return _context.finish(55);
+
+              case 63:
+                return _context.abrupt('return', true);
+
+              case 64:
+                return _context.abrupt('return', false);
+
+              case 65:
+              case 'end':
+                return _context.stop();
             }
           }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
+        }, _callee, this, [[1, 7], [11, 17], [27, 51, 55, 63], [31, 37, 43, 46], [56,, 58, 62]]);
+      }));
 
-        return true;
+      function execute(_x3, _x4) {
+        return _ref.apply(this, arguments);
       }
-      return false;
-    }
+
+      return execute;
+    }()
   }, {
     key: '_handleProcessingError',
-    value: async function _handleProcessingError(productDraft, products) {
-      var transactions = await this.transactionService.getTransactions();
-      var failedTransaction = transactions.find(function (_ref) {
-        var value = _ref.value;
-        return _lodash2.default.isEqual(value.newProductDraft.name, productDraft.name);
-      });
+    value: function () {
+      var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(productDraft, products) {
+        var transactions, failedTransaction;
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return this.transactionService.getTransactions();
 
-      return failedTransaction
-      // transaction was created but not finished, try to finish it
-      ? this._processUnfinishedTransactions(transactions)
-      // transaction was not created, try to process productDraft again
-      : this._processProductDraft(productDraft, products);
-    }
+              case 2:
+                transactions = _context2.sent;
+                failedTransaction = transactions.find(function (_ref3) {
+                  var value = _ref3.value;
+                  return _lodash2.default.isEqual(value.newProductDraft.name, productDraft.name);
+                });
+                return _context2.abrupt('return', failedTransaction
+                // transaction was created but not finished, try to finish it
+                ? this._processUnfinishedTransactions(transactions)
+                // transaction was not created, try to process productDraft again
+                : this._processProductDraft(productDraft, products));
+
+              case 5:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function _handleProcessingError(_x5, _x6) {
+        return _ref2.apply(this, arguments);
+      }
+
+      return _handleProcessingError;
+    }()
 
     /**
      * Log error and return Promise.reject
@@ -183,7 +317,7 @@ var VariantReassignment = function () {
     value: function _error(msg, e) {
       var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
       this.logger.error(msg, e);
-      return _bluebird2.default.reject(new Error(msg + ' - ' + error));
+      return _bluebird2.default.reject(new Error(msg + ' - ' + (0, _stringify2.default)(error)));
     }
 
     /**
@@ -193,122 +327,295 @@ var VariantReassignment = function () {
 
   }, {
     key: '_processUnfinishedTransactions',
-    value: async function _processUnfinishedTransactions() {
-      var transactions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    value: function () {
+      var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
+        var transactions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
-      if (!transactions) {
-        this.logger.debug('Loading unfinished transactions');
-        transactions = await this.transactionService.getTransactions();
+        var _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, transactionObject, key, transaction, error;
+
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (transactions) {
+                  _context3.next = 5;
+                  break;
+                }
+
+                this.logger.debug('Loading unfinished transactions');
+                _context3.next = 4;
+                return this.transactionService.getTransactions();
+
+              case 4:
+                transactions = _context3.sent;
+
+              case 5:
+                _iteratorNormalCompletion2 = true;
+                _didIteratorError2 = false;
+                _iteratorError2 = undefined;
+                _context3.prev = 8;
+                _iterator2 = (0, _getIterator3.default)(transactions);
+
+              case 10:
+                if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
+                  _context3.next = 29;
+                  break;
+                }
+
+                transactionObject = _step2.value;
+                key = transactionObject.key, transaction = transactionObject.value;
+
+
+                this.logger.debug('Processing unfinished transaction with key %s', key);
+                _context3.prev = 14;
+                _context3.next = 17;
+                return this._createAndExecuteActions(transaction.newProductDraft, transaction.backupProductDraft, transaction.variants, transaction.ctpProductToUpdate, transactionObject);
+
+              case 17:
+                _context3.next = 19;
+                return this.transactionService.deleteTransaction(key);
+
+              case 19:
+                _context3.next = 26;
+                break;
+
+              case 21:
+                _context3.prev = 21;
+                _context3.t0 = _context3['catch'](14);
+                error = _context3.t0 instanceof Error ? (0, _utilsErrorToJson2.default)(_context3.t0) : _context3.t0;
+
+                this.logger.error('Could not process unfinished transaction', error);
+                throw _context3.t0;
+
+              case 26:
+                _iteratorNormalCompletion2 = true;
+                _context3.next = 10;
+                break;
+
+              case 29:
+                _context3.next = 35;
+                break;
+
+              case 31:
+                _context3.prev = 31;
+                _context3.t1 = _context3['catch'](8);
+                _didIteratorError2 = true;
+                _iteratorError2 = _context3.t1;
+
+              case 35:
+                _context3.prev = 35;
+                _context3.prev = 36;
+
+                if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                  _iterator2.return();
+                }
+
+              case 38:
+                _context3.prev = 38;
+
+                if (!_didIteratorError2) {
+                  _context3.next = 41;
+                  break;
+                }
+
+                throw _iteratorError2;
+
+              case 41:
+                return _context3.finish(38);
+
+              case 42:
+                return _context3.finish(35);
+
+              case 43:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this, [[8, 31, 35, 43], [14, 21], [36,, 38, 42]]);
+      }));
+
+      function _processUnfinishedTransactions() {
+        return _ref4.apply(this, arguments);
       }
 
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = (0, _getIterator3.default)(transactions), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var transactionObject = _step2.value;
-          var key = transactionObject.key,
-              transaction = transactionObject.value;
-
-
-          this.logger.debug('Processing unfinished transaction with key %s', key);
-          try {
-            await this._createAndExecuteActions(transaction.newProductDraft, transaction.backupProductDraft, transaction.variants, transaction.ctpProductToUpdate, transactionObject);
-            await this.transactionService.deleteTransaction(key);
-          } catch (e) {
-            var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
-            this.logger.error('Could not process unfinished transaction', error);
-            throw e;
-          }
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-    }
+      return _processUnfinishedTransactions;
+    }()
   }, {
     key: '_processProductDraft',
-    value: async function _processProductDraft(productDraft, products) {
-      this.logger.debug('Processing reassignment for productDraft with name %j', productDraft.name);
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(productDraft, products) {
+        var matchingProducts, ctpProductToUpdate, _getRemovedVariants2, backupVariants, variantsToProcess, anonymizedProductDraft, transaction;
 
-      var matchingProducts = await this._selectMatchingProducts(productDraft, products);
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                this.logger.debug('Processing reassignment for productDraft with name %j', productDraft.name);
 
-      if (matchingProducts.length === 0) return;
+                _context4.next = 3;
+                return this._selectMatchingProducts(productDraft, products);
 
-      // select using SLUG, etc..
-      var ctpProductToUpdate = this._selectCtpProductToUpdate(productDraft, matchingProducts);
-      this.logger.debug('Selected ctpProductToUpdate with id "%s"', ctpProductToUpdate.id);
+              case 3:
+                matchingProducts = _context4.sent;
 
-      // get variants and draft to backup
+                if (!(matchingProducts.length === 0)) {
+                  _context4.next = 6;
+                  break;
+                }
 
-      var _getRemovedVariants2 = this._getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate),
-          backupVariants = _getRemovedVariants2.matchingProductsVars,
-          variantsToProcess = _getRemovedVariants2.ctpProductToUpdateVars;
+                return _context4.abrupt('return');
 
-      var anonymizedProductDraft = this._createProductDraftWithRemovedVariants(ctpProductToUpdate, variantsToProcess);
+              case 6:
 
-      this.logger.debug('Will remove %d and reassign %d variants', variantsToProcess.length, backupVariants.length);
+                // select using SLUG, etc..
+                ctpProductToUpdate = this._selectCtpProductToUpdate(productDraft, matchingProducts);
 
-      // create a backup object
-      var transaction = await this._backupToCustomObject(productDraft, backupVariants, anonymizedProductDraft);
+                this.logger.debug('Selected ctpProductToUpdate with id "%s"', ctpProductToUpdate.id);
 
-      await this._createAndExecuteActions(productDraft, anonymizedProductDraft, backupVariants, ctpProductToUpdate, transaction, matchingProducts);
-      await this.transactionService.deleteTransaction(transaction.key);
-    }
+                // get variants and draft to backup
+                _getRemovedVariants2 = this._getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate), backupVariants = _getRemovedVariants2.matchingProductsVars, variantsToProcess = _getRemovedVariants2.ctpProductToUpdateVars;
+                anonymizedProductDraft = this._createProductDraftWithRemovedVariants(ctpProductToUpdate, variantsToProcess);
+
+
+                this.logger.debug('Will remove %d and reassign %d variants', variantsToProcess.length, backupVariants.length);
+
+                // create a backup object
+                _context4.next = 13;
+                return this._backupToCustomObject(productDraft, backupVariants, anonymizedProductDraft);
+
+              case 13:
+                transaction = _context4.sent;
+                _context4.next = 16;
+                return this._createAndExecuteActions(productDraft, anonymizedProductDraft, backupVariants, ctpProductToUpdate, transaction, matchingProducts);
+
+              case 16:
+                _context4.next = 18;
+                return this.transactionService.deleteTransaction(transaction.key);
+
+              case 18:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function _processProductDraft(_x8, _x9) {
+        return _ref5.apply(this, arguments);
+      }
+
+      return _processProductDraft;
+    }()
   }, {
     key: '_createAndExecuteActions',
-    value: async function _createAndExecuteActions(productDraft, anonymizedProductDraft, backupVariants, ctpProductToUpdate, transaction, matchingProducts) {
-      // load products for backupVariants -> matching products
-      if (!matchingProducts) {
-        matchingProducts = await this._selectMatchingProducts(productDraft);
-        // load CTP product to update for backupProductDraft -> CTP product to update
+    value: function () {
+      var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(productDraft, anonymizedProductDraft, backupVariants, ctpProductToUpdate, transaction, matchingProducts) {
+        var productToUpdateCandidate, ctpProductTypeId, draftProductType;
+        return _regenerator2.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                if (matchingProducts) {
+                  _context5.next = 12;
+                  break;
+                }
 
-        var productToUpdateCandidate = this._selectCtpProductToUpdate(productDraft, matchingProducts);
+                _context5.next = 3;
+                return this._selectMatchingProducts(productDraft);
 
-        // if there is no ctpProductToUpdate or it is the same as candidate, take candidate
-        if (!ctpProductToUpdate || this.productService.isProductsSame(productToUpdateCandidate, ctpProductToUpdate)) ctpProductToUpdate = productToUpdateCandidate;else
-          // ctpProductToUpdate has been deleted and not recreated with correct product type id
-          ctpProductToUpdate = await this._createNewProduct(ctpProductToUpdate, productDraft.productType.id);
-      }
+              case 3:
+                matchingProducts = _context5.sent;
 
-      // check if product types are the same for productDraft and CTP product to update
-      var ctpProductTypeId = ctpProductToUpdate.productType.id;
-      var draftProductType = productDraft.productType.id;
-      matchingProducts = matchingProducts.filter(function (product) {
-        return product.id !== ctpProductToUpdate.id;
-      });
-      if (draftProductType !== ctpProductTypeId) {
-        ctpProductToUpdate = await this._changeProductType(transaction, ctpProductToUpdate, draftProductType);
-        // find and replace ctpProductToUpdate in matchingProducts array with updated version
-        matchingProducts = this._replaceProductInProductArray(ctpProductToUpdate, matchingProducts);
-      }
-      matchingProducts = await this._removeVariantsFromMatchingProducts(backupVariants, matchingProducts);
+                // load CTP product to update for backupProductDraft -> CTP product to update
 
-      // when creating variant, also ensure about sameForAll attrs - Examples 9,10,11
-      ctpProductToUpdate = await this._createVariantsInCtpProductToUpdate(backupVariants, productDraft, ctpProductToUpdate);
+                productToUpdateCandidate = this._selectCtpProductToUpdate(productDraft, matchingProducts);
 
-      // this is done only when variants are removed from ctpProductToUpdate
-      if (anonymizedProductDraft) {
-        await this._removeVariantsFromCtpProductToUpdate(anonymizedProductDraft, ctpProductToUpdate);
-        await this._ensureProductCreation(anonymizedProductDraft);
-      }
+                // if there is no ctpProductToUpdate or it is the same as candidate, take candidate
 
-      // e.g. Example 7
-      await this._ensureSlugUniqueness(productDraft, matchingProducts.filter(function (product) {
-        return product.id !== ctpProductToUpdate.id;
+                if (!(!ctpProductToUpdate || this.productService.isProductsSame(productToUpdateCandidate, ctpProductToUpdate))) {
+                  _context5.next = 9;
+                  break;
+                }
+
+                ctpProductToUpdate = productToUpdateCandidate;
+                _context5.next = 12;
+                break;
+
+              case 9:
+                _context5.next = 11;
+                return this._createNewProduct(ctpProductToUpdate, productDraft.productType.id);
+
+              case 11:
+                ctpProductToUpdate = _context5.sent;
+
+              case 12:
+
+                // check if product types are the same for productDraft and CTP product to update
+                ctpProductTypeId = ctpProductToUpdate.productType.id;
+                draftProductType = productDraft.productType.id;
+
+                matchingProducts = matchingProducts.filter(function (product) {
+                  return product.id !== ctpProductToUpdate.id;
+                });
+
+                if (!(draftProductType !== ctpProductTypeId)) {
+                  _context5.next = 20;
+                  break;
+                }
+
+                _context5.next = 18;
+                return this._changeProductType(transaction, ctpProductToUpdate, draftProductType);
+
+              case 18:
+                ctpProductToUpdate = _context5.sent;
+
+                // find and replace ctpProductToUpdate in matchingProducts array with updated version
+                matchingProducts = this._replaceProductInProductArray(ctpProductToUpdate, matchingProducts);
+
+              case 20:
+                _context5.next = 22;
+                return this._removeVariantsFromMatchingProducts(backupVariants, matchingProducts);
+
+              case 22:
+                matchingProducts = _context5.sent;
+                _context5.next = 25;
+                return this._createVariantsInCtpProductToUpdate(backupVariants, productDraft, ctpProductToUpdate);
+
+              case 25:
+                ctpProductToUpdate = _context5.sent;
+
+                if (!anonymizedProductDraft) {
+                  _context5.next = 31;
+                  break;
+                }
+
+                _context5.next = 29;
+                return this._removeVariantsFromCtpProductToUpdate(anonymizedProductDraft, ctpProductToUpdate);
+
+              case 29:
+                _context5.next = 31;
+                return this._ensureProductCreation(anonymizedProductDraft);
+
+              case 31:
+                _context5.next = 33;
+                return this._ensureSlugUniqueness(productDraft, matchingProducts.filter(function (product) {
+                  return product.id !== ctpProductToUpdate.id;
+                }));
+
+              case 33:
+              case 'end':
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this);
       }));
-    }
+
+      function _createAndExecuteActions(_x10, _x11, _x12, _x13, _x14, _x15) {
+        return _ref6.apply(this, arguments);
+      }
+
+      return _createAndExecuteActions;
+    }()
   }, {
     key: '_replaceProductInProductArray',
     value: function _replaceProductInProductArray(productToReplace, productArray) {
@@ -542,13 +849,13 @@ var VariantReassignment = function () {
       // variants that needs to be moved from matching product
       var matchingProductsVariants = productsToRemoveVariants.map(function (product) {
         return _this4._selectVariantsWithCondition(product, function (variant) {
-          return skus.includes(variant.sku);
+          return skus.indexOf(variant.sku) !== -1;
         });
       });
 
       // variants that needs to be removed from CTP product to update
       var ctpProductToUpdateVariants = this._selectVariantsWithCondition(ctpProductToUpdate, function (variant) {
-        return !skus.includes(variant.sku);
+        return !(skus.indexOf(variant.sku) !== -1);
       });
 
       return {
@@ -682,14 +989,42 @@ var VariantReassignment = function () {
     }
   }, {
     key: '_ensureProductCreation',
-    value: async function _ensureProductCreation(productDraft) {
-      var sku = productDraft.masterVariant.sku;
+    value: function () {
+      var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(productDraft) {
+        var sku, existingProducts;
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                sku = productDraft.masterVariant.sku;
+                _context6.next = 3;
+                return this.productService.getProductsBySkus([sku]);
 
-      var existingProducts = await this.productService.getProductsBySkus([sku]);
+              case 3:
+                existingProducts = _context6.sent;
 
-      // productDraft hasn't been created yet
-      if (!existingProducts.length) await this.productService.createProduct(productDraft);
-    }
+                if (existingProducts.length) {
+                  _context6.next = 7;
+                  break;
+                }
+
+                _context6.next = 7;
+                return this.productService.createProduct(productDraft);
+
+              case 7:
+              case 'end':
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this);
+      }));
+
+      function _ensureProductCreation(_x16) {
+        return _ref7.apply(this, arguments);
+      }
+
+      return _ensureProductCreation;
+    }()
 
     /**
      * Create a backup of a product because we need to do product type change for this product
@@ -697,26 +1032,84 @@ var VariantReassignment = function () {
 
   }, {
     key: '_backupProductForProductTypeChange',
-    value: async function _backupProductForProductTypeChange(transactionObject, ctpProductToUpdate) {
-      if (!transactionObject.ctpProductToUpdate) {
-        var transactionKey = transactionObject.key;
-        var transaction = await this.transactionService.getTransaction(transactionKey);
-        transaction.ctpProductToUpdate = ctpProductToUpdate;
+    value: function () {
+      var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(transactionObject, ctpProductToUpdate) {
+        var transactionKey, transaction;
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                if (transactionObject.ctpProductToUpdate) {
+                  _context7.next = 8;
+                  break;
+                }
 
-        await this.transactionService.upsertTransactionByKey(transaction, transactionKey);
+                transactionKey = transactionObject.key;
+                _context7.next = 4;
+                return this.transactionService.getTransaction(transactionKey);
+
+              case 4:
+                transaction = _context7.sent;
+
+                transaction.ctpProductToUpdate = ctpProductToUpdate;
+
+                _context7.next = 8;
+                return this.transactionService.upsertTransactionByKey(transaction, transactionKey);
+
+              case 8:
+              case 'end':
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function _backupProductForProductTypeChange(_x17, _x18) {
+        return _ref8.apply(this, arguments);
       }
-    }
+
+      return _backupProductForProductTypeChange;
+    }()
   }, {
     key: '_changeProductType',
-    value: async function _changeProductType(transaction, ctpProductToUpdate, productTypeId) {
-      this.logger.debug('Changing productType of product %j with id "%s" to productType "%s"', ctpProductToUpdate.masterData.current.name, ctpProductToUpdate.id, productTypeId);
+    value: function () {
+      var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(transaction, ctpProductToUpdate, productTypeId) {
+        var updatedProduct;
+        return _regenerator2.default.wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                this.logger.debug('Changing productType of product %j with id "%s" to productType "%s"', ctpProductToUpdate.masterData.current.name, ctpProductToUpdate.id, productTypeId);
 
-      await this._backupProductForProductTypeChange(transaction, ctpProductToUpdate);
+                _context8.next = 3;
+                return this._backupProductForProductTypeChange(transaction, ctpProductToUpdate);
 
-      var updatedProduct = await this.productService.changeProductType(ctpProductToUpdate, productTypeId);
-      await this._deleteBackupForProductTypeChange(transaction.key);
-      return updatedProduct;
-    }
+              case 3:
+                _context8.next = 5;
+                return this.productService.changeProductType(ctpProductToUpdate, productTypeId);
+
+              case 5:
+                updatedProduct = _context8.sent;
+                _context8.next = 8;
+                return this._deleteBackupForProductTypeChange(transaction.key);
+
+              case 8:
+                return _context8.abrupt('return', updatedProduct);
+
+              case 9:
+              case 'end':
+                return _context8.stop();
+            }
+          }
+        }, _callee8, this);
+      }));
+
+      function _changeProductType(_x19, _x20, _x21) {
+        return _ref9.apply(this, arguments);
+      }
+
+      return _changeProductType;
+    }()
 
     /**
      * Delete a backup that was created because of product type change of a product
@@ -724,11 +1117,37 @@ var VariantReassignment = function () {
 
   }, {
     key: '_deleteBackupForProductTypeChange',
-    value: async function _deleteBackupForProductTypeChange(transactionKey) {
-      var transaction = await this.transactionService.getTransaction(transactionKey);
-      delete transaction.ctpProductToUpdate;
-      await this.transactionService.upsertTransactionByKey(transaction, transactionKey);
-    }
+    value: function () {
+      var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(transactionKey) {
+        var transaction;
+        return _regenerator2.default.wrap(function _callee9$(_context9) {
+          while (1) {
+            switch (_context9.prev = _context9.next) {
+              case 0:
+                _context9.next = 2;
+                return this.transactionService.getTransaction(transactionKey);
+
+              case 2:
+                transaction = _context9.sent;
+
+                delete transaction.ctpProductToUpdate;
+                _context9.next = 6;
+                return this.transactionService.upsertTransactionByKey(transaction, transactionKey);
+
+              case 6:
+              case 'end':
+                return _context9.stop();
+            }
+          }
+        }, _callee9, this);
+      }));
+
+      function _deleteBackupForProductTypeChange(_x22) {
+        return _ref10.apply(this, arguments);
+      }
+
+      return _deleteBackupForProductTypeChange;
+    }()
 
     /**
      * Verify that there are no other products in the platform that has slugs of productDraft
@@ -740,24 +1159,46 @@ var VariantReassignment = function () {
 
   }, {
     key: '_ensureSlugUniqueness',
-    value: async function _ensureSlugUniqueness(productDraft, matchingProducts) {
-      var _this5 = this;
+    value: function () {
+      var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(productDraft, matchingProducts) {
+        var _this5 = this;
 
-      var productDraftSlug = productDraft.slug;
-      var productsToAnonymize = matchingProducts.filter(function (product) {
-        return _this5._isSlugConflicting(product, productDraftSlug);
-      });
+        var productDraftSlug, productsToAnonymize;
+        return _regenerator2.default.wrap(function _callee10$(_context10) {
+          while (1) {
+            switch (_context10.prev = _context10.next) {
+              case 0:
+                productDraftSlug = productDraft.slug;
+                productsToAnonymize = matchingProducts.filter(function (product) {
+                  return _this5._isSlugConflicting(product, productDraftSlug);
+                });
 
-      this.logger.debug('Anonymizing %d products because of duplicate slugs', productsToAnonymize.length);
 
-      await _bluebird2.default.map(productsToAnonymize, function (product) {
-        return _this5.productService.anonymizeCtpProduct(product);
-      }, { concurrency: 3 });
-    }
+                this.logger.debug('Anonymizing %d products because of duplicate slugs', productsToAnonymize.length);
+
+                _context10.next = 5;
+                return _bluebird2.default.map(productsToAnonymize, function (product) {
+                  return _this5.productService.anonymizeCtpProduct(product);
+                }, { concurrency: 3 });
+
+              case 5:
+              case 'end':
+                return _context10.stop();
+            }
+          }
+        }, _callee10, this);
+      }));
+
+      function _ensureSlugUniqueness(_x23, _x24) {
+        return _ref11.apply(this, arguments);
+      }
+
+      return _ensureSlugUniqueness;
+    }()
 
     /**
-     * The slugs from product and product draft are conflicting
-     * when at least one language from product's slug is the same as in product draft slug
+     * The slugs from product and product draft are conflicting when at least one language value
+     * from product's slug is the same as in product draft slug
      * @param product
      * @param productDraftSlug
      * @returns {boolean}
@@ -771,87 +1212,163 @@ var VariantReassignment = function () {
 
       // if at least one version has conflict in slugs, return true
       var _arr2 = ['staged', 'current'];
-      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+
+      var _loop = function _loop() {
         var version = _arr2[_i2];
         var slug = product.masterData[version].slug;
         var slugLength = (0, _keys2.default)(slug).length;
         var stagedDraftSlugs = _lodash2.default.merge({}, productDraftSlug, slug);
         var stagedDraftSlugsLength = (0, _keys2.default)(stagedDraftSlugs).length;
 
-        if (slugLength + productDraftSlugLength !== stagedDraftSlugsLength) return true;
+        var hasSameSlugLang = slugLength + productDraftSlugLength !== stagedDraftSlugsLength;
+        var hasAnySameSlugValue = (0, _keys2.default)(slug).some(function (lang) {
+          return productDraftSlug[lang] === slug[lang];
+        });
+        if (hasSameSlugLang && hasAnySameSlugValue) return {
+            v: true
+          };
+      };
+
+      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+        var _ret = _loop();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object") return _ret.v;
       }
       return false;
     }
   }, {
     key: '_removeVariantsFromCtpProductToUpdate',
-    value: async function _removeVariantsFromCtpProductToUpdate(anonymizedProductDraft, ctpProductToUpdate) {
-      var skusToRemove = this.productService.getProductDraftSkus(anonymizedProductDraft);
-      await this.productService.removeVariantsFromProduct(ctpProductToUpdate, skusToRemove);
-    }
-  }, {
-    key: '_createVariantsInCtpProductToUpdate',
-    value: async function _createVariantsInCtpProductToUpdate(backupVariants, productDraft, ctpProductToUpdate) {
-      var _this6 = this;
+    value: function () {
+      var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11(anonymizedProductDraft, ctpProductToUpdate) {
+        var skusToRemove;
+        return _regenerator2.default.wrap(function _callee11$(_context11) {
+          while (1) {
+            switch (_context11.prev = _context11.next) {
+              case 0:
+                skusToRemove = this.productService.getProductDraftSkus(anonymizedProductDraft);
+                _context11.next = 3;
+                return this.productService.removeVariantsFromProduct(ctpProductToUpdate, skusToRemove);
 
-      var actions = [];
-      var skuToVariant = new _map2.default();
-      var existingSkus = this.productService.getProductSkus(ctpProductToUpdate);
-      var variants = productDraft.variants || [];
-      variants.concat(productDraft.masterVariant).forEach(function (v) {
-        if (!existingSkus.includes(v.sku)) skuToVariant.set(v.sku, v);
-      });
-      // preserve existing attribute data
-      if (!_lodash2.default.isEmpty(this.retainExistingData)) backupVariants.forEach(function (backupVariant) {
-        var draftVariant = skuToVariant.get(backupVariant.sku);
-        _this6.retainExistingData.forEach(function (attrName) {
-          // https://lodash.com/docs/4.17.4#at
-          var retainedAttr = _lodash2.default.at(backupVariant, attrName);
-          if (retainedAttr.length > 0) draftVariant[attrName] = retainedAttr[0];
-        });
-      });
-
-      // ensure sameForAll constraint
-      var setAttrActions = await this._ensureSameForAllAttributes(ctpProductToUpdate, skuToVariant, productDraft);
-      actions.push.apply(actions, (0, _toConsumableArray3.default)(setAttrActions));
-
-      // create addVariant actions
-      var _iteratorNormalCompletion7 = true;
-      var _didIteratorError7 = false;
-      var _iteratorError7 = undefined;
-
-      try {
-        for (var _iterator7 = (0, _getIterator3.default)(skuToVariant), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-          var _step7$value = (0, _slicedToArray3.default)(_step7.value, 2),
-              sku = _step7$value[0],
-              variant = _step7$value[1];
-
-          actions.push({
-            action: 'addVariant',
-            sku: sku,
-            key: variant.key,
-            prices: variant.prices,
-            images: variant.images,
-            attributes: variant.attributes
-          });
-        }
-      } catch (err) {
-        _didIteratorError7 = true;
-        _iteratorError7 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion7 && _iterator7.return) {
-            _iterator7.return();
+              case 3:
+              case 'end':
+                return _context11.stop();
+            }
           }
-        } finally {
-          if (_didIteratorError7) {
-            throw _iteratorError7;
-          }
-        }
+        }, _callee11, this);
+      }));
+
+      function _removeVariantsFromCtpProductToUpdate(_x25, _x26) {
+        return _ref12.apply(this, arguments);
       }
 
-      this.logger.debug('Updating ctpProductToUpdate with %d addVariant actions', actions.length);
-      return this.productService.updateProduct(ctpProductToUpdate, actions);
-    }
+      return _removeVariantsFromCtpProductToUpdate;
+    }()
+  }, {
+    key: '_createVariantsInCtpProductToUpdate',
+    value: function () {
+      var _ref13 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12(backupVariants, productDraft, ctpProductToUpdate) {
+        var _this6 = this;
+
+        var actions, skuToVariant, existingSkus, variants, setAttrActions, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, _step7$value, sku, variant;
+
+        return _regenerator2.default.wrap(function _callee12$(_context12) {
+          while (1) {
+            switch (_context12.prev = _context12.next) {
+              case 0:
+                actions = [];
+                skuToVariant = new _map2.default();
+                existingSkus = this.productService.getProductSkus(ctpProductToUpdate);
+                variants = productDraft.variants || [];
+
+                variants.concat(productDraft.masterVariant).forEach(function (v) {
+                  if (!(existingSkus.indexOf(v.sku) !== -1)) skuToVariant.set(v.sku, v);
+                });
+                // preserve existing attribute data
+                if (!_lodash2.default.isEmpty(this.retainExistingData)) backupVariants.forEach(function (backupVariant) {
+                  var draftVariant = skuToVariant.get(backupVariant.sku);
+                  _this6.retainExistingData.forEach(function (attrName) {
+                    // https://lodash.com/docs/4.17.4#at
+                    var retainedAttr = _lodash2.default.at(backupVariant, attrName);
+                    if (retainedAttr.length > 0) draftVariant[attrName] = retainedAttr[0];
+                  });
+                });
+
+                // ensure sameForAll constraint
+                _context12.next = 8;
+                return this._ensureSameForAllAttributes(ctpProductToUpdate, skuToVariant, productDraft);
+
+              case 8:
+                setAttrActions = _context12.sent;
+
+                actions.push.apply(actions, (0, _toConsumableArray3.default)(setAttrActions));
+
+                // create addVariant actions
+                _iteratorNormalCompletion7 = true;
+                _didIteratorError7 = false;
+                _iteratorError7 = undefined;
+                _context12.prev = 13;
+                for (_iterator7 = (0, _getIterator3.default)(skuToVariant); !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                  _step7$value = (0, _slicedToArray3.default)(_step7.value, 2), sku = _step7$value[0], variant = _step7$value[1];
+
+                  actions.push({
+                    action: 'addVariant',
+                    sku: sku,
+                    key: variant.key,
+                    prices: variant.prices,
+                    images: variant.images,
+                    attributes: variant.attributes
+                  });
+                }_context12.next = 21;
+                break;
+
+              case 17:
+                _context12.prev = 17;
+                _context12.t0 = _context12['catch'](13);
+                _didIteratorError7 = true;
+                _iteratorError7 = _context12.t0;
+
+              case 21:
+                _context12.prev = 21;
+                _context12.prev = 22;
+
+                if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                  _iterator7.return();
+                }
+
+              case 24:
+                _context12.prev = 24;
+
+                if (!_didIteratorError7) {
+                  _context12.next = 27;
+                  break;
+                }
+
+                throw _iteratorError7;
+
+              case 27:
+                return _context12.finish(24);
+
+              case 28:
+                return _context12.finish(21);
+
+              case 29:
+                this.logger.debug('Updating ctpProductToUpdate with %d addVariant actions', actions.length);
+                return _context12.abrupt('return', this.productService.updateProduct(ctpProductToUpdate, actions));
+
+              case 31:
+              case 'end':
+                return _context12.stop();
+            }
+          }
+        }, _callee12, this, [[13, 17, 21, 29], [22,, 24, 28]]);
+      }));
+
+      function _createVariantsInCtpProductToUpdate(_x27, _x28, _x29) {
+        return _ref13.apply(this, arguments);
+      }
+
+      return _createVariantsInCtpProductToUpdate;
+    }()
   }, {
     key: '_ensureSameForAllAttributes',
     value: function _ensureSameForAllAttributes(ctpProductToUpdate, skuToVariant, productDraft) {
@@ -861,59 +1378,107 @@ var VariantReassignment = function () {
     }
   }, {
     key: '_removeVariantsFromMatchingProducts',
-    value: async function _removeVariantsFromMatchingProducts(backupVariants, matchingProducts) {
-      var _this7 = this;
+    value: function () {
+      var _ref14 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13(backupVariants, matchingProducts) {
+        var _this7 = this;
 
-      if (!backupVariants.length) return matchingProducts;
-      var productToSkusToRemoveMap = new _map2.default();
-      var skuToProductMap = matchingProducts.reduce(function (resultMap, p) {
-        _this7.productService.getProductVariants(p).forEach(function (v) {
-          resultMap.set(v.sku, p);
-        });
-        return resultMap;
-      }, new _map2.default());
+        var productToSkusToRemoveMap, skuToProductMap, _iteratorNormalCompletion8, _didIteratorError8, _iteratorError8, _iterator8, _step8, variant, product, actions;
 
-      var _iteratorNormalCompletion8 = true;
-      var _didIteratorError8 = false;
-      var _iteratorError8 = undefined;
+        return _regenerator2.default.wrap(function _callee13$(_context13) {
+          while (1) {
+            switch (_context13.prev = _context13.next) {
+              case 0:
+                if (backupVariants.length) {
+                  _context13.next = 2;
+                  break;
+                }
 
-      try {
-        for (var _iterator8 = (0, _getIterator3.default)(backupVariants), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-          var variant = _step8.value;
+                return _context13.abrupt('return', matchingProducts);
 
-          var product = skuToProductMap.get(variant.sku);
-          var actions = productToSkusToRemoveMap.get(product) || [];
+              case 2:
+                productToSkusToRemoveMap = new _map2.default();
+                skuToProductMap = matchingProducts.reduce(function (resultMap, p) {
+                  _this7.productService.getProductVariants(p).forEach(function (v) {
+                    resultMap.set(v.sku, p);
+                  });
+                  return resultMap;
+                }, new _map2.default());
+                _iteratorNormalCompletion8 = true;
+                _didIteratorError8 = false;
+                _iteratorError8 = undefined;
+                _context13.prev = 7;
 
-          // if there is a product from where we can delete variant..
-          if (product) {
-            actions.push(variant.sku);
-            productToSkusToRemoveMap.set(product, actions);
+
+                for (_iterator8 = (0, _getIterator3.default)(backupVariants); !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                  variant = _step8.value;
+                  product = skuToProductMap.get(variant.sku);
+                  actions = productToSkusToRemoveMap.get(product) || [];
+
+                  // if there is a product from where we can delete variant..
+
+                  if (product) {
+                    actions.push(variant.sku);
+                    productToSkusToRemoveMap.set(product, actions);
+                  }
+                }
+
+                _context13.next = 15;
+                break;
+
+              case 11:
+                _context13.prev = 11;
+                _context13.t0 = _context13['catch'](7);
+                _didIteratorError8 = true;
+                _iteratorError8 = _context13.t0;
+
+              case 15:
+                _context13.prev = 15;
+                _context13.prev = 16;
+
+                if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                  _iterator8.return();
+                }
+
+              case 18:
+                _context13.prev = 18;
+
+                if (!_didIteratorError8) {
+                  _context13.next = 21;
+                  break;
+                }
+
+                throw _iteratorError8;
+
+              case 21:
+                return _context13.finish(18);
+
+              case 22:
+                return _context13.finish(15);
+
+              case 23:
+                this.logger.debug('Removing variants from matching products');
+                return _context13.abrupt('return', _bluebird2.default.map((0, _from2.default)(productToSkusToRemoveMap), function (_ref15) {
+                  var _ref16 = (0, _slicedToArray3.default)(_ref15, 2),
+                      product = _ref16[0],
+                      skus = _ref16[1];
+
+                  return _this7.productService.removeVariantsFromProduct(product, skus);
+                }, { concurrency: 3 }).then(_lodash2.default.compact));
+
+              case 25:
+              case 'end':
+                return _context13.stop();
+            }
           }
-        }
-      } catch (err) {
-        _didIteratorError8 = true;
-        _iteratorError8 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion8 && _iterator8.return) {
-            _iterator8.return();
-          }
-        } finally {
-          if (_didIteratorError8) {
-            throw _iteratorError8;
-          }
-        }
+        }, _callee13, this, [[7, 11, 15, 23], [16,, 18, 22]]);
+      }));
+
+      function _removeVariantsFromMatchingProducts(_x30, _x31) {
+        return _ref14.apply(this, arguments);
       }
 
-      this.logger.debug('Removing variants from matching products');
-      return _bluebird2.default.map((0, _from2.default)(productToSkusToRemoveMap), function (_ref2) {
-        var _ref3 = (0, _slicedToArray3.default)(_ref2, 2),
-            product = _ref3[0],
-            skus = _ref3[1];
-
-        return _this7.productService.removeVariantsFromProduct(product, skus);
-      }, { concurrency: 3 }).then(_lodash2.default.compact);
-    }
+      return _removeVariantsFromMatchingProducts;
+    }()
   }]);
   return VariantReassignment;
 }();
