@@ -136,7 +136,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     expect(spyUnfinished.callCount).to.equal(1)
@@ -168,7 +168,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     return checkResult()
@@ -189,7 +189,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
@@ -213,7 +213,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
@@ -237,7 +237,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
@@ -257,7 +257,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     return checkResult()
@@ -273,7 +273,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     return checkResult()
@@ -289,7 +289,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     return checkResult()
@@ -305,7 +305,7 @@ describe('Reassignment error', () => {
     expect(spyError.callCount).to.equal(1)
     expect(spyError.firstCall.args[0])
       .to.contain('Error while processing productDraft')
-    expect(spyError.firstCall.args[2].name)
+    expect(spyError.firstCall.args[1].name)
       .to.contain('test error')
 
     return checkResult()

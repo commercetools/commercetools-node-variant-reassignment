@@ -44,6 +44,10 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 var _getIterator2 = require('babel-runtime/core-js/get-iterator');
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
@@ -159,7 +163,7 @@ var VariantReassignment = function () {
                 productDraftsForReassignment = this._selectProductDraftsForReassignment(productDrafts, products);
 
 
-                this.logger.debug('Filtered %d productDrafts for reassignment', productDraftsForReassignment.length);
+                this.logger.debug('Filtered ' + productDraftsForReassignment.length + ' productDrafts for reassignment');
 
                 isReassignmentRequired = productDraftsForReassignment.length;
 
@@ -196,14 +200,14 @@ var VariantReassignment = function () {
                 _context.t2 = _context['catch'](31);
                 error = _context.t2 instanceof Error ? (0, _utilsErrorToJson2.default)(_context.t2) : _context.t2;
 
-                this.logger.error('Error while processing productDraft %j, retrying.', productDraft.name, error);
+                this.logger.error('Error while processing productDraft ' + (0, _stringify2.default)(productDraft.name) + ', retrying.', error);
                 _context.next = 43;
                 return this._handleProcessingError(productDraft, products);
 
               case 43:
                 _context.prev = 43;
 
-                this.logger.debug('Finished processing of productDraft with name %j', productDraft.name);
+                this.logger.debug('Finished processing of productDraft with name ' + (0, _stringify2.default)(productDraft.name));
                 return _context.finish(43);
 
               case 46:
@@ -366,7 +370,7 @@ var VariantReassignment = function () {
                 key = transactionObject.key, transaction = transactionObject.value;
 
 
-                this.logger.debug('Processing unfinished transaction with key %s', key);
+                this.logger.debug('Processing unfinished transaction with key ' + key);
                 _context3.prev = 14;
                 _context3.next = 17;
                 return this._createAndExecuteActions(transaction.newProductDraft, transaction.backupProductDraft, transaction.variants, transaction.ctpProductToUpdate, transactionObject);
@@ -450,7 +454,7 @@ var VariantReassignment = function () {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                this.logger.debug('Processing reassignment for productDraft with name %j', productDraft.name);
+                this.logger.debug('Processing reassignment for productDraft with name ' + (0, _stringify2.default)(productDraft.name));
 
                 _context4.next = 3;
                 return this._selectMatchingProducts(productDraft, products);
@@ -470,14 +474,14 @@ var VariantReassignment = function () {
                 // select using SLUG, etc..
                 ctpProductToUpdate = this._selectCtpProductToUpdate(productDraft, matchingProducts);
 
-                this.logger.debug('Selected ctpProductToUpdate with id "%s"', ctpProductToUpdate.id);
+                this.logger.debug('Selected ctpProductToUpdate with id "' + ctpProductToUpdate.id + '"');
 
                 // get variants and draft to backup
                 _getRemovedVariants2 = this._getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate), backupVariants = _getRemovedVariants2.matchingProductsVars, variantsToProcess = _getRemovedVariants2.ctpProductToUpdateVars;
                 anonymizedProductDraft = this._createProductDraftWithRemovedVariants(ctpProductToUpdate, variantsToProcess);
 
 
-                this.logger.debug('Will remove %d and reassign %d variants', variantsToProcess.length, backupVariants.length);
+                this.logger.debug('Will remove ' + variantsToProcess.length + ' and reassign ' + backupVariants.length + ' variants');
 
                 // create a backup object
                 _context4.next = 13;
@@ -1057,7 +1061,7 @@ var VariantReassignment = function () {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                this.logger.debug('Changing productType of product %j with id "%s" to productType "%s"', ctpProductToUpdate.masterData.current.name, ctpProductToUpdate.id, productTypeId);
+                this.logger.debug('Changing productType of product ' + ((0, _stringify2.default)(ctpProductToUpdate.masterData.current.name) + ' with id ') + ('"' + ctpProductToUpdate.id + '" to productType "' + productTypeId + '"'));
 
                 _context8.next = 3;
                 return this._backupProductForProductTypeChange(transaction, ctpProductToUpdate);
@@ -1152,7 +1156,7 @@ var VariantReassignment = function () {
                 });
 
 
-                this.logger.debug('Anonymizing %d products because of duplicate slugs', productsToAnonymize.length);
+                this.logger.debug('Anonymizing ' + productsToAnonymize.length + ' products because of duplicate slugs');
 
                 _context10.next = 5;
                 return _bluebird2.default.map(productsToAnonymize, function (product) {
@@ -1330,7 +1334,7 @@ var VariantReassignment = function () {
                 return _context12.finish(21);
 
               case 29:
-                this.logger.debug('Updating ctpProductToUpdate with %d addVariant actions', actions.length);
+                this.logger.debug('Updating ctpProductToUpdate with ' + actions.length + ' addVariant actions');
                 return _context12.abrupt('return', this.productService.updateProduct(ctpProductToUpdate, actions));
 
               case 31:

@@ -16,10 +16,6 @@ var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
 
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
 var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
 
 var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
@@ -39,6 +35,10 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
 
 var _map = require('babel-runtime/core-js/map');
 
@@ -87,7 +87,7 @@ var ProductManager = function () {
   (0, _createClass3.default)(ProductManager, [{
     key: 'createProduct',
     value: function createProduct(product) {
-      this.logger.debug('Creating product: %j', product);
+      this.logger.debug('Creating product: ' + (0, _stringify2.default)(product));
 
       return this.client.products.create(product).then(function (res) {
         return res.body;
