@@ -812,13 +812,13 @@ var VariantReassignment = function () {
         var product = productSet.values().next().value;
         var draftSkus = this.productService.getProductDraftSkus(productDraft);
         var productSkus = this.productService.getProductSkus(product);
-        if (_lodash2.default.isEqual(draftSkus, productSkus)) {
+        if (_lodash2.default.isEqual(draftSkus.sort(), productSkus.sort())) {
           // variants are assigned correctly, maybe we need to change product type
           var productTypeId = product.productType.id;
           var productDraftTypeId = productDraft.productType.id;
           if (productTypeId === productDraftTypeId)
             // product type are correct, check if product slugs are unique
-            return product.masterData.staged.slug !== productDraft.slug;
+            return _lodash2.default.isEqual(product.masterData.staged.slug, productDraft.slug);
         }
       }
       return true;
