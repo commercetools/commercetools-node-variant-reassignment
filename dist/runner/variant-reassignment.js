@@ -818,7 +818,7 @@ var VariantReassignment = function () {
           var productDraftTypeId = productDraft.productType.id;
           if (productTypeId === productDraftTypeId)
             // product type are correct, check if product slugs are unique
-            return _lodash2.default.isEqual(product.masterData.staged.slug, productDraft.slug);
+            return !_lodash2.default.isEqual(product.masterData.staged.slug, productDraft.slug);
         }
       }
       return true;
