@@ -121,7 +121,7 @@ var TransactionManager = function () {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                this.logger.debug('Removing transaction with key "%s"', key);
+                this.logger.debug('Removing transaction with key "' + key + '"');
                 _context2.next = 3;
                 return this.getTransactionObject(key);
 
