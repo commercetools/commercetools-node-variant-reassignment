@@ -102,7 +102,7 @@ var VariantReassignment = function () {
    *  - for every productDraft check if reassignment is needed
    *  - if yes, create and process actions which will move variants across products
    * @param productDrafts List of productDrafts
-   * @param productTypeCache List of resolved product drafts - in some cases, product type ID
+   * @param productTypeCache List of resolved product types - in some cases, product type ID
    * in product draft is name and not ID - in this case, we use the cache to get ID
    * @returns {Promise<boolean>} true if reassignment has been executed
    */
@@ -259,7 +259,7 @@ var VariantReassignment = function () {
         }, _callee, this, [[1, 7], [11, 17], [27, 51, 55, 63], [31, 37, 43, 46], [56,, 58, 62]]);
       }));
 
-      function execute(_x3, _x4) {
+      function execute(_x2, _x3) {
         return _ref.apply(this, arguments);
       }
 
@@ -297,7 +297,7 @@ var VariantReassignment = function () {
         }, _callee2, this);
       }));
 
-      function _handleProcessingError(_x5, _x6) {
+      function _handleProcessingError(_x4, _x5) {
         return _ref2.apply(this, arguments);
       }
 
@@ -500,7 +500,7 @@ var VariantReassignment = function () {
         }, _callee4, this);
       }));
 
-      function _processProductDraft(_x8, _x9) {
+      function _processProductDraft(_x7, _x8) {
         return _ref5.apply(this, arguments);
       }
 
@@ -559,7 +559,7 @@ var VariantReassignment = function () {
                 });
 
                 if (!(draftProductType !== ctpProductTypeId)) {
-                  _context5.next = 20;
+                  _context5.next = 19;
                   break;
                 }
 
@@ -569,40 +569,35 @@ var VariantReassignment = function () {
               case 18:
                 ctpProductToUpdate = _context5.sent;
 
-                // find and replace ctpProductToUpdate in matchingProducts array with updated version
-                matchingProducts = this._replaceProductInProductArray(ctpProductToUpdate, matchingProducts);
-
-              case 20:
-                _context5.next = 22;
+              case 19:
+                _context5.next = 21;
                 return this._removeVariantsFromMatchingProducts(backupVariants, matchingProducts);
 
-              case 22:
+              case 21:
                 matchingProducts = _context5.sent;
-                _context5.next = 25;
+                _context5.next = 24;
                 return this._createVariantsInCtpProductToUpdate(backupVariants, productDraft, ctpProductToUpdate);
 
-              case 25:
+              case 24:
                 ctpProductToUpdate = _context5.sent;
 
                 if (!anonymizedProductDraft) {
-                  _context5.next = 31;
+                  _context5.next = 30;
                   break;
                 }
 
-                _context5.next = 29;
+                _context5.next = 28;
                 return this._removeVariantsFromCtpProductToUpdate(anonymizedProductDraft, ctpProductToUpdate);
 
-              case 29:
-                _context5.next = 31;
+              case 28:
+                _context5.next = 30;
                 return this._ensureProductCreation(anonymizedProductDraft);
 
-              case 31:
-                _context5.next = 33;
-                return this._ensureSlugUniqueness(productDraft, matchingProducts.filter(function (product) {
-                  return product.id !== ctpProductToUpdate.id;
-                }));
+              case 30:
+                _context5.next = 32;
+                return this._ensureSlugUniqueness(productDraft, matchingProducts);
 
-              case 33:
+              case 32:
               case 'end':
                 return _context5.stop();
             }
@@ -610,24 +605,12 @@ var VariantReassignment = function () {
         }, _callee5, this);
       }));
 
-      function _createAndExecuteActions(_x10, _x11, _x12, _x13, _x14, _x15) {
+      function _createAndExecuteActions(_x9, _x10, _x11, _x12, _x13, _x14) {
         return _ref6.apply(this, arguments);
       }
 
       return _createAndExecuteActions;
     }()
-  }, {
-    key: '_replaceProductInProductArray',
-    value: function _replaceProductInProductArray(productToReplace, productArray) {
-      var _this = this;
-
-      var productToReplaceSkus = this.productService.getProductSkus(productToReplace);
-      return productArray.map(function (product) {
-        var productSkus = _this.productService.getProductSkus(product);
-        if (_lodash2.default.isEqual(productSkus, productToReplaceSkus)) return productToReplace;
-        return product;
-      });
-    }
 
     /**
      * match by variant sku - pick CTP product that has all variants
@@ -756,21 +739,21 @@ var VariantReassignment = function () {
   }, {
     key: '_selectProductDraftsForReassignment',
     value: function _selectProductDraftsForReassignment(productDrafts, ctpProducts) {
-      var _this2 = this;
+      var _this = this;
 
       var skuToProductMap = this._createSkuToProductMap(ctpProducts);
       return productDrafts.filter(function (productDraft) {
-        return _this2._isReassignmentNeeded(productDraft, skuToProductMap);
+        return _this._isReassignmentNeeded(productDraft, skuToProductMap);
       });
     }
   }, {
     key: '_createSkuToProductMap',
     value: function _createSkuToProductMap(ctpProducts) {
-      var _this3 = this;
+      var _this2 = this;
 
       var skuToProductMap = new _map2.default();
       ctpProducts.forEach(function (p) {
-        var skus = _this3.productService.getProductSkus(p);
+        var skus = _this2.productService.getProductSkus(p);
         skus.forEach(function (sku) {
           return skuToProductMap.set(sku, p);
         });
@@ -839,7 +822,7 @@ var VariantReassignment = function () {
   }, {
     key: '_getRemovedVariants',
     value: function _getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate) {
-      var _this4 = this;
+      var _this3 = this;
 
       var productsToRemoveVariants = matchingProducts.filter(function (p) {
         return p !== ctpProductToUpdate;
@@ -848,7 +831,7 @@ var VariantReassignment = function () {
 
       // variants that needs to be moved from matching product
       var matchingProductsVariants = productsToRemoveVariants.map(function (product) {
-        return _this4._selectVariantsWithCondition(product, function (variant) {
+        return _this3._selectVariantsWithCondition(product, function (variant) {
           return skus.indexOf(variant.sku) !== -1;
         });
       });
@@ -918,7 +901,7 @@ var VariantReassignment = function () {
         var matchingProductsBySlug = this._selectMatchingProductsBySlug(products, productDraft);
         // select products that matches by at least one variant with productDraft
         var matchingProductsBySku = this._selectMatchingProductsBySkus(products, productDraftSkus);
-        return _lodash2.default.compact(_lodash2.default.uniq(matchingProductsBySku.concat(matchingProductsBySlug)));
+        return _lodash2.default.compact(_lodash2.default.uniqWith(matchingProductsBySku.concat(matchingProductsBySlug), _lodash2.default.isEqual));
       }
       return this.productService.getProductsBySkusOrSlugs(productDraftSkus, productDraftSlugs);
     }
@@ -929,10 +912,9 @@ var VariantReassignment = function () {
     key: '_selectMatchingProductsBySlug',
     value: function _selectMatchingProductsBySlug(products, productDraft) {
       return products.filter(function (product) {
-        var isMatchBySlug = false;
         var _arr = ['staged', 'current'];
 
-        representationLoop: for (var _i = 0; _i < _arr.length; _i++) {
+        for (var _i = 0; _i < _arr.length; _i++) {
           var representation = _arr[_i];
           var productSlug = product.masterData[representation].slug;
           var _iteratorNormalCompletion6 = true;
@@ -943,10 +925,7 @@ var VariantReassignment = function () {
             for (var _iterator6 = (0, _getIterator3.default)((0, _keys2.default)(productSlug)), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
               var locale = _step6.value;
 
-              if (productSlug[locale] === productDraft.slug[locale]) {
-                isMatchBySlug = true;
-                break representationLoop;
-              }
+              if (productSlug[locale] === productDraft.slug[locale]) return true;
             }
           } catch (err) {
             _didIteratorError6 = true;
@@ -963,8 +942,7 @@ var VariantReassignment = function () {
             }
           }
         }
-
-        return isMatchBySlug;
+        return false;
       });
     }
     /* eslint-enable no-labels */
@@ -1019,7 +997,7 @@ var VariantReassignment = function () {
         }, _callee6, this);
       }));
 
-      function _ensureProductCreation(_x16) {
+      function _ensureProductCreation(_x15) {
         return _ref7.apply(this, arguments);
       }
 
@@ -1064,7 +1042,7 @@ var VariantReassignment = function () {
         }, _callee7, this);
       }));
 
-      function _backupProductForProductTypeChange(_x17, _x18) {
+      function _backupProductForProductTypeChange(_x16, _x17) {
         return _ref8.apply(this, arguments);
       }
 
@@ -1104,7 +1082,7 @@ var VariantReassignment = function () {
         }, _callee8, this);
       }));
 
-      function _changeProductType(_x19, _x20, _x21) {
+      function _changeProductType(_x18, _x19, _x20) {
         return _ref9.apply(this, arguments);
       }
 
@@ -1142,7 +1120,7 @@ var VariantReassignment = function () {
         }, _callee9, this);
       }));
 
-      function _deleteBackupForProductTypeChange(_x22) {
+      function _deleteBackupForProductTypeChange(_x21) {
         return _ref10.apply(this, arguments);
       }
 
@@ -1161,7 +1139,7 @@ var VariantReassignment = function () {
     key: '_ensureSlugUniqueness',
     value: function () {
       var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(productDraft, matchingProducts) {
-        var _this5 = this;
+        var _this4 = this;
 
         var productDraftSlug, productsToAnonymize;
         return _regenerator2.default.wrap(function _callee10$(_context10) {
@@ -1170,7 +1148,7 @@ var VariantReassignment = function () {
               case 0:
                 productDraftSlug = productDraft.slug;
                 productsToAnonymize = matchingProducts.filter(function (product) {
-                  return _this5._isSlugConflicting(product, productDraftSlug);
+                  return _this4._isSlugConflicting(product, productDraftSlug);
                 });
 
 
@@ -1178,7 +1156,7 @@ var VariantReassignment = function () {
 
                 _context10.next = 5;
                 return _bluebird2.default.map(productsToAnonymize, function (product) {
-                  return _this5.productService.anonymizeCtpProduct(product);
+                  return _this4.productService.anonymizeCtpProduct(product);
                 }, { concurrency: 3 });
 
               case 5:
@@ -1189,7 +1167,7 @@ var VariantReassignment = function () {
         }, _callee10, this);
       }));
 
-      function _ensureSlugUniqueness(_x23, _x24) {
+      function _ensureSlugUniqueness(_x22, _x23) {
         return _ref11.apply(this, arguments);
       }
 
@@ -1257,7 +1235,7 @@ var VariantReassignment = function () {
         }, _callee11, this);
       }));
 
-      function _removeVariantsFromCtpProductToUpdate(_x25, _x26) {
+      function _removeVariantsFromCtpProductToUpdate(_x24, _x25) {
         return _ref12.apply(this, arguments);
       }
 
@@ -1267,7 +1245,7 @@ var VariantReassignment = function () {
     key: '_createVariantsInCtpProductToUpdate',
     value: function () {
       var _ref13 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12(backupVariants, productDraft, ctpProductToUpdate) {
-        var _this6 = this;
+        var _this5 = this;
 
         var actions, skuToVariant, existingSkus, variants, setAttrActions, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, _step7$value, sku, variant;
 
@@ -1286,7 +1264,7 @@ var VariantReassignment = function () {
                 // preserve existing attribute data
                 if (!_lodash2.default.isEmpty(this.retainExistingData)) backupVariants.forEach(function (backupVariant) {
                   var draftVariant = skuToVariant.get(backupVariant.sku);
-                  _this6.retainExistingData.forEach(function (attrName) {
+                  _this5.retainExistingData.forEach(function (attrName) {
                     // https://lodash.com/docs/4.17.4#at
                     var retainedAttr = _lodash2.default.at(backupVariant, attrName);
                     if (retainedAttr.length > 0) draftVariant[attrName] = retainedAttr[0];
@@ -1363,7 +1341,7 @@ var VariantReassignment = function () {
         }, _callee12, this, [[13, 17, 21, 29], [22,, 24, 28]]);
       }));
 
-      function _createVariantsInCtpProductToUpdate(_x27, _x28, _x29) {
+      function _createVariantsInCtpProductToUpdate(_x26, _x27, _x28) {
         return _ref13.apply(this, arguments);
       }
 
@@ -1380,7 +1358,7 @@ var VariantReassignment = function () {
     key: '_removeVariantsFromMatchingProducts',
     value: function () {
       var _ref14 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13(backupVariants, matchingProducts) {
-        var _this7 = this;
+        var _this6 = this;
 
         var productToSkusToRemoveMap, skuToProductMap, _iteratorNormalCompletion8, _didIteratorError8, _iteratorError8, _iterator8, _step8, variant, product, actions;
 
@@ -1398,7 +1376,7 @@ var VariantReassignment = function () {
               case 2:
                 productToSkusToRemoveMap = new _map2.default();
                 skuToProductMap = matchingProducts.reduce(function (resultMap, p) {
-                  _this7.productService.getProductVariants(p).forEach(function (v) {
+                  _this6.productService.getProductVariants(p).forEach(function (v) {
                     resultMap.set(v.sku, p);
                   });
                   return resultMap;
@@ -1462,7 +1440,7 @@ var VariantReassignment = function () {
                       product = _ref16[0],
                       skus = _ref16[1];
 
-                  return _this7.productService.removeVariantsFromProduct(product, skus);
+                  return _this6.productService.removeVariantsFromProduct(product, skus);
                 }, { concurrency: 3 }).then(_lodash2.default.compact));
 
               case 25:
@@ -1473,7 +1451,7 @@ var VariantReassignment = function () {
         }, _callee13, this, [[7, 11, 15, 23], [16,, 18, 22]]);
       }));
 
-      function _removeVariantsFromMatchingProducts(_x30, _x31) {
+      function _removeVariantsFromMatchingProducts(_x29, _x30) {
         return _ref14.apply(this, arguments);
       }
 

@@ -264,7 +264,7 @@ var ProductManager = function () {
                 _ref7 = (0, _slicedToArray3.default)(_ref6, 2);
                 productsBySkus = _ref7[0];
                 productsBySlug = _ref7[1];
-                return _context3.abrupt('return', this._filterOutDuplicateProducts([].concat((0, _toConsumableArray3.default)(_lodash2.default.compact(productsBySkus)), (0, _toConsumableArray3.default)(_lodash2.default.compact(productsBySlug)))));
+                return _context3.abrupt('return', this._filterOutDuplicateProducts([].concat((0, _toConsumableArray3.default)(productsBySkus), (0, _toConsumableArray3.default)(productsBySlug))));
 
               case 11:
               case 'end':
@@ -283,7 +283,7 @@ var ProductManager = function () {
   }, {
     key: '_fetchProductsByPredicate',
     value: function _fetchProductsByPredicate(predicate) {
-      return this.client.products.where(predicate).fetch().then(function (res) {
+      return this.client.products.where(predicate).perPage(500).fetch().then(function (res) {
         return res.body.results;
       });
     }
