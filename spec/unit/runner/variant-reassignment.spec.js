@@ -380,12 +380,12 @@ describe('Variant reassignment', () => {
         .returns([])
       variantReassignments.productService = productServiceMock
 
-      const productTypeKey = 'productTypeKey'
+      const productTypeName = 'productTypeName'
       const productTypeId = 'productTypeId'
       await variantReassignments.execute(
-        [{ id: 'product-id', productType: { id: productTypeKey } }],
+        [{ id: 'product-id', productType: { id: productTypeName } }],
         {
-          [productTypeKey]: {
+          [productTypeName]: {
             id: productTypeId
           }
         })
