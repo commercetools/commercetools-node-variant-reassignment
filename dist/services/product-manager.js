@@ -533,24 +533,23 @@ var ProductManager = function () {
         key: product.key + '-' + salt
       });
 
-      // run through both versions
-      var _arr = ['current', 'staged'];
-      for (var _i = 0; _i < _arr.length; _i++) {
-        var version = _arr[_i];
-        var staged = version === 'staged';
-        var slugs = product.masterData[version].slug;
+      // we always take the staged version of the slug as it's the one that is most current
+      // and other tools (sphere-product-import) work only with staged version
+      var stagedSlugs = product.masterData.staged.slug;
+      for (var lang in stagedSlugs) {
+        // eslint-disable-line guard-for-in
+        stagedSlugs[lang] += '-' + salt;
+      }stagedSlugs[constant.PRODUCT_ANONYMIZE_SLUG_KEY] = salt;
 
-        for (var lang in slugs) {
-          // eslint-disable-line guard-for-in
-          slugs[lang] += '-' + salt;
-        }slugs[constant.PRODUCT_ANONYMIZE_SLUG_KEY] = salt;
-
-        actions.push({
-          action: 'changeSlug',
-          slug: slugs,
-          staged: staged
-        });
-      }
+      actions.push({
+        action: 'changeSlug',
+        slug: stagedSlugs,
+        staged: false
+      }, {
+        action: 'changeSlug',
+        slug: stagedSlugs,
+        staged: true
+      });
 
       return this.updateProduct(product, actions);
     }

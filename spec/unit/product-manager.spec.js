@@ -311,7 +311,6 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            de: `product-slug-de-${ctsdSalt}`,
             ctsd: ctsdSalt
           },
           staged: false
@@ -343,7 +342,6 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            de: `product-slug-de-${ctsdSalt}`,
             ctsd: ctsdSalt
           },
           staged: false
