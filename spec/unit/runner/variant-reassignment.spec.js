@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 import ProductManager from '../../../lib/services/product-manager'
+import TransactionManager from '../../../lib/services/transaction-manager'
 import * as utils from '../../utils/helper'
 
 describe('Variant reassignment', () => {
@@ -443,6 +444,53 @@ describe('Variant reassignment', () => {
       expect(testFunction.callCount).to.equal(1)
       const productDraftsToVerify = testFunction.firstCall.args[0]
       expect(productDraftsToVerify[0].productType.id).to.equal(productTypeId)
+    })
+  })
+
+  describe('on error', () => {
+    let variantReassignment
+    let errorCallback
+    let mockTransactionService
+    let deleteBackupFn
+    let processTransactionFn
+
+    beforeEach(() => {
+      errorCallback = sinon.stub()
+      mockTransactionService = new TransactionManager(logger, null)
+      sinon.stub(mockTransactionService, 'getTransactions')
+        .resolves([{ value: { key: 'test', newProductDraft: { name: 'test' } } }])
+      deleteBackupFn = sinon.stub(mockTransactionService, 'deleteTransaction')
+        .resolves()
+
+      variantReassignment = new VariantReassignment(null, logger)
+      variantReassignment.transactionService = mockTransactionService
+      sinon.stub(variantReassignment, '_processUnfinishedTransactions').resolves()
+      processTransactionFn = sinon.stub(variantReassignment, '_processProductDraft').resolves()
+    })
+
+    it('should retry in case of 409 error', async () => {
+      variantReassignment.errorCallback = errorCallback
+      const error = { statusCode: 409 }
+      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
+      expect(errorCallback.called).to.equal(false)
+      expect(processTransactionFn.called).to.equal(true)
+    })
+
+    it('should delete backup and call custom errorCallback in case of 400 error', async () => {
+      variantReassignment.errorCallback = errorCallback
+      const error = { statusCode: 400 }
+      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
+      expect(errorCallback.called).to.equal(true)
+      expect(deleteBackupFn.called).to.equal(true)
+      expect(processTransactionFn.called).to.equal(false)
+    })
+
+    it('should delete backup and skip productDraft by default in case of 400 error', async () => {
+      const error = { statusCode: 400 }
+      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
+      expect(errorCallback.called).to.equal(false)
+      expect(deleteBackupFn.called).to.equal(true)
+      expect(processTransactionFn.called).to.equal(false)
     })
   })
 })
