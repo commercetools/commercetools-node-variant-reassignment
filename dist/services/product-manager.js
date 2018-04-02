@@ -524,6 +524,9 @@ var ProductManager = function () {
       var salt = this._getSalt();
       var actions = [];
 
+      // Usually you don't want to have product with anonymized URL to appear in the shop,
+      // so that's why we first unpublish them before anonymization.
+      // Later another process can change the URL to correct one and publish
       if (product.masterData.published) actions.push({
         action: 'unpublish'
       });
