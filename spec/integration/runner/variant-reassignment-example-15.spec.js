@@ -67,7 +67,7 @@ describe('Variant reassignment', () => {
 
   it('different variants in staged and current for one product', async () => {
     const reassignment = new VariantReassignment(ctpClient, logger)
-    await reassignment.execute([{
+    const statistics = await reassignment.execute([{
       productType: product1.productType,
       name: product1.name,
       slug: product1.slug,
@@ -76,6 +76,8 @@ describe('Variant reassignment', () => {
       },
       variants: []
     }])
+
+    utils.expectStatistics(statistics, 1, 0, 1, 1)
     const { body: product1After } = await ctpClient.products.byId(product1.id).fetch()
     expect(product1After.masterData.staged.masterVariant.sku).to.equal('1')
     expect(product1After.masterData.staged.variants.length).to.equal(0)
