@@ -97,7 +97,7 @@ var VariantReassignment = function () {
     this.errorCallback = errorCallback;
     this.productService = new _productManager2.default(logger, client);
     this.transactionService = new _transactionManager2.default(logger, client);
-1    this.statistics = {
+    this.statistics = {
       anonymized: 0, // products with conflicting slugs OR backup products
       productTypeChanged: 0,
       processed: 0,
