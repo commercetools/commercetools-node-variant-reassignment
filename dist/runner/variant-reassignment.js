@@ -97,6 +97,14 @@ var VariantReassignment = function () {
     this.errorCallback = errorCallback;
     this.productService = new _productManager2.default(logger, client);
     this.transactionService = new _transactionManager2.default(logger, client);
+1    this.statistics = {
+      anonymized: 0, // products with conflicting slugs OR backup products
+      productTypeChanged: 0,
+      processed: 0,
+      succeeded: 0,
+      retries: 0,
+      errors: 0
+    };
   }
 
   /**
@@ -105,7 +113,7 @@ var VariantReassignment = function () {
    *  - if yes, create and process actions which will move variants across products
    * @param productDrafts List of productDrafts
    * @param productTypeNameToTypeObj product type cache to resolve product type references
-   * @returns {Promise.<*>} true if reassignment has been executed
+   * @returns {Promise.<*>} total reassignment statistics of all runs
    */
 
 
@@ -115,7 +123,7 @@ var VariantReassignment = function () {
       var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(productDrafts) {
         var productTypeNameToTypeObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        var products, productDraftsForReassignment, isReassignmentRequired, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft, error;
+        var products, productDraftsForReassignment, isReassignmentRequired, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft;
 
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
@@ -133,32 +141,34 @@ var VariantReassignment = function () {
                 return this._processUnfinishedTransactions();
 
               case 5:
-                _context.next = 10;
+                _context.next = 11;
                 break;
 
               case 7:
                 _context.prev = 7;
                 _context.t0 = _context['catch'](1);
+
+                this.statistics.errors++;
                 return _context.abrupt('return', this._error('Could not process unfinished transactions', _context.t0));
 
-              case 10:
+              case 11:
                 this.firstRun = false;
 
-                _context.prev = 11;
-                _context.next = 14;
+                _context.prev = 12;
+                _context.next = 15;
                 return this.productService.fetchProductsFromProductDrafts(productDrafts);
 
-              case 14:
+              case 15:
                 products = _context.sent;
-                _context.next = 20;
+                _context.next = 21;
                 break;
 
-              case 17:
-                _context.prev = 17;
-                _context.t1 = _context['catch'](11);
+              case 18:
+                _context.prev = 18;
+                _context.t1 = _context['catch'](12);
                 return _context.abrupt('return', this._error('Error while fetching products for reassignment', _context.t1));
 
-              case 20:
+              case 21:
 
                 productDrafts = this._resolveProductTypeReferences(productDrafts, productTypeNameToTypeObj);
 
@@ -170,97 +180,96 @@ var VariantReassignment = function () {
                 isReassignmentRequired = productDraftsForReassignment.length;
 
                 if (!isReassignmentRequired) {
-                  _context.next = 64;
+                  _context.next = 65;
                   break;
                 }
 
                 _iteratorNormalCompletion = true;
                 _didIteratorError = false;
                 _iteratorError = undefined;
-                _context.prev = 28;
+                _context.prev = 29;
                 _iterator = (0, _getIterator3.default)(productDraftsForReassignment);
 
-              case 30:
+              case 31:
                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-                  _context.next = 49;
+                  _context.next = 50;
                   break;
                 }
 
                 productDraft = _step.value;
-                _context.prev = 32;
-                _context.next = 35;
+                _context.prev = 33;
+                _context.next = 36;
                 return this._processProductDraft(productDraft, products);
 
-              case 35:
+              case 36:
+                this.statistics.succeeded++;
                 _context.next = 43;
                 break;
 
-              case 37:
-                _context.prev = 37;
-                _context.t2 = _context['catch'](32);
-                error = _context.t2 instanceof Error ? (0, _utilsErrorToJson2.default)(_context.t2) : _context.t2;
-
-                this.logger.error('Error while processing productDraft ' + (0, _stringify2.default)(productDraft.name) + '.', error);
+              case 39:
+                _context.prev = 39;
+                _context.t2 = _context['catch'](33);
                 _context.next = 43;
                 return this._handleProcessingError(productDraft, products, _context.t2);
 
               case 43:
                 _context.prev = 43;
 
+                this.statistics.processed++;
                 this.logger.debug('Finished processing of productDraft with name ' + (0, _stringify2.default)(productDraft.name));
                 return _context.finish(43);
 
-              case 46:
+              case 47:
                 _iteratorNormalCompletion = true;
-                _context.next = 30;
+                _context.next = 31;
                 break;
 
-              case 49:
-                _context.next = 55;
+              case 50:
+                _context.next = 56;
                 break;
 
-              case 51:
-                _context.prev = 51;
-                _context.t3 = _context['catch'](28);
+              case 52:
+                _context.prev = 52;
+                _context.t3 = _context['catch'](29);
                 _didIteratorError = true;
                 _iteratorError = _context.t3;
 
-              case 55:
-                _context.prev = 55;
+              case 56:
                 _context.prev = 56;
+                _context.prev = 57;
 
                 if (!_iteratorNormalCompletion && _iterator.return) {
                   _iterator.return();
                 }
 
-              case 58:
-                _context.prev = 58;
+              case 59:
+                _context.prev = 59;
 
                 if (!_didIteratorError) {
-                  _context.next = 61;
+                  _context.next = 62;
                   break;
                 }
 
                 throw _iteratorError;
 
-              case 61:
-                return _context.finish(58);
-
               case 62:
-                return _context.finish(55);
+                return _context.finish(59);
 
               case 63:
-                return _context.abrupt('return', true);
+                return _context.finish(56);
 
               case 64:
-                return _context.abrupt('return', false);
+                return _context.abrupt('return', this.statistics);
 
               case 65:
+                return _context.abrupt('return', this.statistics);
+
+              case 66:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this, [[1, 7], [11, 17], [28, 51, 55, 63], [32, 37, 43, 46], [56,, 58, 62]]);
+        }, _callee, this, [[1, 7], [12, 18], [29, 52, 56, 64], [33, 39, 43, 47], [57,, 59, 63]]);
       }));
 
       function execute(_x3) {
@@ -271,7 +280,7 @@ var VariantReassignment = function () {
     }()
 
     /**
-     * For 400 errors, we don't repeat the actions as the request itself is wrong.
+     * For 400 or 404 errors, we don't repeat the actions as the request itself is wrong.
      * For other errors, we retry the actions.
      *
      * @see https://github.com/commercetools/commercetools-node-variant-reassignment/issues/60
@@ -289,30 +298,33 @@ var VariantReassignment = function () {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                if (!(error.statusCode === 400)) {
-                  _context2.next = 8;
+                this.statistics.errors++;
+
+                if (!(error.statusCode === 400 || error.statusCode === 404)) {
+                  _context2.next = 9;
                   break;
                 }
 
                 this.logger.info('Unrecoverable error, will delete backup custom object.');
-                _context2.next = 4;
+                _context2.next = 5;
                 return this.transactionService.getTransactions();
 
-              case 4:
+              case 5:
                 _transactions = _context2.sent;
-                _context2.next = 7;
+                _context2.next = 8;
                 return _bluebird2.default.map(_transactions, function (transaction) {
                   return _this.transactionService.deleteTransaction(transaction.key);
                 }, { concurrency: 3 });
 
-              case 7:
+              case 8:
                 return _context2.abrupt('return', this.errorCallback(error, productDraft));
 
-              case 8:
-                _context2.next = 10;
+              case 9:
+                this.statistics.retries++;
+                _context2.next = 12;
                 return this.transactionService.getTransactions();
 
-              case 10:
+              case 12:
                 transactions = _context2.sent;
                 failedTransaction = transactions.find(function (_ref3) {
                   var value = _ref3.value;
@@ -324,7 +336,7 @@ var VariantReassignment = function () {
                 // transaction was not created, try to process productDraft again
                 : this._processProductDraft(productDraft, products));
 
-              case 13:
+              case 15:
               case 'end':
                 return _context2.stop();
             }
@@ -617,7 +629,7 @@ var VariantReassignment = function () {
                 ctpProductToUpdate = _context5.sent;
 
                 if (!anonymizedProductDraft) {
-                  _context5.next = 30;
+                  _context5.next = 31;
                   break;
                 }
 
@@ -629,10 +641,13 @@ var VariantReassignment = function () {
                 return this._ensureProductCreation(anonymizedProductDraft);
 
               case 30:
-                _context5.next = 32;
+                this.statistics.anonymized++;
+
+              case 31:
+                _context5.next = 33;
                 return this._ensureSlugUniqueness(productDraft, matchingProducts);
 
-              case 32:
+              case 33:
               case 'end':
                 return _context5.stop();
             }
@@ -1123,9 +1138,10 @@ var VariantReassignment = function () {
                 return this._deleteBackupForProductTypeChange(transaction.key);
 
               case 8:
+                this.statistics.productTypeChanged++;
                 return _context8.abrupt('return', updatedProduct);
 
-              case 9:
+              case 10:
               case 'end':
                 return _context8.stop();
             }
@@ -1211,6 +1227,9 @@ var VariantReassignment = function () {
                 }, { concurrency: 3 });
 
               case 5:
+                this.statistics.anonymized += productsToAnonymize.length;
+
+              case 6:
               case 'end':
                 return _context10.stop();
             }
@@ -1514,7 +1533,8 @@ var VariantReassignment = function () {
       var _this8 = this;
 
       return function (error, productDraft) {
-        _this8.logger.error('Error when processing productDraft ' + (0, _stringify2.default)(productDraft) + ', ' + 'skipping the product draft.', error);
+        var errorObj = error instanceof Error ? (0, _utilsErrorToJson2.default)(error) : error;
+        _this8.logger.error('Error when processing productDraft ' + (0, _stringify2.default)(productDraft) + ', ' + 'skipping the product draft.', errorObj);
         return _bluebird2.default.resolve();
       };
     }
