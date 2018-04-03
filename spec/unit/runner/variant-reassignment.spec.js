@@ -458,7 +458,7 @@ describe('Variant reassignment', () => {
       errorCallback = sinon.stub()
       mockTransactionService = new TransactionManager(logger, null)
       sinon.stub(mockTransactionService, 'getTransactions')
-        .resolves([{ value: { key: 'test', newProductDraft: { name: 'test' } } }])
+        .resolves([{ value: { key: 'test', newProductDraft: { slug: { de: 'test' } } } }])
       deleteBackupFn = sinon.stub(mockTransactionService, 'deleteTransaction')
         .resolves()
 
