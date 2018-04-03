@@ -16,7 +16,6 @@ describe('Reassignment error', () => {
   let productDraft
   let reassignment
   let logger
-  let spyError
 
   const checkResult = async (results = null) => {
     if (!results) {
@@ -56,7 +55,6 @@ describe('Reassignment error', () => {
 
   beforeEach(async () => {
     logger = utils.createLogger(__filename)
-    spyError = sinon.spy(logger, 'error')
     reassignment = new VariantReassignment(ctpClient, logger)
 
     await utils.deleteResourcesAll(ctpClient, logger)
@@ -100,9 +98,6 @@ describe('Reassignment error', () => {
       return Promise.reject('Should throw an error')
     } catch (e) {
       expect(e.toString()).to.contain('Could not process unfinished transactions')
-      expect(spyError.callCount).to.equal(1)
-      expect(spyError.lastCall.args[1].toString()).to.contain('test error')
-
       return Promise.resolve()
     }
   })
@@ -116,9 +111,6 @@ describe('Reassignment error', () => {
       return Promise.reject('Should throw an error')
     } catch (e) {
       expect(e.toString()).to.contain('Error while fetching products for reassignment')
-      expect(spyError.callCount).to.equal(1)
-      expect(spyError.lastCall.args[1].toString()).to.contain('test error')
-
       return Promise.resolve()
     }
   })
