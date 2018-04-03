@@ -97,7 +97,7 @@ describe('Reassignment error', () => {
       await reassignment.execute([productDraft])
       return Promise.reject('Should throw an error')
     } catch (e) {
-      expect(e.toString()).to.contain('Could not process unfinished transactions')
+      expect(e.toString()).to.contain('test error')
       return Promise.resolve()
     }
   })

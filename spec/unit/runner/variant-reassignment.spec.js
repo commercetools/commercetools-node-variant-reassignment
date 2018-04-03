@@ -471,7 +471,7 @@ describe('Variant reassignment', () => {
     it('should retry in case of 409 error', async () => {
       variantReassignment.errorCallback = errorCallback
       const error = { statusCode: 409 }
-      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
+      await variantReassignment._handleProcessingError(error, { id: 'testProductDraft' }, {})
       expect(errorCallback.called).to.equal(false)
       expect(processTransactionFn.called).to.equal(true)
     })
@@ -479,7 +479,7 @@ describe('Variant reassignment', () => {
     it('should delete backup and call custom errorCallback in case of 400 error', async () => {
       variantReassignment.errorCallback = errorCallback
       const error = { statusCode: 400 }
-      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
+      await variantReassignment._handleProcessingError(error, { id: 'testProductDraft' }, {})
       expect(errorCallback.called).to.equal(true)
       expect(deleteBackupFn.called).to.equal(true)
       expect(processTransactionFn.called).to.equal(false)
@@ -487,7 +487,7 @@ describe('Variant reassignment', () => {
 
     it('should delete backup and skip productDraft by default in case of 400 error', async () => {
       const error = { statusCode: 400 }
-      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
+      await variantReassignment._handleProcessingError(error, { id: 'testProductDraft' }, {})
       expect(errorCallback.called).to.equal(false)
       expect(deleteBackupFn.called).to.equal(true)
       expect(processTransactionFn.called).to.equal(false)
