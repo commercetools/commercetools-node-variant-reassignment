@@ -80,6 +80,12 @@ var _transactionManager = require('../services/transaction-manager');
 
 var _transactionManager2 = _interopRequireDefault(_transactionManager);
 
+var _constants = require('../constants');
+
+var constants = _interopRequireWildcard(_constants);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var VariantReassignment = function () {
@@ -113,7 +119,7 @@ var VariantReassignment = function () {
    *  - if yes, create and process actions which will move variants across products
    * @param productDrafts List of productDrafts
    * @param productTypeNameToTypeObj product type cache to resolve product type references
-   * @returns {Promise.<*>} total reassignment statistics of all runs
+   * @returns {Promise.<*>} updated global statistics
    */
 
 
@@ -147,9 +153,8 @@ var VariantReassignment = function () {
               case 7:
                 _context.prev = 7;
                 _context.t0 = _context['catch'](1);
-
-                this.statistics.errors++;
-                return _context.abrupt('return', this._error('Could not process unfinished transactions', _context.t0));
+                _context.next = 11;
+                return this._handleUnrecoverableError(_context.t0);
 
               case 11:
                 this.firstRun = false;
@@ -210,7 +215,7 @@ var VariantReassignment = function () {
                 _context.prev = 39;
                 _context.t2 = _context['catch'](33);
                 _context.next = 43;
-                return this._handleProcessingError(productDraft, products, _context.t2);
+                return this._handleUnrecoverableError(_context.t2);
 
               case 43:
                 _context.prev = 43;
@@ -278,65 +283,31 @@ var VariantReassignment = function () {
 
       return execute;
     }()
-
-    /**
-     * For 400 or 404 errors, we don't repeat the actions as the request itself is wrong.
-     * For other errors, we retry the actions.
-     *
-     * @see https://github.com/commercetools/commercetools-node-variant-reassignment/issues/60
-     */
-
   }, {
-    key: '_handleProcessingError',
+    key: '_handleUnfinishedTransactionsError',
     value: function () {
-      var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(productDraft, products, error) {
-        var _this = this;
-
-        var _transactions, transactions, failedTransaction;
-
+      var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(error, retryCount) {
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                this.statistics.errors++;
-
-                if (!(error.statusCode === 400 || error.statusCode === 404)) {
-                  _context2.next = 9;
+                if (!this._isUnrecoverableError(error)) {
+                  _context2.next = 4;
                   break;
                 }
 
-                this.logger.info('Unrecoverable error, will delete backup custom object.');
-                _context2.next = 5;
-                return this.transactionService.getTransactions();
+                _context2.next = 3;
+                return this._handleUnrecoverableError(error);
 
-              case 5:
-                _transactions = _context2.sent;
-                _context2.next = 8;
-                return _bluebird2.default.map(_transactions, function (transaction) {
-                  return _this.transactionService.deleteTransaction(transaction.key);
-                }, { concurrency: 3 });
+              case 3:
+                return _context2.abrupt('return');
 
-              case 8:
-                return _context2.abrupt('return', this.errorCallback(error, productDraft));
-
-              case 9:
+              case 4:
                 this.statistics.retries++;
-                _context2.next = 12;
-                return this.transactionService.getTransactions();
+                _context2.next = 7;
+                return this._processUnfinishedTransactions(null, ++retryCount);
 
-              case 12:
-                transactions = _context2.sent;
-                failedTransaction = transactions.find(function (_ref3) {
-                  var value = _ref3.value;
-                  return _lodash2.default.isEqual(value.newProductDraft.name, productDraft.name);
-                });
-                return _context2.abrupt('return', failedTransaction
-                // transaction was created but not finished, try to finish it
-                ? this._processUnfinishedTransactions(transactions)
-                // transaction was not created, try to process productDraft again
-                : this._processProductDraft(productDraft, products));
-
-              case 15:
+              case 7:
               case 'end':
                 return _context2.stop();
             }
@@ -344,15 +315,130 @@ var VariantReassignment = function () {
         }, _callee2, this);
       }));
 
-      function _handleProcessingError(_x5, _x6, _x7) {
+      function _handleUnfinishedTransactionsError(_x5, _x6) {
         return _ref2.apply(this, arguments);
+      }
+
+      return _handleUnfinishedTransactionsError;
+    }()
+  }, {
+    key: '_handleProcessingError',
+    value: function () {
+      var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(error, productDraft, products, retryCount) {
+        var transactions, failedTransaction;
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (!this._isUnrecoverableError(error)) {
+                  _context3.next = 4;
+                  break;
+                }
+
+                _context3.next = 3;
+                return this._handleUnrecoverableError(error);
+
+              case 3:
+                return _context3.abrupt('return');
+
+              case 4:
+                this.statistics.retries++;
+                _context3.next = 7;
+                return this.transactionService.getTransactions();
+
+              case 7:
+                transactions = _context3.sent;
+                failedTransaction = transactions.find(function (_ref4) {
+                  var value = _ref4.value;
+                  return _lodash2.default.isEqual(value.newProductDraft.slug, productDraft.slug);
+                });
+
+                if (!failedTransaction) {
+                  _context3.next = 12;
+                  break;
+                }
+
+                _context3.next = 12;
+                return this._processUnfinishedTransactions(transactions, ++retryCount);
+
+              case 12:
+                _context3.next = 14;
+                return this._processProductDraft(productDraft, products, ++retryCount);
+
+              case 14:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function _handleProcessingError(_x7, _x8, _x9, _x10) {
+        return _ref3.apply(this, arguments);
       }
 
       return _handleProcessingError;
     }()
+  }, {
+    key: '_handleUnrecoverableError',
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(error) {
+        var _this = this;
+
+        var transactions;
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                error[constants.ERROR_CONTEXT] = 'Unrecoverable error, will delete backup custom object.';
+                _context4.next = 3;
+                return this.errorCallback(error);
+
+              case 3:
+                _context4.prev = 3;
+                _context4.next = 6;
+                return this.transactionService.getTransactions();
+
+              case 6:
+                transactions = _context4.sent;
+                _context4.next = 9;
+                return _bluebird2.default.map(transactions, function (transaction) {
+                  return _this.transactionService.deleteTransaction(transaction.key);
+                }, { concurrency: 3 });
+
+              case 9:
+                _context4.next = 14;
+                break;
+
+              case 11:
+                _context4.prev = 11;
+                _context4.t0 = _context4['catch'](3);
+
+                this.logger.debug('Error when deleting backup custom objects', _context4.t0);
+
+              case 14:
+                _context4.prev = 14;
+
+                this.statistics.errors++;
+                return _context4.finish(14);
+
+              case 17:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this, [[3, 11, 14, 17]]);
+      }));
+
+      function _handleUnrecoverableError(_x11) {
+        return _ref5.apply(this, arguments);
+      }
+
+      return _handleUnrecoverableError;
+    }()
 
     /**
-     * Log error and return Promise.reject
+     * Return Promise.reject
      * @param msg String with error description
      * @param e Error object with details
      * @return <Promise.reject>
@@ -363,7 +449,6 @@ var VariantReassignment = function () {
     key: '_error',
     value: function _error(msg, e) {
       var error = e instanceof Error ? (0, _utilsErrorToJson2.default)(e) : e;
-      this.logger.error(msg, e);
       return _bluebird2.default.reject(new Error(msg + ' - ' + (0, _stringify2.default)(error)));
     }
 
@@ -375,37 +460,39 @@ var VariantReassignment = function () {
   }, {
     key: '_processUnfinishedTransactions',
     value: function () {
-      var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
-        var transactions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(transactions) {
+        var retryCount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
-        var _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, transactionObject, key, transaction, error;
+        var _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, transactionObject, key, transaction;
 
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
+        return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
+                _context5.prev = 0;
+
                 if (transactions) {
-                  _context3.next = 5;
+                  _context5.next = 6;
                   break;
                 }
 
                 this.logger.debug('Loading unfinished transactions');
-                _context3.next = 4;
+                _context5.next = 5;
                 return this.transactionService.getTransactions();
 
-              case 4:
-                transactions = _context3.sent;
-
               case 5:
+                transactions = _context5.sent;
+
+              case 6:
                 _iteratorNormalCompletion2 = true;
                 _didIteratorError2 = false;
                 _iteratorError2 = undefined;
-                _context3.prev = 8;
+                _context5.prev = 9;
                 _iterator2 = (0, _getIterator3.default)(transactions);
 
-              case 10:
+              case 11:
                 if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-                  _context3.next = 29;
+                  _context5.next = 22;
                   break;
                 }
 
@@ -414,75 +501,85 @@ var VariantReassignment = function () {
 
 
                 this.logger.debug('Processing unfinished transaction with key ' + key);
-                _context3.prev = 14;
-                _context3.next = 17;
+                _context5.next = 17;
                 return this._createAndExecuteActions(transaction.newProductDraft, transaction.backupProductDraft, transaction.variants, transaction.ctpProductToUpdate, transactionObject);
 
               case 17:
-                _context3.next = 19;
+                _context5.next = 19;
                 return this.transactionService.deleteTransaction(key);
 
               case 19:
-                _context3.next = 26;
-                break;
-
-              case 21:
-                _context3.prev = 21;
-                _context3.t0 = _context3['catch'](14);
-                error = _context3.t0 instanceof Error ? (0, _utilsErrorToJson2.default)(_context3.t0) : _context3.t0;
-
-                this.logger.error('Could not process unfinished transaction', error);
-                throw _context3.t0;
-
-              case 26:
                 _iteratorNormalCompletion2 = true;
-                _context3.next = 10;
+                _context5.next = 11;
                 break;
 
-              case 29:
-                _context3.next = 35;
+              case 22:
+                _context5.next = 28;
                 break;
 
-              case 31:
-                _context3.prev = 31;
-                _context3.t1 = _context3['catch'](8);
+              case 24:
+                _context5.prev = 24;
+                _context5.t0 = _context5['catch'](9);
                 _didIteratorError2 = true;
-                _iteratorError2 = _context3.t1;
+                _iteratorError2 = _context5.t0;
 
-              case 35:
-                _context3.prev = 35;
-                _context3.prev = 36;
+              case 28:
+                _context5.prev = 28;
+                _context5.prev = 29;
 
                 if (!_iteratorNormalCompletion2 && _iterator2.return) {
                   _iterator2.return();
                 }
 
-              case 38:
-                _context3.prev = 38;
+              case 31:
+                _context5.prev = 31;
 
                 if (!_didIteratorError2) {
-                  _context3.next = 41;
+                  _context5.next = 34;
                   break;
                 }
 
                 throw _iteratorError2;
 
-              case 41:
-                return _context3.finish(38);
+              case 34:
+                return _context5.finish(31);
 
-              case 42:
-                return _context3.finish(35);
+              case 35:
+                return _context5.finish(28);
+
+              case 36:
+                _context5.next = 46;
+                break;
+
+              case 38:
+                _context5.prev = 38;
+                _context5.t1 = _context5['catch'](0);
+
+                if (!(retryCount < constants.MAX_RETRIES)) {
+                  _context5.next = 45;
+                  break;
+                }
+
+                _context5.next = 43;
+                return this._handleUnfinishedTransactionsError(_context5.t1, retryCount);
 
               case 43:
+                _context5.next = 46;
+                break;
+
+              case 45:
+                throw _context5.t1;
+
+              case 46:
               case 'end':
-                return _context3.stop();
+                return _context5.stop();
             }
           }
-        }, _callee3, this, [[8, 31, 35, 43], [14, 21], [36,, 38, 42]]);
+        }, _callee5, this, [[0, 38], [9, 24, 28, 36], [29,, 31, 35]]);
       }));
 
-      function _processUnfinishedTransactions() {
-        return _ref4.apply(this, arguments);
+      function _processUnfinishedTransactions(_x12) {
+        return _ref6.apply(this, arguments);
       }
 
       return _processUnfinishedTransactions;
@@ -490,29 +587,33 @@ var VariantReassignment = function () {
   }, {
     key: '_processProductDraft',
     value: function () {
-      var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(productDraft, products) {
+      var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(productDraft, products) {
+        var retryCount = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
         var matchingProducts, ctpProductToUpdate, _getRemovedVariants2, backupVariants, variantsToProcess, anonymizedProductDraft, transaction;
 
-        return _regenerator2.default.wrap(function _callee4$(_context4) {
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
+                _context6.prev = 0;
+
                 this.logger.debug('Processing reassignment for productDraft with name ' + (0, _stringify2.default)(productDraft.name));
 
-                _context4.next = 3;
+                _context6.next = 4;
                 return this._selectMatchingProducts(productDraft, products);
 
-              case 3:
-                matchingProducts = _context4.sent;
+              case 4:
+                matchingProducts = _context6.sent;
 
                 if (!(matchingProducts.length === 0)) {
-                  _context4.next = 6;
+                  _context6.next = 7;
                   break;
                 }
 
-                return _context4.abrupt('return');
+                return _context6.abrupt('return');
 
-              case 6:
+              case 7:
 
                 // select using SLUG, etc..
                 ctpProductToUpdate = this._selectCtpProductToUpdate(productDraft, matchingProducts);
@@ -527,28 +628,51 @@ var VariantReassignment = function () {
                 this.logger.debug('Will remove ' + variantsToProcess.length + ' and reassign ' + backupVariants.length + ' variants');
 
                 // create a backup object
-                _context4.next = 13;
+                _context6.next = 14;
                 return this._backupToCustomObject(productDraft, backupVariants, anonymizedProductDraft);
 
-              case 13:
-                transaction = _context4.sent;
-                _context4.next = 16;
+              case 14:
+                transaction = _context6.sent;
+                _context6.next = 17;
                 return this._createAndExecuteActions(productDraft, anonymizedProductDraft, backupVariants, ctpProductToUpdate, transaction, matchingProducts);
 
-              case 16:
-                _context4.next = 18;
+              case 17:
+                _context6.next = 19;
                 return this.transactionService.deleteTransaction(transaction.key);
 
-              case 18:
+              case 19:
+                _context6.next = 29;
+                break;
+
+              case 21:
+                _context6.prev = 21;
+                _context6.t0 = _context6['catch'](0);
+
+                if (!(retryCount < constants.MAX_RETRIES)) {
+                  _context6.next = 28;
+                  break;
+                }
+
+                _context6.next = 26;
+                return this._handleProcessingError(_context6.t0, productDraft, products, retryCount);
+
+              case 26:
+                _context6.next = 29;
+                break;
+
+              case 28:
+                throw _context6.t0;
+
+              case 29:
               case 'end':
-                return _context4.stop();
+                return _context6.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee6, this, [[0, 21]]);
       }));
 
-      function _processProductDraft(_x9, _x10) {
-        return _ref5.apply(this, arguments);
+      function _processProductDraft(_x14, _x15) {
+        return _ref7.apply(this, arguments);
       }
 
       return _processProductDraft;
@@ -556,22 +680,22 @@ var VariantReassignment = function () {
   }, {
     key: '_createAndExecuteActions',
     value: function () {
-      var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(productDraft, anonymizedProductDraft, backupVariants, ctpProductToUpdate, transaction, matchingProducts) {
+      var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(productDraft, anonymizedProductDraft, backupVariants, ctpProductToUpdate, transaction, matchingProducts) {
         var productToUpdateCandidate, ctpProductTypeId, draftProductType;
-        return _regenerator2.default.wrap(function _callee5$(_context5) {
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 if (matchingProducts) {
-                  _context5.next = 12;
+                  _context7.next = 12;
                   break;
                 }
 
-                _context5.next = 3;
+                _context7.next = 3;
                 return this._selectMatchingProducts(productDraft);
 
               case 3:
-                matchingProducts = _context5.sent;
+                matchingProducts = _context7.sent;
 
                 // load CTP product to update for backupProductDraft -> CTP product to update
 
@@ -580,20 +704,20 @@ var VariantReassignment = function () {
                 // if there is no ctpProductToUpdate or it is the same as candidate, take candidate
 
                 if (!(!ctpProductToUpdate || this.productService.isProductsSame(productToUpdateCandidate, ctpProductToUpdate))) {
-                  _context5.next = 9;
+                  _context7.next = 9;
                   break;
                 }
 
                 ctpProductToUpdate = productToUpdateCandidate;
-                _context5.next = 12;
+                _context7.next = 12;
                 break;
 
               case 9:
-                _context5.next = 11;
+                _context7.next = 11;
                 return this._createNewProduct(ctpProductToUpdate, productDraft.productType.id);
 
               case 11:
-                ctpProductToUpdate = _context5.sent;
+                ctpProductToUpdate = _context7.sent;
 
               case 12:
 
@@ -606,57 +730,57 @@ var VariantReassignment = function () {
                 });
 
                 if (!(draftProductType !== ctpProductTypeId)) {
-                  _context5.next = 19;
+                  _context7.next = 19;
                   break;
                 }
 
-                _context5.next = 18;
+                _context7.next = 18;
                 return this._changeProductType(transaction, ctpProductToUpdate, draftProductType);
 
               case 18:
-                ctpProductToUpdate = _context5.sent;
+                ctpProductToUpdate = _context7.sent;
 
               case 19:
-                _context5.next = 21;
+                _context7.next = 21;
                 return this._removeVariantsFromMatchingProducts(backupVariants, matchingProducts);
 
               case 21:
-                matchingProducts = _context5.sent;
-                _context5.next = 24;
+                matchingProducts = _context7.sent;
+                _context7.next = 24;
                 return this._createVariantsInCtpProductToUpdate(backupVariants, productDraft, ctpProductToUpdate);
 
               case 24:
-                ctpProductToUpdate = _context5.sent;
+                ctpProductToUpdate = _context7.sent;
 
                 if (!anonymizedProductDraft) {
-                  _context5.next = 31;
+                  _context7.next = 31;
                   break;
                 }
 
-                _context5.next = 28;
+                _context7.next = 28;
                 return this._removeVariantsFromCtpProductToUpdate(anonymizedProductDraft, ctpProductToUpdate);
 
               case 28:
-                _context5.next = 30;
+                _context7.next = 30;
                 return this._ensureProductCreation(anonymizedProductDraft);
 
               case 30:
                 this.statistics.anonymized++;
 
               case 31:
-                _context5.next = 33;
+                _context7.next = 33;
                 return this._ensureSlugUniqueness(productDraft, matchingProducts);
 
               case 33:
               case 'end':
-                return _context5.stop();
+                return _context7.stop();
             }
           }
-        }, _callee5, this);
+        }, _callee7, this);
       }));
 
-      function _createAndExecuteActions(_x11, _x12, _x13, _x14, _x15, _x16) {
-        return _ref6.apply(this, arguments);
+      function _createAndExecuteActions(_x17, _x18, _x19, _x20, _x21, _x22) {
+        return _ref8.apply(this, arguments);
       }
 
       return _createAndExecuteActions;
@@ -1034,37 +1158,37 @@ var VariantReassignment = function () {
   }, {
     key: '_ensureProductCreation',
     value: function () {
-      var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(productDraft) {
+      var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(productDraft) {
         var sku, existingProducts;
-        return _regenerator2.default.wrap(function _callee6$(_context6) {
+        return _regenerator2.default.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context6.prev = _context6.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
                 sku = productDraft.masterVariant.sku;
-                _context6.next = 3;
+                _context8.next = 3;
                 return this.productService.getProductsBySkus([sku]);
 
               case 3:
-                existingProducts = _context6.sent;
+                existingProducts = _context8.sent;
 
                 if (existingProducts.length) {
-                  _context6.next = 7;
+                  _context8.next = 7;
                   break;
                 }
 
-                _context6.next = 7;
+                _context8.next = 7;
                 return this.productService.createProduct(productDraft);
 
               case 7:
               case 'end':
-                return _context6.stop();
+                return _context8.stop();
             }
           }
-        }, _callee6, this);
+        }, _callee8, this);
       }));
 
-      function _ensureProductCreation(_x17) {
-        return _ref7.apply(this, arguments);
+      function _ensureProductCreation(_x23) {
+        return _ref9.apply(this, arguments);
       }
 
       return _ensureProductCreation;
@@ -1077,39 +1201,39 @@ var VariantReassignment = function () {
   }, {
     key: '_backupProductForProductTypeChange',
     value: function () {
-      var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(transactionObject, ctpProductToUpdate) {
+      var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(transactionObject, ctpProductToUpdate) {
         var transactionKey, transaction;
-        return _regenerator2.default.wrap(function _callee7$(_context7) {
+        return _regenerator2.default.wrap(function _callee9$(_context9) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context9.prev = _context9.next) {
               case 0:
                 if (transactionObject.ctpProductToUpdate) {
-                  _context7.next = 8;
+                  _context9.next = 8;
                   break;
                 }
 
                 transactionKey = transactionObject.key;
-                _context7.next = 4;
+                _context9.next = 4;
                 return this.transactionService.getTransaction(transactionKey);
 
               case 4:
-                transaction = _context7.sent;
+                transaction = _context9.sent;
 
                 transaction.ctpProductToUpdate = ctpProductToUpdate;
 
-                _context7.next = 8;
+                _context9.next = 8;
                 return this.transactionService.upsertTransactionByKey(transaction, transactionKey);
 
               case 8:
               case 'end':
-                return _context7.stop();
+                return _context9.stop();
             }
           }
-        }, _callee7, this);
+        }, _callee9, this);
       }));
 
-      function _backupProductForProductTypeChange(_x18, _x19) {
-        return _ref8.apply(this, arguments);
+      function _backupProductForProductTypeChange(_x24, _x25) {
+        return _ref10.apply(this, arguments);
       }
 
       return _backupProductForProductTypeChange;
@@ -1117,40 +1241,40 @@ var VariantReassignment = function () {
   }, {
     key: '_changeProductType',
     value: function () {
-      var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(transaction, ctpProductToUpdate, productTypeId) {
+      var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(transaction, ctpProductToUpdate, productTypeId) {
         var updatedProduct;
-        return _regenerator2.default.wrap(function _callee8$(_context8) {
+        return _regenerator2.default.wrap(function _callee10$(_context10) {
           while (1) {
-            switch (_context8.prev = _context8.next) {
+            switch (_context10.prev = _context10.next) {
               case 0:
                 this.logger.debug('Changing productType of product ' + ((0, _stringify2.default)(ctpProductToUpdate.masterData.current.name) + ' with id ') + ('"' + ctpProductToUpdate.id + '" to productType "' + productTypeId + '"'));
 
-                _context8.next = 3;
+                _context10.next = 3;
                 return this._backupProductForProductTypeChange(transaction, ctpProductToUpdate);
 
               case 3:
-                _context8.next = 5;
+                _context10.next = 5;
                 return this.productService.changeProductType(ctpProductToUpdate, productTypeId);
 
               case 5:
-                updatedProduct = _context8.sent;
-                _context8.next = 8;
+                updatedProduct = _context10.sent;
+                _context10.next = 8;
                 return this._deleteBackupForProductTypeChange(transaction.key);
 
               case 8:
                 this.statistics.productTypeChanged++;
-                return _context8.abrupt('return', updatedProduct);
+                return _context10.abrupt('return', updatedProduct);
 
               case 10:
               case 'end':
-                return _context8.stop();
+                return _context10.stop();
             }
           }
-        }, _callee8, this);
+        }, _callee10, this);
       }));
 
-      function _changeProductType(_x20, _x21, _x22) {
-        return _ref9.apply(this, arguments);
+      function _changeProductType(_x26, _x27, _x28) {
+        return _ref11.apply(this, arguments);
       }
 
       return _changeProductType;
@@ -1163,32 +1287,32 @@ var VariantReassignment = function () {
   }, {
     key: '_deleteBackupForProductTypeChange',
     value: function () {
-      var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(transactionKey) {
+      var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11(transactionKey) {
         var transaction;
-        return _regenerator2.default.wrap(function _callee9$(_context9) {
+        return _regenerator2.default.wrap(function _callee11$(_context11) {
           while (1) {
-            switch (_context9.prev = _context9.next) {
+            switch (_context11.prev = _context11.next) {
               case 0:
-                _context9.next = 2;
+                _context11.next = 2;
                 return this.transactionService.getTransaction(transactionKey);
 
               case 2:
-                transaction = _context9.sent;
+                transaction = _context11.sent;
 
                 delete transaction.ctpProductToUpdate;
-                _context9.next = 6;
+                _context11.next = 6;
                 return this.transactionService.upsertTransactionByKey(transaction, transactionKey);
 
               case 6:
               case 'end':
-                return _context9.stop();
+                return _context11.stop();
             }
           }
-        }, _callee9, this);
+        }, _callee11, this);
       }));
 
-      function _deleteBackupForProductTypeChange(_x23) {
-        return _ref10.apply(this, arguments);
+      function _deleteBackupForProductTypeChange(_x29) {
+        return _ref12.apply(this, arguments);
       }
 
       return _deleteBackupForProductTypeChange;
@@ -1205,13 +1329,13 @@ var VariantReassignment = function () {
   }, {
     key: '_ensureSlugUniqueness',
     value: function () {
-      var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(productDraft, matchingProducts) {
+      var _ref13 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12(productDraft, matchingProducts) {
         var _this5 = this;
 
         var productDraftSlug, productsToAnonymize;
-        return _regenerator2.default.wrap(function _callee10$(_context10) {
+        return _regenerator2.default.wrap(function _callee12$(_context12) {
           while (1) {
-            switch (_context10.prev = _context10.next) {
+            switch (_context12.prev = _context12.next) {
               case 0:
                 productDraftSlug = productDraft.slug;
                 productsToAnonymize = matchingProducts.filter(function (product) {
@@ -1221,7 +1345,7 @@ var VariantReassignment = function () {
 
                 this.logger.debug('Anonymizing ' + productsToAnonymize.length + ' products because of duplicate slugs');
 
-                _context10.next = 5;
+                _context12.next = 5;
                 return _bluebird2.default.map(productsToAnonymize, function (product) {
                   return _this5.productService.anonymizeCtpProduct(product);
                 }, { concurrency: 3 });
@@ -1231,14 +1355,14 @@ var VariantReassignment = function () {
 
               case 6:
               case 'end':
-                return _context10.stop();
+                return _context12.stop();
             }
           }
-        }, _callee10, this);
+        }, _callee12, this);
       }));
 
-      function _ensureSlugUniqueness(_x24, _x25) {
-        return _ref11.apply(this, arguments);
+      function _ensureSlugUniqueness(_x30, _x31) {
+        return _ref13.apply(this, arguments);
       }
 
       return _ensureSlugUniqueness;
@@ -1287,26 +1411,26 @@ var VariantReassignment = function () {
   }, {
     key: '_removeVariantsFromCtpProductToUpdate',
     value: function () {
-      var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11(anonymizedProductDraft, ctpProductToUpdate) {
+      var _ref14 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13(anonymizedProductDraft, ctpProductToUpdate) {
         var skusToRemove;
-        return _regenerator2.default.wrap(function _callee11$(_context11) {
+        return _regenerator2.default.wrap(function _callee13$(_context13) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context13.prev = _context13.next) {
               case 0:
                 skusToRemove = this.productService.getProductDraftSkus(anonymizedProductDraft);
-                _context11.next = 3;
+                _context13.next = 3;
                 return this.productService.removeVariantsFromProduct(ctpProductToUpdate, skusToRemove);
 
               case 3:
               case 'end':
-                return _context11.stop();
+                return _context13.stop();
             }
           }
-        }, _callee11, this);
+        }, _callee13, this);
       }));
 
-      function _removeVariantsFromCtpProductToUpdate(_x26, _x27) {
-        return _ref12.apply(this, arguments);
+      function _removeVariantsFromCtpProductToUpdate(_x32, _x33) {
+        return _ref14.apply(this, arguments);
       }
 
       return _removeVariantsFromCtpProductToUpdate;
@@ -1314,14 +1438,14 @@ var VariantReassignment = function () {
   }, {
     key: '_createVariantsInCtpProductToUpdate',
     value: function () {
-      var _ref13 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12(backupVariants, productDraft, ctpProductToUpdate) {
+      var _ref15 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee14(backupVariants, productDraft, ctpProductToUpdate) {
         var _this6 = this;
 
         var actions, skuToVariant, existingSkus, variants, setAttrActions, _iteratorNormalCompletion7, _didIteratorError7, _iteratorError7, _iterator7, _step7, _step7$value, sku, variant;
 
-        return _regenerator2.default.wrap(function _callee12$(_context12) {
+        return _regenerator2.default.wrap(function _callee14$(_context14) {
           while (1) {
-            switch (_context12.prev = _context12.next) {
+            switch (_context14.prev = _context14.next) {
               case 0:
                 actions = [];
                 skuToVariant = new _map2.default();
@@ -1342,11 +1466,11 @@ var VariantReassignment = function () {
                 });
 
                 // ensure sameForAll constraint
-                _context12.next = 8;
+                _context14.next = 8;
                 return this._ensureSameForAllAttributes(ctpProductToUpdate, skuToVariant, productDraft);
 
               case 8:
-                setAttrActions = _context12.sent;
+                setAttrActions = _context14.sent;
 
                 actions.push.apply(actions, (0, _toConsumableArray3.default)(setAttrActions));
 
@@ -1354,7 +1478,7 @@ var VariantReassignment = function () {
                 _iteratorNormalCompletion7 = true;
                 _didIteratorError7 = false;
                 _iteratorError7 = undefined;
-                _context12.prev = 13;
+                _context14.prev = 13;
                 for (_iterator7 = (0, _getIterator3.default)(skuToVariant); !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
                   _step7$value = (0, _slicedToArray3.default)(_step7.value, 2), sku = _step7$value[0], variant = _step7$value[1];
 
@@ -1366,53 +1490,53 @@ var VariantReassignment = function () {
                     images: variant.images,
                     attributes: variant.attributes
                   });
-                }_context12.next = 21;
+                }_context14.next = 21;
                 break;
 
               case 17:
-                _context12.prev = 17;
-                _context12.t0 = _context12['catch'](13);
+                _context14.prev = 17;
+                _context14.t0 = _context14['catch'](13);
                 _didIteratorError7 = true;
-                _iteratorError7 = _context12.t0;
+                _iteratorError7 = _context14.t0;
 
               case 21:
-                _context12.prev = 21;
-                _context12.prev = 22;
+                _context14.prev = 21;
+                _context14.prev = 22;
 
                 if (!_iteratorNormalCompletion7 && _iterator7.return) {
                   _iterator7.return();
                 }
 
               case 24:
-                _context12.prev = 24;
+                _context14.prev = 24;
 
                 if (!_didIteratorError7) {
-                  _context12.next = 27;
+                  _context14.next = 27;
                   break;
                 }
 
                 throw _iteratorError7;
 
               case 27:
-                return _context12.finish(24);
+                return _context14.finish(24);
 
               case 28:
-                return _context12.finish(21);
+                return _context14.finish(21);
 
               case 29:
                 this.logger.debug('Updating ctpProductToUpdate with ' + actions.length + ' addVariant actions');
-                return _context12.abrupt('return', this.productService.updateProduct(ctpProductToUpdate, actions));
+                return _context14.abrupt('return', this.productService.updateProduct(ctpProductToUpdate, actions));
 
               case 31:
               case 'end':
-                return _context12.stop();
+                return _context14.stop();
             }
           }
-        }, _callee12, this, [[13, 17, 21, 29], [22,, 24, 28]]);
+        }, _callee14, this, [[13, 17, 21, 29], [22,, 24, 28]]);
       }));
 
-      function _createVariantsInCtpProductToUpdate(_x28, _x29, _x30) {
-        return _ref13.apply(this, arguments);
+      function _createVariantsInCtpProductToUpdate(_x34, _x35, _x36) {
+        return _ref15.apply(this, arguments);
       }
 
       return _createVariantsInCtpProductToUpdate;
@@ -1427,21 +1551,21 @@ var VariantReassignment = function () {
   }, {
     key: '_removeVariantsFromMatchingProducts',
     value: function () {
-      var _ref14 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13(backupVariants, matchingProducts) {
+      var _ref16 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee15(backupVariants, matchingProducts) {
         var _this7 = this;
 
         var productToSkusToRemoveMap, skuToProductMap, _iteratorNormalCompletion8, _didIteratorError8, _iteratorError8, _iterator8, _step8, variant, product, actions;
 
-        return _regenerator2.default.wrap(function _callee13$(_context13) {
+        return _regenerator2.default.wrap(function _callee15$(_context15) {
           while (1) {
-            switch (_context13.prev = _context13.next) {
+            switch (_context15.prev = _context15.next) {
               case 0:
                 if (backupVariants.length) {
-                  _context13.next = 2;
+                  _context15.next = 2;
                   break;
                 }
 
-                return _context13.abrupt('return', matchingProducts);
+                return _context15.abrupt('return', matchingProducts);
 
               case 2:
                 productToSkusToRemoveMap = new _map2.default();
@@ -1454,7 +1578,7 @@ var VariantReassignment = function () {
                 _iteratorNormalCompletion8 = true;
                 _didIteratorError8 = false;
                 _iteratorError8 = undefined;
-                _context13.prev = 7;
+                _context15.prev = 7;
 
 
                 for (_iterator8 = (0, _getIterator3.default)(backupVariants); !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
@@ -1470,59 +1594,59 @@ var VariantReassignment = function () {
                   }
                 }
 
-                _context13.next = 15;
+                _context15.next = 15;
                 break;
 
               case 11:
-                _context13.prev = 11;
-                _context13.t0 = _context13['catch'](7);
+                _context15.prev = 11;
+                _context15.t0 = _context15['catch'](7);
                 _didIteratorError8 = true;
-                _iteratorError8 = _context13.t0;
+                _iteratorError8 = _context15.t0;
 
               case 15:
-                _context13.prev = 15;
-                _context13.prev = 16;
+                _context15.prev = 15;
+                _context15.prev = 16;
 
                 if (!_iteratorNormalCompletion8 && _iterator8.return) {
                   _iterator8.return();
                 }
 
               case 18:
-                _context13.prev = 18;
+                _context15.prev = 18;
 
                 if (!_didIteratorError8) {
-                  _context13.next = 21;
+                  _context15.next = 21;
                   break;
                 }
 
                 throw _iteratorError8;
 
               case 21:
-                return _context13.finish(18);
+                return _context15.finish(18);
 
               case 22:
-                return _context13.finish(15);
+                return _context15.finish(15);
 
               case 23:
                 this.logger.debug('Removing variants from matching products');
-                return _context13.abrupt('return', _bluebird2.default.map((0, _from2.default)(productToSkusToRemoveMap), function (_ref15) {
-                  var _ref16 = (0, _slicedToArray3.default)(_ref15, 2),
-                      product = _ref16[0],
-                      skus = _ref16[1];
+                return _context15.abrupt('return', _bluebird2.default.map((0, _from2.default)(productToSkusToRemoveMap), function (_ref17) {
+                  var _ref18 = (0, _slicedToArray3.default)(_ref17, 2),
+                      product = _ref18[0],
+                      skus = _ref18[1];
 
                   return _this7.productService.removeVariantsFromProduct(product, skus);
                 }, { concurrency: 3 }).then(_lodash2.default.compact));
 
               case 25:
               case 'end':
-                return _context13.stop();
+                return _context15.stop();
             }
           }
-        }, _callee13, this, [[7, 11, 15, 23], [16,, 18, 22]]);
+        }, _callee15, this, [[7, 11, 15, 23], [16,, 18, 22]]);
       }));
 
-      function _removeVariantsFromMatchingProducts(_x31, _x32) {
-        return _ref14.apply(this, arguments);
+      function _removeVariantsFromMatchingProducts(_x37, _x38) {
+        return _ref16.apply(this, arguments);
       }
 
       return _removeVariantsFromMatchingProducts;
@@ -1537,6 +1661,11 @@ var VariantReassignment = function () {
         _this8.logger.error('Error when processing productDraft ' + (0, _stringify2.default)(productDraft) + ', ' + 'skipping the product draft.', errorObj);
         return _bluebird2.default.resolve();
       };
+    }
+  }, {
+    key: '_isUnrecoverableError',
+    value: function _isUnrecoverableError(error) {
+      return [400, 404].indexOf(error.statusCode) !== -1;
     }
   }]);
   return VariantReassignment;

@@ -16,7 +16,7 @@ describe('Reassignment error', () => {
   let productDraft
   let reassignment
   let logger
-  let spyError
+  let errorCallback
 
   const checkResult = async (results = null) => {
     if (!results) {
@@ -56,8 +56,8 @@ describe('Reassignment error', () => {
 
   beforeEach(async () => {
     logger = utils.createLogger(__filename)
-    spyError = sinon.spy(logger, 'error')
-    reassignment = new VariantReassignment(ctpClient, logger)
+    errorCallback = sinon.spy()
+    reassignment = new VariantReassignment(ctpClient, logger, errorCallback)
 
     await utils.deleteResourcesAll(ctpClient, logger)
     const products = await utils.createCtpProducts([['1', '2'], ['3', '4']], ctpClient)
@@ -95,16 +95,9 @@ describe('Reassignment error', () => {
     sinon.stub(reassignment.transactionService, 'getTransactions')
       .rejects('test error')
 
-    try {
-      await reassignment.execute([productDraft])
-      return Promise.reject('Should throw an error')
-    } catch (e) {
-      expect(e.toString()).to.contain('Could not process unfinished transactions')
-      expect(spyError.callCount).to.equal(1)
-      expect(spyError.lastCall.args[1].toString()).to.contain('test error')
-
-      return Promise.resolve()
-    }
+    await reassignment.execute([productDraft])
+    expect(errorCallback.args[0].toString()).to.contain('test error')
+    return Promise.resolve()
   })
 
   it('fail when process can\'t load existing products', async () => {
@@ -116,9 +109,6 @@ describe('Reassignment error', () => {
       return Promise.reject('Should throw an error')
     } catch (e) {
       expect(e.toString()).to.contain('Error while fetching products for reassignment')
-      expect(spyError.callCount).to.equal(1)
-      expect(spyError.lastCall.args[1].toString()).to.contain('test error')
-
       return Promise.resolve()
     }
   })
@@ -140,19 +130,15 @@ describe('Reassignment error', () => {
   })
 
   it('retry only once when reassignment fails before creating transaction', async () => {
-    const selectFn = sinon.stub(reassignment, '_selectMatchingProducts').rejects('test error')
+    sinon.stub(reassignment, '_selectMatchingProducts').rejects('test error')
+    await reassignment.execute([productDraft])
 
-    try {
-      await reassignment.execute([productDraft])
-      return Promise.reject('Should throw an error')
-    } catch (e) {
-      expect(selectFn.callCount).to.equal(2)
-      return Promise.resolve()
-    }
+    expect(errorCallback.callCount).to.equal(1)
+    return Promise.resolve()
   })
 
-  it('retry when it fails after creating transaction', async () => {
-    sinon.stub(reassignment, '_createAndExecuteActions')
+  it('retry when it fails during creating transaction', async () => {
+    sinon.stub(reassignment, '_selectMatchingProducts')
       .onFirstCall().rejects('test error')
       .callThrough()
 
@@ -168,7 +154,7 @@ describe('Reassignment error', () => {
     await reassignment.productService.publishProduct(product1)
 
     sinon.stub(reassignment.productService, 'changeProductType')
-      .onFirstCall().rejects('test error')
+      .onFirstCall().rejects({ statusCode: 409, message: 'test error' })
       .callThrough()
 
     await reassignment.execute([customProductDraft])
