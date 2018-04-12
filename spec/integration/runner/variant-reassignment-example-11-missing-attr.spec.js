@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import _ from 'lodash'
 import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
@@ -10,39 +11,39 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  * | [ ]       | Product:                                                   | Product:                                                                |        |
  * |           | slug: { en: "product" }                                    | id: 1                                                                   |        |
  * |           | product-type: "pt1"                                        | slug: { en: "product-1" }                                               |        |
- * |           | masterVariant: { sku: v1, attributes: [ { brandId: 1 } ] } | product-type: "pt1"                                                     |        |
- * |           | variants: { sku: v2, attributes: [ { brandId: 2 } ] }      | masterVariant: { sku: v1, attributes: [ { brandId (sameForAll): 2 } ] } |        |
+ * |           | masterVariant: { sku: v1, attributes: [ { brandId: 2 } ] } | product-type: "pt1"                                                     |        |
+ * |           | variants: { sku: v2, attributes: [ { brandId: 2 } ] }      | masterVariant: { sku: v1, attributes: [] }                              |        |
  * +-----------+------------------------------------------------------------+-------------------------------------------------------------------------+        +
  * |           |                                                            | Product:                                                                |        |
  * |           |                                                            | id: 2                                                                   |        |
  * |           |                                                            | slug: { en: "product-2" }                                               |        |
  * |           |                                                            | product-type: "pt1"                                                     |        |
- * |           |                                                            | masterVariant: { sku: v2, attributes: [ { brandId (sameForAll): 2 } ] } |        |
+ * |           |                                                            | masterVariant: { sku: v2, attributes: [ { brandId (sameForAll): 1 } ] } |        |
  * +-----------+------------------------------------------------------------+-------------------------------------------------------------------------+--------+
  */
 /* eslint-enable max-len */
 // todo: https://github.com/commercetools/commercetools-node-variant-reassignment/issues/43
-describe.skip('Variant reassignment', () => {
+describe('Variant reassignment', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
-  let product2
 
   before(async () => {
     ctpClient = await utils.createClient()
-    const results = await utils.createCtpProducts([['1'], ['2']], ctpClient, (pD) => {
-      pD.masterVariant.attributes = [{ name: 'brandId', value: '2' }]
+    const results = await utils.createCtpProducts([['1'], ['2']], ctpClient, (pD, ind) => {
+      // create brandId attribute only on second product (index = 1)
+      if (ind)
+        pD.masterVariant.attributes = [{ name: 'brandId', value: '1' }]
     })
     product1 = results.find(product => product.masterVariant.sku === '1')
-    product2 = results.find(product => product.masterVariant.sku === '2')
   })
 
   after(() =>
     utils.deleteResourcesAll(ctpClient, logger)
   )
 
-  it('product draft does not contain correct sameForAll data', async () => {
-    const reassignment = new VariantReassignment(ctpClient, logger, ['brandId'])
+  it('product draft contains correct sameForAll and one variant is missing attribute', async () => {
+    const reassignment = new VariantReassignment(ctpClient, logger, {}, ['brandId'])
     await reassignment.execute([{
       productType: {
         id: product1.productType.id
@@ -58,7 +59,7 @@ describe.skip('Variant reassignment', () => {
         attributes: [
           {
             name: 'brandId',
-            value: '1'
+            value: '2'
           }
         ]
       },
@@ -76,10 +77,12 @@ describe.skip('Variant reassignment', () => {
     }])
 
     const { body: { results } } = await utils.getProductsBySkus(['1', '2'], ctpClient)
-    expect(results).to.have.lengthOf(2)
-    const product1ToVerify = results.find(p => p.masterVariant.sku === '1')
-    expect(product1ToVerify).to.deep.equal(product1)
-    const product2ToVerify = results.find(p => p.masterVariant.sku === '2')
-    expect(product2ToVerify).to.deep.equal(product2)
+    expect(results).to.have.lengthOf(1)
+    const product = results[0]
+    product.variants.concat(product.masterVariant).forEach((variant) => {
+      const attr = _.find(variant.attributes, ['name', 'brandId'])
+      expect(attr).to.be.an('object')
+      expect(attr.value).to.be.equal('2')
+    })
   })
 })

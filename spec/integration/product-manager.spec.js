@@ -42,7 +42,7 @@ describe('ProductManager', () => {
   })
 
   beforeEach(() =>
-    productService = new ProductManager(utils.logger, ctpClient)
+    productService = new ProductManager(ctpClient)
   )
 
   afterEach(() =>

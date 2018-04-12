@@ -45,7 +45,7 @@ describe('Variant reassignment', () => {
   it('merge variants with different sameForAll attributes without blacklist',
     async () => {
       const reassignment = new VariantReassignment(ctpClient, logger)
-      await reassignment.execute([{
+      const statistics = await reassignment.execute([{
         productType: {
           id: product1.productType.id
         },
@@ -67,6 +67,7 @@ describe('Variant reassignment', () => {
         ]
       }])
 
+      utils.expectStatistics(statistics, 0, 0, 1, 1)
       const { body: { results } } = await utils.getProductsBySkus(['1', '2'], ctpClient)
       expect(results).to.have.lengthOf(1)
       const product = results[0]

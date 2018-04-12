@@ -39,7 +39,7 @@ function getMockProduct () {
 describe('ProductManager', () => {
   describe('removing variant', () => {
     beforeEach(() => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
       sinon.stub(pM, 'updateProduct')
         .callsFake((product, actions) => actions)
 
@@ -139,7 +139,7 @@ describe('ProductManager', () => {
 
   describe('compare two products', () => {
     beforeEach(() => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
     })
 
     it('should equal when product ids are equal', () => {
@@ -227,7 +227,7 @@ describe('ProductManager', () => {
     }
 
     beforeEach(() => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
     })
 
     it('should anonymize product', async () => {
@@ -311,7 +311,6 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            de: `product-slug-de-${ctsdSalt}`,
             ctsd: ctsdSalt
           },
           staged: false
@@ -343,7 +342,6 @@ describe('ProductManager', () => {
           action: 'changeSlug',
           slug: {
             en: `product-slug-${ctsdSalt}`,
-            de: `product-slug-de-${ctsdSalt}`,
             ctsd: ctsdSalt
           },
           staged: false
@@ -399,7 +397,7 @@ describe('ProductManager', () => {
     ]
 
     beforeEach(() => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
       pM.productTypeCache.set(productType.id, productType)
     })
 
@@ -433,13 +431,58 @@ describe('ProductManager', () => {
       expect(updateAction.value).to.equal(null)
       expect(variantsClone.every(v => v.attributes.length === 2)).to.equal(true)
     })
+
+    it('should ensure sameForAll even when variants do not have attribute', async () => {
+      const variantsClone = _.cloneDeep(variants)
+      variantsClone[1].attributes = []
+
+      const productDraft = {
+        masterVariant: {
+          attributes: _.cloneDeep(variantsClone[0].attributes)
+        }
+      }
+      productDraft.masterVariant.attributes[0].value = '222'
+      const updateActions = await pM.ensureSameForAllAttributes(
+        variantsClone, productType.id, productDraft
+      )
+      expect(updateActions.length).to.equal(1)
+      const updateAction = updateActions[0]
+      expect(updateAction.action).to.equal('setAttributeInAllVariants')
+      expect(updateAction.name).to.equal('brandId')
+      expect(updateAction.value).to.equal('222')
+      expect(variantsClone.every(v => _.find(v.attributes, ['name', 'brandId']))).to.equal(true)
+      // second variant should have now brandId == 222
+      expect(variantsClone[1].attributes.length).to.equal(1)
+      expect(variantsClone[1].attributes[0].name).to.equal('brandId')
+      expect(variantsClone[1].attributes[0].value).to.equal('222')
+    })
+
+    it('should remove sameForAll when it is missing in productDraft', async () => {
+      const variantsClone = _.cloneDeep(variants)
+      variantsClone[1].attributes = []
+
+      const productDraft = {
+        masterVariant: {
+          attributes: []
+        }
+      }
+      const updateActions = await pM.ensureSameForAllAttributes(
+        variantsClone, productType.id, productDraft
+      )
+      expect(updateActions.length).to.equal(1)
+      const updateAction = updateActions[0]
+      expect(updateAction.action).to.equal('setAttributeInAllVariants')
+      expect(updateAction.name).to.equal('brandId')
+      expect(updateAction.value).to.equal(null)
+      expect(variantsClone.every(v => _.find(v.attributes, ['name', 'brandId']))).to.equal(false)
+    })
   })
 
   describe('get product by skus or slugs', () => {
     let productsQuerySpy
 
     beforeEach(async () => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
       const client = await utils.createClient()
       productsQuerySpy = sinon.spy(client.products, 'where')
       sinon.stub(client.products, 'fetch').callsFake(() =>
