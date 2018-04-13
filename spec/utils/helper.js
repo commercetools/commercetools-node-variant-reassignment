@@ -5,7 +5,7 @@ import bunyan from 'bunyan'
 import { expect } from 'chai'
 import * as ctp from './ctp'
 
-import Logger from '../../lib/services/logger'
+import Logger from './logger'
 
 const sampleProductType = require('../resources/productType.json')
 const sampleProductProjection = require('../resources/productProjection.json')

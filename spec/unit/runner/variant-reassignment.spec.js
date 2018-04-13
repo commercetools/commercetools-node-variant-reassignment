@@ -319,7 +319,7 @@ describe('Variant reassignment', () => {
     let testFunction
     let variantReassignments
     beforeEach(() => {
-      productServiceMock = new ProductManager(utils.logger, {})
+      productServiceMock = new ProductManager({})
       testFunction = sinon.stub(productServiceMock, 'anonymizeCtpProduct')
         .resolves(null)
 
@@ -394,7 +394,7 @@ describe('Variant reassignment', () => {
       const productTypeKey = 'productTypeKey'
       const productDraftArray = [{ id: 'product-id', productType: { id: productTypeKey } }]
 
-      const productServiceMock = new ProductManager(utils.logger, {})
+      const productServiceMock = new ProductManager({})
       sinon.stub(productServiceMock, 'fetchProductsFromProductDrafts')
         .resolves(null)
       const variantReassignments = new VariantReassignment(null, logger)
@@ -421,7 +421,7 @@ describe('Variant reassignment', () => {
 
   describe('resolve product type references', () => {
     it('should resolve product type references', async () => {
-      const productServiceMock = new ProductManager(utils.logger, {})
+      const productServiceMock = new ProductManager({})
       sinon.stub(productServiceMock, 'fetchProductsFromProductDrafts')
         .resolves(null)
       const variantReassignments = new VariantReassignment(null, logger)
@@ -456,7 +456,7 @@ describe('Variant reassignment', () => {
 
     beforeEach(() => {
       errorCallback = sinon.stub()
-      mockTransactionService = new TransactionManager(logger, null)
+      mockTransactionService = new TransactionManager(null)
       sinon.stub(mockTransactionService, 'getTransactions')
         .resolves([{ value: { key: 'test', newProductDraft: { slug: { de: 'test' } } } }])
       deleteBackupFn = sinon.stub(mockTransactionService, 'deleteTransaction')

@@ -39,7 +39,7 @@ function getMockProduct () {
 describe('ProductManager', () => {
   describe('removing variant', () => {
     beforeEach(() => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
       sinon.stub(pM, 'updateProduct')
         .callsFake((product, actions) => actions)
 
@@ -139,7 +139,7 @@ describe('ProductManager', () => {
 
   describe('compare two products', () => {
     beforeEach(() => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
     })
 
     it('should equal when product ids are equal', () => {
@@ -227,7 +227,7 @@ describe('ProductManager', () => {
     }
 
     beforeEach(() => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
     })
 
     it('should anonymize product', async () => {
@@ -397,7 +397,7 @@ describe('ProductManager', () => {
     ]
 
     beforeEach(() => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
       pM.productTypeCache.set(productType.id, productType)
     })
 
@@ -482,7 +482,7 @@ describe('ProductManager', () => {
     let productsQuerySpy
 
     beforeEach(async () => {
-      pM = new ProductManager(utils.logger, {})
+      pM = new ProductManager({})
       const client = await utils.createClient()
       productsQuerySpy = sinon.spy(client.products, 'where')
       sinon.stub(client.products, 'fetch').callsFake(() =>

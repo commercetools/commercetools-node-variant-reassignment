@@ -11,7 +11,7 @@ describe('TransactionManager', () => {
 
   before(async () => {
     ctpClient = await utils.createClient()
-    transactionService = new TransactionManager(utils.logger, ctpClient)
+    transactionService = new TransactionManager(ctpClient)
 
     await utils.deleteResource(ctpClient.customObjects)
   })
