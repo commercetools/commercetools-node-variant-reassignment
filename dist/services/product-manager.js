@@ -68,16 +68,19 @@ var _constants = require('../constants');
 
 var constant = _interopRequireWildcard(_constants);
 
+var _logger = require('../services/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var ProductManager = function () {
-  function ProductManager(logger, client) {
+  function ProductManager(client) {
     (0, _classCallCheck3.default)(this, ProductManager);
 
     this.client = client;
-    if (logger.child) this.logger = logger.child({ service: 'productManager' });else this.logger = logger;
     this.productTypeCache = new _map2.default();
 
     this.loadBatchCount = 20;
@@ -87,7 +90,7 @@ var ProductManager = function () {
   (0, _createClass3.default)(ProductManager, [{
     key: 'createProduct',
     value: function createProduct(product) {
-      this.logger.debug('Creating product: ' + (0, _stringify2.default)(product));
+      (0, _logger2.default)('Creating product: ' + (0, _stringify2.default)(product));
 
       return this.client.products.create(product).then(function (res) {
         return res.body;
@@ -701,7 +704,7 @@ var ProductManager = function () {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
-                this.logger.debug('Changing productType', product.id);
+                (0, _logger2.default)('Changing productType', product.id);
                 productProjection = this.transformProductToProjection(product);
                 _context6.next = 4;
                 return this.deleteByProduct(productProjection);

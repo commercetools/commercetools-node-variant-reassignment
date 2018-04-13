@@ -28,6 +28,10 @@ var _constants = require('../constants');
 
 var constants = _interopRequireWildcard(_constants);
 
+var _logger = require('../services/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -39,11 +43,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * transaction to recover modified product and its variants.
  */
 var TransactionManager = function () {
-  function TransactionManager(logger, client) {
+  function TransactionManager(client) {
     (0, _classCallCheck3.default)(this, TransactionManager);
 
     this.client = client;
-    if (logger.child) this.logger = logger.child({ service: 'transactionManager' });else this.logger = logger;
   }
 
   (0, _createClass3.default)(TransactionManager, [{
@@ -121,7 +124,7 @@ var TransactionManager = function () {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                this.logger.debug('Removing transaction with key "' + key + '"');
+                (0, _logger2.default)('Removing transaction with key "' + key + '"');
                 _context2.next = 3;
                 return this.getTransactionObject(key);
 

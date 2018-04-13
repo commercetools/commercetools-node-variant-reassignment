@@ -84,6 +84,10 @@ var _constants = require('../constants');
 
 var constants = _interopRequireWildcard(_constants);
 
+var _logger = require('../services/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -101,8 +105,8 @@ var VariantReassignment = function () {
     this.retainExistingData = retainExistingData;
     this.logger = logger;
     this.errorCallback = errorCallback;
-    this.productService = new _productManager2.default(logger, client);
-    this.transactionService = new _transactionManager2.default(logger, client);
+    this.productService = new _productManager2.default(client);
+    this.transactionService = new _transactionManager2.default(client);
     this.statistics = {
       anonymized: 0, // products with conflicting slugs OR backup products
       productTypeChanged: 0,
@@ -414,7 +418,7 @@ var VariantReassignment = function () {
                 _context4.prev = 11;
                 _context4.t0 = _context4['catch'](3);
 
-                this.logger.debug('Error when deleting backup custom objects', _context4.t0);
+                (0, _logger2.default)('Error when deleting backup custom objects', _context4.t0);
 
               case 14:
                 _context4.prev = 14;
@@ -476,7 +480,7 @@ var VariantReassignment = function () {
                   break;
                 }
 
-                this.logger.debug('Loading unfinished transactions');
+                (0, _logger2.default)('Loading unfinished transactions');
                 _context5.next = 5;
                 return this.transactionService.getTransactions();
 
@@ -598,7 +602,7 @@ var VariantReassignment = function () {
               case 0:
                 _context6.prev = 0;
 
-                this.logger.debug('Processing reassignment for productDraft with name ' + (0, _stringify2.default)(productDraft.name));
+                (0, _logger2.default)('Processing reassignment for productDraft with name ' + (0, _stringify2.default)(productDraft.name));
 
                 _context6.next = 4;
                 return this._selectMatchingProducts(productDraft, products);
@@ -618,14 +622,14 @@ var VariantReassignment = function () {
                 // select using SLUG, etc..
                 ctpProductToUpdate = this._selectCtpProductToUpdate(productDraft, matchingProducts);
 
-                this.logger.debug('Selected ctpProductToUpdate with id "' + ctpProductToUpdate.id + '"');
+                (0, _logger2.default)('Selected ctpProductToUpdate with id "' + ctpProductToUpdate.id + '"');
 
                 // get variants and draft to backup
                 _getRemovedVariants2 = this._getRemovedVariants(productDraft, matchingProducts, ctpProductToUpdate), backupVariants = _getRemovedVariants2.matchingProductsVars, variantsToProcess = _getRemovedVariants2.ctpProductToUpdateVars;
                 anonymizedProductDraft = this._createProductDraftWithRemovedVariants(ctpProductToUpdate, variantsToProcess);
 
 
-                this.logger.debug('Will remove ' + variantsToProcess.length + ' and reassign ' + backupVariants.length + ' variants');
+                (0, _logger2.default)('Will remove ' + variantsToProcess.length + ' and reassign ' + backupVariants.length + ' variants');
 
                 // create a backup object
                 _context6.next = 14;
@@ -1247,7 +1251,7 @@ var VariantReassignment = function () {
           while (1) {
             switch (_context10.prev = _context10.next) {
               case 0:
-                this.logger.debug('Changing productType of product ' + ((0, _stringify2.default)(ctpProductToUpdate.masterData.current.name) + ' with id ') + ('"' + ctpProductToUpdate.id + '" to productType "' + productTypeId + '"'));
+                (0, _logger2.default)('Changing productType of product ' + ((0, _stringify2.default)(ctpProductToUpdate.masterData.current.name) + ' with id ') + ('"' + ctpProductToUpdate.id + '" to productType "' + productTypeId + '"'));
 
                 _context10.next = 3;
                 return this._backupProductForProductTypeChange(transaction, ctpProductToUpdate);
@@ -1343,7 +1347,7 @@ var VariantReassignment = function () {
                 });
 
 
-                this.logger.debug('Anonymizing ' + productsToAnonymize.length + ' products because of duplicate slugs');
+                (0, _logger2.default)('Anonymizing ' + productsToAnonymize.length + ' products because of duplicate slugs');
 
                 _context12.next = 5;
                 return _bluebird2.default.map(productsToAnonymize, function (product) {
@@ -1524,7 +1528,7 @@ var VariantReassignment = function () {
                 return _context14.finish(21);
 
               case 29:
-                this.logger.debug('Updating ctpProductToUpdate with ' + actions.length + ' addVariant actions');
+                (0, _logger2.default)('Updating ctpProductToUpdate with ' + actions.length + ' addVariant actions');
                 return _context14.abrupt('return', this.productService.updateProduct(ctpProductToUpdate, actions));
 
               case 31:
@@ -1628,7 +1632,7 @@ var VariantReassignment = function () {
                 return _context15.finish(15);
 
               case 23:
-                this.logger.debug('Removing variants from matching products');
+                (0, _logger2.default)('Removing variants from matching products');
                 return _context15.abrupt('return', _bluebird2.default.map((0, _from2.default)(productToSkusToRemoveMap), function (_ref17) {
                   var _ref18 = (0, _slicedToArray3.default)(_ref17, 2),
                       product = _ref18[0],
