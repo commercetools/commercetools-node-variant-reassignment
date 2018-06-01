@@ -366,10 +366,9 @@ var VariantReassignment = function () {
                 return this._processUnfinishedTransactions(transactions, ++retryCount);
 
               case 12:
-                _context3.next = 14;
-                return this._processProductDraft(productDraft, products, ++retryCount);
+                return _context3.abrupt('return', this._processProductDraft(productDraft, products, ++retryCount));
 
-              case 14:
+              case 13:
               case 'end':
                 return _context3.stop();
             }
