@@ -343,7 +343,7 @@ var VariantReassignment = function () {
                 return this._handleUnrecoverableError(error);
 
               case 3:
-                return _context3.abrupt('return');
+                return _context3.abrupt('return', this.errorCallback(error));
 
               case 4:
                 this.statistics.retries++;
