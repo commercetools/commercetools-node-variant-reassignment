@@ -241,4 +241,25 @@ describe('Reassignment error', () => {
 
     return checkResult()
   })
+
+  it('push return list of failed products', async () => {
+    sinon.stub(reassignment, '_ensureSlugUniqueness')
+      .rejects('test error')
+
+    const res = await reassignment.execute([productDraft])
+    expect(res.statistics).to.deep.equal({
+      anonymized: 3,
+      productTypeChanged: 0,
+      processed: 1,
+      succeeded: 0,
+      retries: 2,
+      errors: 1,
+      failedSkus: ['1', '3', '5'] // list of failed skus for all runs
+    })
+
+    // list of failed skus for that one run
+    expect(res.failedSkus).to.deep.equal([
+      '1', '3', '5'
+    ])
+  })
 })

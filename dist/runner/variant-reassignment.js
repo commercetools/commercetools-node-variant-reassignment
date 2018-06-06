@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
-
-var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
-
 var _typeof2 = require('babel-runtime/helpers/typeof');
 
 var _typeof3 = _interopRequireDefault(_typeof2);
@@ -43,6 +39,10 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
+
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
 
 var _getIterator2 = require('babel-runtime/core-js/get-iterator');
 
@@ -113,7 +113,8 @@ var VariantReassignment = function () {
       processed: 0,
       succeeded: 0,
       retries: 0,
-      errors: 0
+      errors: 0,
+      failedSkus: []
     };
   }
 
@@ -131,53 +132,56 @@ var VariantReassignment = function () {
     key: 'execute',
     value: function () {
       var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(productDrafts) {
+        var _statistics$failedSku;
+
         var productTypeNameToTypeObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        var products, productDraftsForReassignment, isReassignmentRequired, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft;
+        var failedSkus, products, productDraftsForReassignment, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft;
 
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                failedSkus = [];
                 products = void 0;
-                _context.prev = 1;
+                _context.prev = 2;
 
                 if (!this.firstRun) {
-                  _context.next = 5;
+                  _context.next = 6;
                   break;
                 }
 
-                _context.next = 5;
+                _context.next = 6;
                 return this._processUnfinishedTransactions();
 
-              case 5:
-                _context.next = 11;
+              case 6:
+                _context.next = 12;
                 break;
 
-              case 7:
-                _context.prev = 7;
-                _context.t0 = _context['catch'](1);
-                _context.next = 11;
+              case 8:
+                _context.prev = 8;
+                _context.t0 = _context['catch'](2);
+                _context.next = 12;
                 return this._handleUnrecoverableError(_context.t0);
 
-              case 11:
+              case 12:
                 this.firstRun = false;
 
-                _context.prev = 12;
-                _context.next = 15;
+                _context.prev = 13;
+                _context.next = 16;
                 return this.productService.fetchProductsFromProductDrafts(productDrafts);
 
-              case 15:
+              case 16:
                 products = _context.sent;
-                _context.next = 21;
+                _context.next = 22;
                 break;
 
-              case 18:
-                _context.prev = 18;
-                _context.t1 = _context['catch'](12);
+              case 19:
+                _context.prev = 19;
+                _context.t1 = _context['catch'](13);
                 return _context.abrupt('return', this._error('Error while fetching products for reassignment', _context.t1));
 
-              case 21:
+              case 22:
 
                 productDrafts = this._resolveProductTypeReferences(productDrafts, productTypeNameToTypeObj);
 
@@ -186,38 +190,33 @@ var VariantReassignment = function () {
 
                 this.logger.debug('Filtered ' + productDraftsForReassignment.length + ' productDrafts for reassignment');
 
-                isReassignmentRequired = productDraftsForReassignment.length;
-
-                if (!isReassignmentRequired) {
-                  _context.next = 65;
-                  break;
-                }
-
                 _iteratorNormalCompletion = true;
                 _didIteratorError = false;
                 _iteratorError = undefined;
-                _context.prev = 29;
+                _context.prev = 28;
                 _iterator = (0, _getIterator3.default)(productDraftsForReassignment);
 
-              case 31:
+              case 30:
                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
                   _context.next = 50;
                   break;
                 }
 
                 productDraft = _step.value;
-                _context.prev = 33;
-                _context.next = 36;
+                _context.prev = 32;
+                _context.next = 35;
                 return this._processProductDraft(productDraft, products);
 
-              case 36:
+              case 35:
                 this.statistics.succeeded++;
                 _context.next = 43;
                 break;
 
-              case 39:
-                _context.prev = 39;
-                _context.t2 = _context['catch'](33);
+              case 38:
+                _context.prev = 38;
+                _context.t2 = _context['catch'](32);
+
+                failedSkus.push.apply(failedSkus, (0, _toConsumableArray3.default)(this.productService.getProductDraftSkus(productDraft)));
                 _context.next = 43;
                 return this._handleUnrecoverableError(_context.t2);
 
@@ -230,7 +229,7 @@ var VariantReassignment = function () {
 
               case 47:
                 _iteratorNormalCompletion = true;
-                _context.next = 31;
+                _context.next = 30;
                 break;
 
               case 50:
@@ -239,7 +238,7 @@ var VariantReassignment = function () {
 
               case 52:
                 _context.prev = 52;
-                _context.t3 = _context['catch'](29);
+                _context.t3 = _context['catch'](28);
                 _didIteratorError = true;
                 _iteratorError = _context.t3;
 
@@ -268,17 +267,19 @@ var VariantReassignment = function () {
                 return _context.finish(56);
 
               case 64:
-                return _context.abrupt('return', this.statistics);
 
-              case 65:
-                return _context.abrupt('return', this.statistics);
+                (_statistics$failedSku = this.statistics.failedSkus).push.apply(_statistics$failedSku, failedSkus);
+                return _context.abrupt('return', {
+                  failedSkus: failedSkus,
+                  statistics: this.statistics
+                });
 
               case 66:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this, [[1, 7], [12, 18], [29, 52, 56, 64], [33, 39, 43, 47], [57,, 59, 63]]);
+        }, _callee, this, [[2, 8], [13, 19], [28, 52, 56, 64], [32, 38, 43, 47], [57,, 59, 63]]);
       }));
 
       function execute(_x3) {
