@@ -68,7 +68,7 @@ describe('Variant reassignment', () => {
   it('different products on staged and current AND different variants on staged and current',
     async () => {
       const reassignment = new VariantReassignment(ctpClient, logger)
-      const statistics = await reassignment.execute([{
+      const { statistics } = await reassignment.execute([{
         productType: product1.productType,
         name: product1.name,
         slug: product1.slug,

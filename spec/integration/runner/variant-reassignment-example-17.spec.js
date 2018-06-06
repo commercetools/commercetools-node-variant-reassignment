@@ -51,7 +51,7 @@ describe('Variant reassignment', () => {
   it('change SKU only', async () => {
     const reassignment = new VariantReassignment(ctpClient, logger)
     const productDraftSku = 'red-bike'
-    const statistics = await reassignment.execute([{
+    const { statistics } = await reassignment.execute([{
       productType: {
         id: product1.productType.id
       },

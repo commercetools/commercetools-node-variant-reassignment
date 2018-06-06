@@ -82,7 +82,7 @@ describe('Variant reassignment', () => {
         }
       ]
     }
-    const statistics = await reassignment.execute([productDraft])
+    const { statistics } = await reassignment.execute([productDraft])
 
     utils.expectStatistics(statistics, 2, 0, 1, 1)
     const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)

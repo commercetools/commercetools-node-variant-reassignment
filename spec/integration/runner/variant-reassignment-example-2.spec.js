@@ -51,7 +51,7 @@ describe('Variant reassignment', () => {
       productDraftProductType, 'name')
 
     const reassignment = new VariantReassignment(ctpClient, logger)
-    const statistics = await reassignment.execute([{
+    const { statistics } = await reassignment.execute([{
       productType: {
         id: productType.id
       },

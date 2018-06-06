@@ -56,7 +56,7 @@ describe('Variant reassignment', () => {
 
   it('merge variants v1 and v3 + remove variants v2 and v4', async () => {
     const reassignment = new VariantReassignment(ctpClient, logger)
-    const statistics = await reassignment.execute([{
+    const { statistics } = await reassignment.execute([{
       productType: {
         id: product1.productType.id
       },
