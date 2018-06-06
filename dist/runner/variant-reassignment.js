@@ -1664,9 +1664,9 @@ var VariantReassignment = function () {
     value: function _getDefaultErrorCallback() {
       var _this8 = this;
 
-      return function (error, productDraft) {
+      return function (error) {
         var errorObj = error instanceof Error ? (0, _utilsErrorToJson2.default)(error) : error;
-        _this8.logger.error('Error when processing productDraft ' + (0, _stringify2.default)(productDraft) + ', ' + 'skipping the product draft.', _util2.default.inspect(errorObj, false, null));
+        _this8.logger.error('Error during reassignment - skipping productDraft.', _util2.default.inspect(errorObj, false, null));
         return _bluebird2.default.resolve();
       };
     }
