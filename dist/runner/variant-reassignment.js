@@ -64,6 +64,10 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _util = require('util');
+
+var _util2 = _interopRequireDefault(_util);
+
 var _bluebird = require('bluebird');
 
 var _bluebird2 = _interopRequireDefault(_bluebird);
@@ -344,7 +348,7 @@ var VariantReassignment = function () {
                 return this._handleUnrecoverableError(error);
 
               case 3:
-                return _context3.abrupt('return', this.errorCallback(error));
+                return _context3.abrupt('return', this.errorCallback(error, this.logger));
 
               case 4:
                 this.statistics.retries++;
@@ -396,7 +400,7 @@ var VariantReassignment = function () {
               case 0:
                 error[constants.ERROR_CONTEXT] = 'Unrecoverable error, will delete backup custom object.';
                 _context4.next = 3;
-                return this.errorCallback(error);
+                return this.errorCallback(error, this.logger);
 
               case 3:
                 _context4.prev = 3;
@@ -1662,7 +1666,7 @@ var VariantReassignment = function () {
 
       return function (error, productDraft) {
         var errorObj = error instanceof Error ? (0, _utilsErrorToJson2.default)(error) : error;
-        _this8.logger.error('Error when processing productDraft ' + (0, _stringify2.default)(productDraft) + ', ' + 'skipping the product draft.', errorObj);
+        _this8.logger.error('Error when processing productDraft ' + (0, _stringify2.default)(productDraft) + ', ' + 'skipping the product draft.', _util2.default.inspect(errorObj, false, null));
         return _bluebird2.default.resolve();
       };
     }
