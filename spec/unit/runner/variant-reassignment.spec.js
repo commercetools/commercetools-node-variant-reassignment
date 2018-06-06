@@ -447,50 +447,43 @@ describe('Variant reassignment', () => {
     })
   })
 
-  describe('on error', () => {
+  describe('on processing error', () => {
+    const productDraft = { name: 'mockProductDraft' }
     let variantReassignment
-    let errorCallback
     let mockTransactionService
-    let deleteBackupFn
-    let processTransactionFn
+    let retryProcessFn
 
     beforeEach(() => {
-      errorCallback = sinon.stub()
       mockTransactionService = new TransactionManager(null)
       sinon.stub(mockTransactionService, 'getTransactions')
         .resolves([{ value: { key: 'test', newProductDraft: { slug: { de: 'test' } } } }])
-      deleteBackupFn = sinon.stub(mockTransactionService, 'deleteTransaction')
-        .resolves()
 
       variantReassignment = new VariantReassignment(null, logger)
       variantReassignment.transactionService = mockTransactionService
       sinon.stub(variantReassignment, '_processUnfinishedTransactions').resolves()
-      processTransactionFn = sinon.stub(variantReassignment, '_processProductDraft').resolves()
+      retryProcessFn = sinon.stub(variantReassignment, '_retryProcessingOfProductDraft').resolves()
     })
 
     it('should retry in case of 409 error', async () => {
-      variantReassignment.errorCallback = errorCallback
       const error = { statusCode: 409 }
-      await variantReassignment._handleProcessingError(error, { id: 'testProductDraft' }, {})
-      expect(errorCallback.called).to.equal(false)
-      expect(processTransactionFn.called).to.equal(true)
+      sinon.stub(variantReassignment, '_selectMatchingProducts').throws(error)
+
+      await variantReassignment._processProductDraft(productDraft)
+      expect(retryProcessFn.called).to.equal(true)
+      expect(retryProcessFn.callCount).to.equal(1) // retry only once
     })
 
-    it('should delete backup and call custom errorCallback in case of 400 error', async () => {
-      variantReassignment.errorCallback = errorCallback
+    it('should not retry in case of 400 error', async () => {
       const error = { statusCode: 400 }
-      await variantReassignment._handleProcessingError(error, { id: 'testProductDraft' }, {})
-      expect(errorCallback.called).to.equal(true)
-      expect(deleteBackupFn.called).to.equal(true)
-      expect(processTransactionFn.called).to.equal(false)
-    })
+      sinon.stub(variantReassignment, '_selectMatchingProducts').throws(error)
+      try {
+        await variantReassignment._processProductDraft(productDraft)
+        throw new Error('Should throw an error')
+      } catch (err) {
+        expect(err).to.deep.equal({ statusCode: 400 })
+      }
 
-    it('should delete backup and skip productDraft by default in case of 400 error', async () => {
-      const error = { statusCode: 400 }
-      await variantReassignment._handleProcessingError(error, { id: 'testProductDraft' }, {})
-      expect(errorCallback.called).to.equal(false)
-      expect(deleteBackupFn.called).to.equal(true)
-      expect(processTransactionFn.called).to.equal(false)
+      expect(retryProcessFn.called).to.equal(false)
     })
   })
 })
