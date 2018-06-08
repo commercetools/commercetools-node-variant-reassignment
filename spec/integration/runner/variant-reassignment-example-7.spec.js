@@ -77,6 +77,7 @@ describe('Variant reassignment', () => {
       ]
     }])
 
+    expect(statistics.processedSkus).to.deep.equal([ '1', '3' ])
     utils.expectStatistics(statistics, 2, 0, 1, 1)
     const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
     expect(results).to.have.lengthOf(3)

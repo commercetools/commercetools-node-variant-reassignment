@@ -141,7 +141,7 @@ var VariantReassignment = function () {
 
         var productTypeNameToTypeObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        var failedSkus, products, productDraftsForReassignment, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft, skus, _statistics;
+        var failedSkus, products, productDraftsForReassignment, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft, skus, _statistics$processed;
 
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
@@ -214,7 +214,7 @@ var VariantReassignment = function () {
                 return this._processProductDraft(productDraft, products);
 
               case 36:
-                (_statistics = this.statistics).processedSkus.apply(_statistics, (0, _toConsumableArray3.default)(skus));
+                (_statistics$processed = this.statistics.processedSkus).push.apply(_statistics$processed, (0, _toConsumableArray3.default)(skus));
                 this.statistics.succeeded++;
                 _context.next = 45;
                 break;
