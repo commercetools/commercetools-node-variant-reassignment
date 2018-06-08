@@ -118,6 +118,7 @@ var VariantReassignment = function () {
       succeeded: 0,
       retries: 0,
       errors: 0,
+      processedSkus: [],
       failedSkus: []
     };
   }
@@ -140,7 +141,7 @@ var VariantReassignment = function () {
 
         var productTypeNameToTypeObj = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        var failedSkus, products, productDraftsForReassignment, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft;
+        var failedSkus, products, productDraftsForReassignment, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, productDraft, skus, _statistics;
 
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
@@ -202,75 +203,77 @@ var VariantReassignment = function () {
 
               case 30:
                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-                  _context.next = 50;
+                  _context.next = 52;
                   break;
                 }
 
                 productDraft = _step.value;
-                _context.prev = 32;
-                _context.next = 35;
+                skus = this.productService.getProductDraftSkus(productDraft);
+                _context.prev = 33;
+                _context.next = 36;
                 return this._processProductDraft(productDraft, products);
 
-              case 35:
+              case 36:
+                (_statistics = this.statistics).processedSkus.apply(_statistics, (0, _toConsumableArray3.default)(skus));
                 this.statistics.succeeded++;
-                _context.next = 43;
+                _context.next = 45;
                 break;
 
-              case 38:
-                _context.prev = 38;
-                _context.t2 = _context['catch'](32);
+              case 40:
+                _context.prev = 40;
+                _context.t2 = _context['catch'](33);
 
-                failedSkus.push.apply(failedSkus, (0, _toConsumableArray3.default)(this.productService.getProductDraftSkus(productDraft)));
-                _context.next = 43;
+                failedSkus.push.apply(failedSkus, (0, _toConsumableArray3.default)(skus));
+                _context.next = 45;
                 return this._handleUnrecoverableError(_context.t2);
 
-              case 43:
-                _context.prev = 43;
+              case 45:
+                _context.prev = 45;
 
                 this.statistics.processed++;
                 this.logger.debug('Finished processing of productDraft with name ' + (0, _stringify2.default)(productDraft.name));
-                return _context.finish(43);
+                return _context.finish(45);
 
-              case 47:
+              case 49:
                 _iteratorNormalCompletion = true;
                 _context.next = 30;
                 break;
 
-              case 50:
-                _context.next = 56;
+              case 52:
+                _context.next = 58;
                 break;
 
-              case 52:
-                _context.prev = 52;
+              case 54:
+                _context.prev = 54;
                 _context.t3 = _context['catch'](28);
                 _didIteratorError = true;
                 _iteratorError = _context.t3;
 
-              case 56:
-                _context.prev = 56;
-                _context.prev = 57;
+              case 58:
+                _context.prev = 58;
+                _context.prev = 59;
 
                 if (!_iteratorNormalCompletion && _iterator.return) {
                   _iterator.return();
                 }
 
-              case 59:
-                _context.prev = 59;
+              case 61:
+                _context.prev = 61;
 
                 if (!_didIteratorError) {
-                  _context.next = 62;
+                  _context.next = 64;
                   break;
                 }
 
                 throw _iteratorError;
 
-              case 62:
-                return _context.finish(59);
-
-              case 63:
-                return _context.finish(56);
-
               case 64:
+                return _context.finish(61);
+
+              case 65:
+                return _context.finish(58);
+
+              case 66:
 
                 (_statistics$failedSku = this.statistics.failedSkus).push.apply(_statistics$failedSku, failedSkus);
                 return _context.abrupt('return', {
@@ -278,12 +281,12 @@ var VariantReassignment = function () {
                   statistics: this.statistics
                 });
 
-              case 66:
+              case 68:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this, [[2, 8], [13, 19], [28, 52, 56, 64], [32, 38, 43, 47], [57,, 59, 63]]);
+        }, _callee, this, [[2, 8], [13, 19], [28, 54, 58, 66], [33, 40, 45, 49], [59,, 61, 65]]);
       }));
 
       function execute(_x3) {
