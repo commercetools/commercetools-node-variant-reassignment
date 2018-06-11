@@ -111,29 +111,39 @@ var VariantReassignment = function () {
     this.errorCallback = errorCallback;
     this.productService = new _productManager2.default(client);
     this.transactionService = new _transactionManager2.default(client);
-    this.statistics = {
-      anonymized: 0, // products with conflicting slugs OR backup products
-      productTypeChanged: 0,
-      processed: 0,
-      succeeded: 0,
-      retries: 0,
-      errors: 0,
-      processedSkus: [],
-      failedSkus: []
-    };
+    this.statistics = this._getDefaultStats();
   }
 
-  /**
-   * Take a list of product drafts and existing products matched by sku
-   *  - for every productDraft check if reassignment is needed
-   *  - if yes, create and process actions which will move variants across products
-   * @param productDrafts List of productDrafts
-   * @param productTypeNameToTypeObj product type cache to resolve product type references
-   * @returns {Promise.<*>} updated global statistics
-   */
-
-
   (0, _createClass3.default)(VariantReassignment, [{
+    key: '_resetStats',
+    value: function _resetStats() {
+      this.statistics = this._getDefaultStats();
+    }
+  }, {
+    key: '_getDefaultStats',
+    value: function _getDefaultStats() {
+      return {
+        anonymized: 0, // products with conflicting slugs OR backup products
+        productTypeChanged: 0,
+        processed: 0,
+        succeeded: 0,
+        retries: 0,
+        errors: 0,
+        processedSkus: [],
+        failedSkus: []
+      };
+    }
+
+    /**
+     * Take a list of product drafts and existing products matched by sku
+     *  - for every productDraft check if reassignment is needed
+     *  - if yes, create and process actions which will move variants across products
+     * @param productDrafts List of productDrafts
+     * @param productTypeNameToTypeObj product type cache to resolve product type references
+     * @returns {Promise.<*>} updated global statistics
+     */
+
+  }, {
     key: 'execute',
     value: function () {
       var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(productDrafts) {
