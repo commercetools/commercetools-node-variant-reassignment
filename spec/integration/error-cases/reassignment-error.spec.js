@@ -254,7 +254,7 @@ describe('Reassignment error', () => {
       succeeded: 0,
       retries: 2,
       errors: 1,
-      processedSkus: [],
+      processedSkus: ['1', '3', '5'],
       failedSkus: ['1', '3', '5'] // list of failed skus for all runs
     })
 

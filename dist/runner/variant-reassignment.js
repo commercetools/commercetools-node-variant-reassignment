@@ -98,7 +98,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var VariantReassignment = function () {
   function VariantReassignment(client, logger) {
-    var errorCallback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._getDefaultErrorCallback();
+    var errorCallback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._defaultErrorCallback.bind(this);
     var retainExistingData = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
     (0, _classCallCheck3.default)(this, VariantReassignment);
 
@@ -407,7 +407,7 @@ var VariantReassignment = function () {
 
                 this.statistics.errors++;
                 _context4.next = 16;
-                return this.errorCallback(error, this.logger);
+                return this.errorCallback(error);
 
               case 16:
                 return _context4.finish(12);
@@ -1642,13 +1642,11 @@ var VariantReassignment = function () {
       return _removeVariantsFromMatchingProducts;
     }()
   }, {
-    key: '_getDefaultErrorCallback',
-    value: function _getDefaultErrorCallback() {
-      return function (error, logger) {
-        var errorObj = error instanceof Error ? (0, _utilsErrorToJson2.default)(error) : error;
-        logger.error('Error during reassignment - skipping productDraft.', _util2.default.inspect(errorObj, false, null));
-        return _bluebird2.default.resolve();
-      };
+    key: '_defaultErrorCallback',
+    value: function _defaultErrorCallback(error) {
+      var errorObj = error instanceof Error ? (0, _utilsErrorToJson2.default)(error) : error;
+      this.logger.error('Error during reassignment - skipping productDraft.', _util2.default.inspect(errorObj, false, null));
+      return _bluebird2.default.resolve();
     }
   }, {
     key: '_isUnrecoverableError',
