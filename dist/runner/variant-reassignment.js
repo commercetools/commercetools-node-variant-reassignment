@@ -210,29 +210,30 @@ var VariantReassignment = function () {
                 productDraft = _step.value;
                 skus = this.productService.getProductDraftSkus(productDraft);
                 _context.prev = 33;
-                _context.next = 36;
+
+                this.statistics.processed++;
+                (_statistics$processed = this.statistics.processedSkus).push.apply(_statistics$processed, (0, _toConsumableArray3.default)(skus));
+                _context.next = 38;
                 return this._processProductDraft(productDraft, products);
 
-              case 36:
-                (_statistics$processed = this.statistics.processedSkus).push.apply(_statistics$processed, (0, _toConsumableArray3.default)(skus));
+              case 38:
                 this.statistics.succeeded++;
-                _context.next = 45;
+                _context.next = 46;
                 break;
 
-              case 40:
-                _context.prev = 40;
+              case 41:
+                _context.prev = 41;
                 _context.t2 = _context['catch'](33);
 
                 failedSkus.push.apply(failedSkus, (0, _toConsumableArray3.default)(skus));
-                _context.next = 45;
+                _context.next = 46;
                 return this._handleUnrecoverableError(_context.t2);
 
-              case 45:
-                _context.prev = 45;
+              case 46:
+                _context.prev = 46;
 
-                this.statistics.processed++;
                 this.logger.debug('Finished processing of productDraft with name ' + (0, _stringify2.default)(productDraft.name));
-                return _context.finish(45);
+                return _context.finish(46);
 
               case 49:
                 _iteratorNormalCompletion = true;
@@ -286,7 +287,7 @@ var VariantReassignment = function () {
                 return _context.stop();
             }
           }
-        }, _callee, this, [[2, 8], [13, 19], [28, 54, 58, 66], [33, 40, 45, 49], [59,, 61, 65]]);
+        }, _callee, this, [[2, 8], [13, 19], [28, 54, 58, 66], [33, 41, 46, 49], [59,, 61, 65]]);
       }));
 
       function execute(_x3) {
