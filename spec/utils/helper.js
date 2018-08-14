@@ -2,9 +2,10 @@ import _ from 'lodash'
 import path from 'path'
 import Promise from 'bluebird'
 import bunyan from 'bunyan'
+import { expect } from 'chai'
 import * as ctp from './ctp'
 
-import Logger from '../../lib/services/logger'
+import Logger from './logger'
 
 const sampleProductType = require('../resources/productType.json')
 const sampleProductProjection = require('../resources/productProjection.json')
@@ -199,7 +200,7 @@ export async function createCtpProducts (skuGroups, ctpClient, beforeProductCrea
     const skus = skuGroups[i]
     const productDraft = generateProductProjection(skus, productType.id)
     if (beforeProductCreateCb)
-      beforeProductCreateCb(productDraft)
+      beforeProductCreateCb(productDraft, i)
     const product = await ensureResource(ctpClient.products, productDraft)
     masterVariantSkus.push(product.masterData.current.masterVariant.sku)
   }
@@ -237,4 +238,19 @@ export function getProductsBySkus (skus, ctpClient) {
     .where(`variants(sku in ("${skus.join('","')}"))`)
     .whereOperator('or')
     .fetch()
+}
+
+export function expectStatistics (statistics,
+                                  anonymized = 0,
+                                  productTypeChanged = 0,
+                                  processed = 0,
+                                  succeeded = 0,
+                                  retries = 0,
+                                  errors = 0) {
+  expect(statistics.anonymized).to.equal(anonymized)
+  expect(statistics.productTypeChanged).to.equal(productTypeChanged)
+  expect(statistics.processed).to.equal(processed)
+  expect(statistics.succeeded).to.equal(succeeded)
+  expect(statistics.retries).to.equal(retries)
+  expect(statistics.errors).to.equal(errors)
 }

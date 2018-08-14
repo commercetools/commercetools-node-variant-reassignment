@@ -40,7 +40,7 @@ describe('Variant reassignment', () => {
 
   it('remove variants v2 and v3 from product 1', async () => {
     const reassignment = new VariantReassignment(ctpClient, logger)
-    await reassignment.execute([{
+    const { statistics } = await reassignment.execute([{
       productType: {
         id: product1.productType.id
       },
@@ -55,6 +55,8 @@ describe('Variant reassignment', () => {
       },
       variants: []
     }])
+
+    utils.expectStatistics(statistics, 1, 0, 1, 1)
     const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3'], ctpClient)
     expect(results).to.have.lengthOf(2)
     const updatedProduct = results.find(product => product.masterVariant.sku === '1')

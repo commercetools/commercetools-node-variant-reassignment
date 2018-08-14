@@ -4,7 +4,11 @@
     "es6": true,
     "node": true
   },
+  "plugins": [
+    "no-only-tests"
+  ],
   "rules": {
+    "no-only-tests/no-only-tests": 2,
     "class-methods-use-this": 0,
     "no-return-assign": 0,
     "no-plusplus": 0,
@@ -23,6 +27,7 @@
       "exports": "never",
       "functions": "ignore"
     }],
+    "import/no-extraneous-dependencies": ["off", {"devDependencies": ["spec"]}],
     "no-restricted-syntax": ["error", "WithStatement"],
     "no-await-in-loop": 0,
     "max-len": ["error", 100]

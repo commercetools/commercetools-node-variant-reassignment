@@ -1,7 +1,6 @@
 .DS_Store
 node_modules
 .idea
-dist
 tmp
 output
 data
@@ -9,7 +8,7 @@ coverage
 .vscode
 .nyc_output
 REVISION
-
+dist
 *.log
 
 # credentials
