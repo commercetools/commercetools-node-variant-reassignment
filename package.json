@@ -37,10 +37,7 @@
     "product-import"
   ],
   "dependencies": {
-    "babel-cli": "^6.18.0",
     "babel-core": "^6.21.0",
-    "babel-eslint": "^7.1.1",
-    "babel-istanbul": "^0.12.1",
     "babel-plugin-array-includes": "^2.0.3",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.15.0",
@@ -61,6 +58,9 @@
     "uuid": "^3.0.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-istanbul": "^0.12.1",
+    "babel-eslint": "^7.1.1",
     "bunyan": "^1.8.12",
     "chai": "^4.1.0",
     "eslint": "^3.13.1",
