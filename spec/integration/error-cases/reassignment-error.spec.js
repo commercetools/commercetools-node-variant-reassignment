@@ -247,20 +247,16 @@ describe('Reassignment error', () => {
       .rejects('test error')
 
     const res = await reassignment.execute([productDraft])
-    expect(res.statistics).to.deep.equal({
-      anonymized: 3,
-      productTypeChanged: 0,
-      processed: 1,
-      succeeded: 0,
-      retries: 2,
-      errors: 1,
-      processedSkus: ['1', '3', '5'],
-      failedSkus: ['1', '3', '5'] // list of failed skus for all runs
-    })
-
-    // list of failed skus for that one run
-    expect(res.failedSkus).to.deep.equal([
-      '1', '3', '5'
-    ])
+    expect(res.statistics.anonymized).to.equal(1)
+    expect(res.statistics.productTypeChanged).to.equal(0)
+    expect(res.statistics.processed).to.equal(1)
+    expect(res.statistics.succeeded).to.equal(0)
+    expect(res.statistics.transactionRetries).to.equal(2)
+    expect(res.statistics.badRequestErrors).to.equal(1)
+    expect(res.statistics.processedSkus).to.deep.equal(['1', '3', '5'])
+    // list of failed skus for all runs
+    expect(res.statistics.badRequestSKUs).to.deep.equal(['1', '3', '5'])
+    expect(res.statistics.anonymizedSlug.length).to.equal(1)
+    expect(res.statistics.anonymizedSlug[0]).to.have.string(Object.values(productDraft.slug)[0])
   })
 })

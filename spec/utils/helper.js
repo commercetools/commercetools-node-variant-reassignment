@@ -251,6 +251,6 @@ export function expectStatistics (statistics,
   expect(statistics.productTypeChanged).to.equal(productTypeChanged)
   expect(statistics.processed).to.equal(processed)
   expect(statistics.succeeded).to.equal(succeeded)
-  expect(statistics.retries).to.equal(retries)
-  expect(statistics.errors).to.equal(errors)
+  expect(statistics.transactionRetries).to.equal(retries)
+  expect(statistics.badRequestErrors).to.equal(errors)
 }
