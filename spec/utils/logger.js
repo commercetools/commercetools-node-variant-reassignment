@@ -20,14 +20,6 @@ export default (scope, logLevel) => {
     return this.error(_.merge(details, { error }), msg)
   }
 
-  logger.extend = function extend (...args) {
-    const childLogger = logger.child.apply(this, args)
-
-    childLogger.logError = logger.logError
-    childLogger.extend = logger.extend
-    return childLogger
-  }
-
   return logger
 }
 
