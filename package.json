@@ -13,10 +13,6 @@
     "coverage": "npm run lint && ./node_modules/.bin/nyc --reporter=html --reporter=text npm test",
     "lint": "./node_modules/.bin/eslint lib spec",
     "prepublish": "npm run build",
-    "release": "./node_modules/.bin/mversion patch -m",
-    "release:patch": "npm run release",
-    "release:minor": "./node_modules/.bin/mversion minor -m",
-    "release:major": "./node_modules/.bin/mversion major -m",
     "test": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive ./spec",
     "test:unit": "LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 10000 --require babel-core/register --recursive spec/unit/*.spec.js",
     "test:integration": "npm run build && LOG_LEVEL=debug NODE_ENV=test node_modules/.bin/mocha --bail --full-trace -t 60000 --require babel-core/register --recursive spec/integration/*.spec.js",
@@ -35,6 +31,10 @@
     "CTP products",
     "variants",
     "product-import"
+  ],
+  "files": [
+    "dist",
+    "lib"
   ],
   "dependencies": {
     "babel-core": "^6.21.0",
@@ -59,8 +59,8 @@
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
-    "babel-istanbul": "^0.12.1",
     "babel-eslint": "^7.1.1",
+    "babel-istanbul": "^0.12.1",
     "bunyan": "^1.8.12",
     "chai": "^4.1.0",
     "eslint": "^3.13.1",
@@ -70,7 +70,6 @@
     "eslint-plugin-no-only-tests": "^2.0.0",
     "istanbul": "^0.4.5",
     "mocha": "^4.1.0",
-    "mversion": "^1.10.1",
     "nyc": "^11.4.1",
     "precommit-hook-eslint": "^3.0.0",
     "sinon": "^4.1.4"
