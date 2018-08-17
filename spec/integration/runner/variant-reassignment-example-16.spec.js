@@ -48,8 +48,8 @@ describe('Variant reassignment', () => {
 
   it('only anonymize product', async () => {
     const product2BeforeVersion = product2.version
-    const reassignment = new VariantReassignment(ctpClient, logger, {}, ['brandId'])
-    await reassignment.execute([{
+    const reassignment = new VariantReassignment(ctpClient, logger, undefined, ['brandId'])
+    const { statistics } = await reassignment.execute([{
       productType: {
         id: product1.productType.id
       },
@@ -58,6 +58,7 @@ describe('Variant reassignment', () => {
       masterVariant: product2.masterVariant
     }])
 
+    utils.expectStatistics(statistics, 1, 0, 1, 1)
     const { body: { results } } = await utils.getProductsBySkus([product1Sku, product2Sku],
       ctpClient)
     expect(results).to.have.lengthOf(2)

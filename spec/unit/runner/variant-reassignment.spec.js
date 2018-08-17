@@ -319,7 +319,7 @@ describe('Variant reassignment', () => {
     let testFunction
     let variantReassignments
     beforeEach(() => {
-      productServiceMock = new ProductManager(utils.logger, {})
+      productServiceMock = new ProductManager({})
       testFunction = sinon.stub(productServiceMock, 'anonymizeCtpProduct')
         .resolves(null)
 
@@ -367,11 +367,61 @@ describe('Variant reassignment', () => {
         }])
       expect(testFunction.callCount).to.equal(0)
     })
+
+    it('product has different slug with same lang, should not anonymize', async () => {
+      await variantReassignments._ensureSlugUniqueness({ slug: { en: 'test-slug-1' } },
+        [{
+          id: testProductId,
+          masterData: {
+            current: {
+              slug: {
+                en: 'test-slug-2'
+              }
+            },
+            staged: {
+              slug: {
+                en: 'test-slug-2'
+              }
+            }
+          }
+        }])
+      expect(testFunction.callCount).to.equal(0)
+    })
   })
 
   describe('resolve product type references', () => {
     it('should resolve product type references', async () => {
-      const productServiceMock = new ProductManager(utils.logger, {})
+      const productTypeKey = 'productTypeKey'
+      const productDraftArray = [{ id: 'product-id', productType: { id: productTypeKey } }]
+
+      const productServiceMock = new ProductManager({})
+      sinon.stub(productServiceMock, 'fetchProductsFromProductDrafts')
+        .resolves(null)
+      const variantReassignments = new VariantReassignment(null, logger)
+      sinon.stub(variantReassignments, '_processUnfinishedTransactions')
+        .resolves(null)
+      sinon.stub(variantReassignments, '_selectProductDraftsForReassignment')
+        .returns(productDraftArray)
+      const testFunction = sinon.stub(variantReassignments, '_processProductDraft').resolves(null)
+      variantReassignments.productService = productServiceMock
+
+      const productTypeId = 'productTypeId'
+      await variantReassignments.execute(
+        productDraftArray,
+        {
+          [productTypeKey]: {
+            id: productTypeId
+          }
+        })
+
+      const productDraftToVerify = testFunction.firstCall.args[0]
+      expect(productDraftToVerify.productType.id).to.equal(productTypeId)
+    })
+  })
+
+  describe('resolve product type references', () => {
+    it('should resolve product type references', async () => {
+      const productServiceMock = new ProductManager({})
       sinon.stub(productServiceMock, 'fetchProductsFromProductDrafts')
         .resolves(null)
       const variantReassignments = new VariantReassignment(null, logger)
@@ -397,50 +447,43 @@ describe('Variant reassignment', () => {
     })
   })
 
-  describe('on error', () => {
+  describe('on processing error', () => {
+    const productDraft = { name: 'mockProductDraft' }
     let variantReassignment
-    let errorCallback
     let mockTransactionService
-    let deleteBackupFn
-    let processTransactionFn
+    let retryProcessFn
 
     beforeEach(() => {
-      errorCallback = sinon.stub()
-      mockTransactionService = new TransactionManager(logger, null)
+      mockTransactionService = new TransactionManager(null)
       sinon.stub(mockTransactionService, 'getTransactions')
-        .resolves([{ value: { key: 'test', newProductDraft: { name: 'test' } } }])
-      deleteBackupFn = sinon.stub(mockTransactionService, 'deleteTransaction')
-        .resolves()
+        .resolves([{ value: { key: 'test', newProductDraft: { slug: { de: 'test' } } } }])
 
       variantReassignment = new VariantReassignment(null, logger)
       variantReassignment.transactionService = mockTransactionService
       sinon.stub(variantReassignment, '_processUnfinishedTransactions').resolves()
-      processTransactionFn = sinon.stub(variantReassignment, '_processProductDraft').resolves()
+      retryProcessFn = sinon.stub(variantReassignment, '_retryProcessingOfProductDraft').resolves()
     })
 
     it('should retry in case of 409 error', async () => {
-      variantReassignment.errorCallback = errorCallback
       const error = { statusCode: 409 }
-      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
-      expect(errorCallback.called).to.equal(false)
-      expect(processTransactionFn.called).to.equal(true)
+      sinon.stub(variantReassignment, '_selectMatchingProducts').throws(error)
+
+      await variantReassignment._processProductDraft(productDraft)
+      expect(retryProcessFn.called).to.equal(true)
+      expect(retryProcessFn.callCount).to.equal(1) // retry only once
     })
 
-    it('should delete backup and call custom errorCallback in case of 400 error', async () => {
-      variantReassignment.errorCallback = errorCallback
+    it('should not retry in case of 400 error', async () => {
       const error = { statusCode: 400 }
-      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
-      expect(errorCallback.called).to.equal(true)
-      expect(deleteBackupFn.called).to.equal(true)
-      expect(processTransactionFn.called).to.equal(false)
-    })
+      sinon.stub(variantReassignment, '_selectMatchingProducts').throws(error)
+      try {
+        await variantReassignment._processProductDraft(productDraft)
+        throw new Error('Should throw an error')
+      } catch (err) {
+        expect(err).to.deep.equal({ statusCode: 400 })
+      }
 
-    it('should delete backup and skip productDraft by default in case of 400 error', async () => {
-      const error = { statusCode: 400 }
-      await variantReassignment._handleProcessingError({ id: 'testProductDraft' }, {}, error)
-      expect(errorCallback.called).to.equal(false)
-      expect(deleteBackupFn.called).to.equal(true)
-      expect(processTransactionFn.called).to.equal(false)
+      expect(retryProcessFn.called).to.equal(false)
     })
   })
 })

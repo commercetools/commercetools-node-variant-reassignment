@@ -43,7 +43,7 @@ describe('Variant reassignment', () => {
       productTypeDraft2, 'name')
 
     const reassignment = new VariantReassignment(ctpClient, logger)
-    await reassignment.execute([{
+    const { statistics } = await reassignment.execute([{
       productType: {
         id: productType2.id
       },
@@ -59,6 +59,7 @@ describe('Variant reassignment', () => {
       variants: []
     }])
 
+    utils.expectStatistics(statistics, 0, 1, 1, 1)
     const { body: { results } } = await utils.getProductsBySkus(['1'], ctpClient)
     expect(results).to.have.lengthOf(1)
     const updatedProduct = results[0]

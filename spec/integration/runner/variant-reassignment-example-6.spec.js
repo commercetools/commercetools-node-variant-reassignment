@@ -82,8 +82,9 @@ describe('Variant reassignment', () => {
         }
       ]
     }
-    await reassignment.execute([productDraft])
+    const { statistics } = await reassignment.execute([productDraft])
 
+    utils.expectStatistics(statistics, 2, 0, 1, 1)
     const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
     expect(results).to.have.lengthOf(3)
     const updatedProduct1 = results.find(product => product.masterVariant.sku === '1'
