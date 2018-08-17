@@ -32,6 +32,10 @@
     "variants",
     "product-import"
   ],
+  "files": [
+    "dist",
+    "lib"
+  ],
   "dependencies": {
     "babel-core": "^6.21.0",
     "babel-plugin-array-includes": "^2.0.3",
