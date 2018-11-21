@@ -1,6 +1,6 @@
 {
   "name": "commercetools-node-variant-reassignment",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Node.js utility which complements product sync/import process by automatic conflicts resolution and reassignment of variants from one product to another",
   "license": "MIT",
   "homepage": "https://github.com/commercetools/commercetools-node-variant-reassignment",
