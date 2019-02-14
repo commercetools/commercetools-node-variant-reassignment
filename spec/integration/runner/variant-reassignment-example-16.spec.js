@@ -21,7 +21,7 @@ import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
  * +------------------------------------+--------------------------------------+--------------------+------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe('Variant reassignment', () => {
+describe('Variant reassignment - product anonymization', () => {
   let ctpClient
   let product1
   let product2

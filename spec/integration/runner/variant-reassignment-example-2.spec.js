@@ -30,7 +30,7 @@ const productDraftProductType = require('../../resources/productType.json')
  * +---------------------------+---------------------------------------------+--------------------+---------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe('Variant reassignment', () => {
+describe('Variant reassignment - moving + removing variants, changing productType', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1

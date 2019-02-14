@@ -23,7 +23,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  */
 /* eslint-enable max-len */
 // todo: https://github.com/commercetools/commercetools-node-variant-reassignment/issues/43
-describe('Variant reassignment', () => {
+describe('Variant reassignment - sameForAll and missing attribute', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1

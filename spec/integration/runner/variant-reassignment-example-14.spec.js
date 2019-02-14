@@ -24,7 +24,7 @@ import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
  +---------+----------------------------+----------------------------+----------------------------+--------------------+----------------------------+-------------------------------------------------------------+
  */
 /* eslint-enable max-len */
-describe('Variant reassignment', () => {
+describe('Variant reassignment - different product and variant info on staged and current', () => {
   const logger = utils.createLogger(__filename)
   let ctpClient
   let product1
