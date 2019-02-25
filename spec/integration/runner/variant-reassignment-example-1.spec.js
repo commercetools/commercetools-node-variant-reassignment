@@ -21,7 +21,7 @@ import VariantReassignment from '../../../lib/runner/variant-reassignment'
  * +---------------------------+---------------------------------------------+--------------------+---------------------------------------------+
  */
 /* eslint-enable max-len */
-describe('Variant reassignment', () => {
+describe('Variant reassignment - moving variant to another product', () => {
   let ctpClient
   let product1
   const logger = utils.createLogger(__filename)
