@@ -56,7 +56,7 @@ describe('Variant reassignment - changing backup variant', () => {
       variants: []
     }])
 
-    utils.expectStatistics(statistics, 1, 0, 1, 1)
+    utils.expectStatistics(statistics, 0, 0, 1, 1)
     const { body: { results } } = await utils.getProductsBySkus(['1', '2'], ctpClient)
     expect(results).to.have.lengthOf(2)
     const updatedProduct1 = results.find(product => product.masterVariant.sku === '1')

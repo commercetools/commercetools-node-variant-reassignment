@@ -213,7 +213,7 @@ describe('Reassignment error', () => {
   })
 
   it('retry when it fails after moving variants into ctpProductToUpdate', async () => {
-    sinon.stub(reassignment, '_removeVariantsFromCtpProductToUpdate')
+    sinon.stub(reassignment, '_removeVariantsAndUpdateSlugFromCtpProductToUpdate')
       .onFirstCall().rejects('test error')
       .callThrough()
 

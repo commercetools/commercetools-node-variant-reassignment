@@ -72,13 +72,14 @@ describe('Variant reassignment - creating new product, promoting masterVariant',
       }
       const { statistics } = await reassignment.execute([productDraft])
 
-      utils.expectStatistics(statistics, 1, 0, 1, 1)
+      utils.expectStatistics(statistics, 0, 0, 1, 1)
       const { body: { results } } = await utils.getProductsBySkus(['1', '2', '3', '4'], ctpClient)
       expect(results).to.have.lengthOf(3)
       const updatedProduct1 = results.find(product => product.masterVariant.sku === '1')
       expect(updatedProduct1.variants).to.have.lengthOf(1)
       expect(updatedProduct1.variants[0].sku).to.equal('3')
       expect(updatedProduct1.id).to.equal(product1.id)
+      expect(updatedProduct1.slug).to.deep.equal(productDraft.slug)
 
       const updatedProduct2 = results.find(product => product.masterVariant.sku === '4')
       expect(updatedProduct2.variants).to.have.lengthOf(0)
@@ -86,6 +87,6 @@ describe('Variant reassignment - creating new product, promoting masterVariant',
 
       const newProduct3 = results.find(product => product.masterVariant.sku === '2')
       expect(newProduct3.variants).to.have.lengthOf(0)
-      expect(newProduct3.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.be.a('string')
+      expect(newProduct3.slug).to.deep.equal(product1.slug)
     })
 })

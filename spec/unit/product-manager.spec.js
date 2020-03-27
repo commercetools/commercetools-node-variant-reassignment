@@ -263,18 +263,29 @@ describe('ProductManager', () => {
     })
 
     it('should anonymize product with missing key', () => {
-      const productDraft = {
+      const backupProduct = {
         slug: {
           en: 'slugEn',
         },
         name: {
-          en: 'nameEn',
+          en: 'backupProduct',
         },
         masterVariant: {},
         variants: []
       }
 
-      const anonymized = pM.getAnonymizedProductDraft(productDraft)
+      const productDraft = {
+        slug: {
+          en: 'slugEn',
+        },
+        name: {
+          en: 'product',
+        },
+        masterVariant: {},
+        variants: []
+      }
+
+      const anonymized = pM.getAnonymizedProductDraft(backupProduct, productDraft)
 
       expect(anonymized.slug).to.have.property(PRODUCT_ANONYMIZE_SLUG_KEY)
       const ctsdSalt = anonymized.slug[PRODUCT_ANONYMIZE_SLUG_KEY]

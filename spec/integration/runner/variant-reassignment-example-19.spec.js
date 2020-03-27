@@ -3,23 +3,6 @@ import * as utils from '../../utils/helper'
 import VariantReassignment from '../../../lib/runner/variant-reassignment'
 
 /* eslint-disable max-len */
-/**
- * +------------------------------------+------------------------------------+--------------------+-------------------------------------+
- * | Product draft                      | CTP product                        |                    | CTP product                         |
- * +------------------------------------+------------------------------------+                    +-------------------------------------+
- * | Product:                           | Product:                           |                    | Product:                            |
- * | slug: { en: "red-bike" }           | id: 1                              |                    | id: 1                               |
- * | masterVariant: { sku: "red-bike" } | slug: { en: "bike" }               |                    | slug: { en: "bike" }                |
- * | variants: [ ]                      | masterVariant: { sku: "red-bike" } |                    | masterVariant: { sku:"green-bike" } |
- * |                                    | variants: [ { sku:"green-bike" } ] | After reassignment | variants: []                        |
- * +------------------------------------+------------------------------------+                    +-------------------------------------+
- * |                                    |                                    |                    | Product:                            |
- * |                                    |                                    |                    | id: 2                               |
- * |                                    |                                    |                    | slug: { en: "red-bike" }            |
- * |                                    |                                    |                    | masterVariant: { sku: "red-bike" }  |
- * |                                    |                                    |                    | variants: []                        |
- * +------------------------------------+------------------------------------+--------------------+-------------------------------------+
- */
 /* eslint-enable max-len */
 describe('Variant reassignment - do not anonymize slugs when not necessary', () => {
   const logger = utils.createLogger(__filename)
@@ -49,8 +32,8 @@ describe('Variant reassignment - do not anonymize slugs when not necessary', () 
       productType: {
         id: productBefore.productType.id
       },
-      name: productBefore.name,
-      slug: productBefore.slug,
+      name: { en: 'red-bike-name' },
+      slug: { en: 'red-bike-slug' },
       masterVariant: productBefore.variants[0]
     }
     const { statistics } = await reassignment.execute([productDraft])
@@ -62,7 +45,7 @@ describe('Variant reassignment - do not anonymize slugs when not necessary', () 
     expect(results).to.have.lengthOf(2)
     const productFromDraft = results.find(product =>
       product.masterVariant.sku === productDraft.masterVariant.sku)
-    expect(productFromDraft.id).to.not.equal(productBefore.id)
+    expect(productFromDraft.id).to.equal(productBefore.id)
     for (const productAfter of results)
       expect(productAfter.slug).to.not.have.any.keys('ctsd')
   })

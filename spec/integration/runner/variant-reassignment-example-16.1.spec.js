@@ -77,14 +77,15 @@ describe('Variant reassignment - product anonymization', () => {
 
     // Reassignment #2
     const reassignment2 = new VariantReassignment(ctpClient, logger)
-    const { statistics: stats2 } = await reassignment2.execute([{
+    const productDraft2 = {
       productType: {
         id: product.productType.id
       },
       name: { en: `${product.name.en}-1` },
       slug: { en: `${product.slug.en}-1` },
       masterVariant: { sku: anonymizedProduct.masterVariant.sku }
-    }])
+    }
+    const { statistics: stats2 } = await reassignment2.execute([productDraft2])
 
     utils.expectStatistics(stats1, 1, 0, 1, 1)
     expect(stats2.processedSkus).to.be.an('array')
@@ -104,16 +105,12 @@ describe('Variant reassignment - product anonymization', () => {
     // updated product should have only one variant now
     expect(updatedProduct.variants).to.have.length(0)
     // slug should not be changed - it should be done later by product importer
-    expect(updatedProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.equal(reassignment1AnonymizationId)
-    expect(updatedProduct.slug.en).to.contain(reassignment1AnonymizationId)
-
-    const reassignment2AnonymizationId = anonymizedProduct2.slug[PRODUCT_ANONYMIZE_SLUG_KEY]
+    expect(updatedProduct.slug[PRODUCT_ANONYMIZE_SLUG_KEY]).to.equal(undefined)
+    expect(updatedProduct.slug.en).to.equal(productDraft2.slug.en)
 
     // new anonymized product should have only one variant
     expect(anonymizedProduct2.variants).to.have.length(0)
-    // and slug should not contain anonymization id from previous reassignment
-    expect(reassignment2AnonymizationId).to.not.equal(reassignment1AnonymizationId)
-    expect(anonymizedProduct2.slug.en).to.contain(reassignment2AnonymizationId)
-    expect(anonymizedProduct2.slug.en).to.not.contain(reassignment1AnonymizationId)
+    // should take slugs from the previous anonymized slug
+    expect(anonymizedProduct2.slug).to.deep.equal(anonymizedProduct.slug)
   })
 })
