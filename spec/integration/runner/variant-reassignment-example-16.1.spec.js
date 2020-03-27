@@ -11,8 +11,8 @@ import { PRODUCT_ANONYMIZE_SLUG_KEY } from '../../../lib/constants'
  * | Product draft                      | CTP product                          | After reassignment | CTP product                                                |
  * +------------------------------------+--------------------------------------+--------------------+------------------------------------------------------------+
  * | Product:                           | Product:                             |                    | Product id1 only with masterVariant sku1                   |
- * | slug: { en: "bike" }               | id: 1                                |    Reassignment    | New anonymized product with sku2, sku3                     |
- * | masterVariant: { sku: "red-bike" } | slug: { en: "test1" }                |        #1          |                                                            |
+ * | slug: { en: "test1" }              | id: 1                                |    Reassignment    | New anonymized product with sku2, sku3                     |
+ * | masterVariant: { sku: "sku1" }     | slug: { en: "test1" }                |        #1          |                                                            |
  * |                                    | masterVariant: { sku: "sku1" }       |                    |                                                            |
  * |                                    | variant SKUs: ['sku2', 'sku3']       |                    |                                                            |
  * +------------------------------------+--------------------------------------+--------------------+------------------------------------------------------------+
