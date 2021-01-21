@@ -500,8 +500,16 @@ describe('ProductManager', () => {
       const testSlugLang1 = 'de'
       const testSlugValue2 = 'test_slug_2'
       const testSlugLang2 = 'en'
-      const result = await pM.getProductsBySkusOrSlugs([testSku1, testSku2, testSku3],
-        [{ [testSlugLang1]: testSlugValue1, [testSlugLang2]: testSlugValue2 }])
+      const testSlugValue3 = 'test_slug_3'
+      const testSlugLang3 = 'fr'
+      const allowedLocales = ['en', 'de']
+      const slugs = [{
+        [testSlugLang1]: testSlugValue1,
+        [testSlugLang2]: testSlugValue2,
+        [testSlugLang3]: testSlugValue3
+      }]
+      const result = await pM.getProductsBySkusOrSlugs(
+  [testSku1, testSku2, testSku3], slugs, allowedLocales)
 
       const productQueries = productsQuerySpy.getCalls().map(call => call.args[0])
 
