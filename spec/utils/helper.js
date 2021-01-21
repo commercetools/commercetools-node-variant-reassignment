@@ -12,7 +12,7 @@ const sampleProductProjection = require('../resources/productProjection.json')
 const sampleProduct = require('../resources/product.json')
 
 export const projectKey = process.env.TEST_PROJECT_KEY
-  || 'ctp-node-variant-reassignment-tests'
+  || 'node-variant-reassignment-tests'
 
 // Basic usage.
 export const logger = bunyan.createLogger({

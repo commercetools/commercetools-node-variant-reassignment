@@ -12,7 +12,11 @@ const mockProduct = {
     en: 'Test Product'
   },
   slug: {
-    en: 'testProduct'
+    'en-AU': 'slug-en-AU',
+    'fr-CH': 'slug-fr-CH',
+    'de-CH': 'slug-de-CH',
+    'de-DE': 'slug-de-DE',
+    'en-GB': 'slug-en-GB'
   },
   masterVariant: {
     sku: '1'
@@ -103,6 +107,36 @@ describe('ProductManager', () => {
       )
 
       expect(deletedProduct).to.be.an('undefined')
+    })
+
+    it('should fetch products by slugs with given whitelistedLocales', async () => {
+      const newProduct = getProductMock()
+      const createdProduct = await productService.createProduct(newProduct)
+
+      const whiteListedLocales = ['en-GB', 'fr-FR']
+      const products = await productService.getProductsBySkusOrSlugs(
+          ['skuNotExists'],
+          [createdProduct.masterData.staged.slug],
+          whiteListedLocales
+      )
+
+      expect(products).to.have.lengthOf(1)
+      expect(products[0].id).to.be.equal(createdProduct.id)
+    })
+
+    it('should not fetch products when product ' +
+        'does not have slugs within whitelistedLocales', async () => {
+      const newProduct = getProductMock()
+      const createdProduct = await productService.createProduct(newProduct)
+
+      const whiteListedLocales = ['fr-FR']
+      const products = await productService.getProductsBySkusOrSlugs(
+          ['skuNotExists'],
+          [createdProduct.masterData.staged.slug],
+          whiteListedLocales
+      )
+
+      expect(products).to.have.lengthOf(0)
     })
   })
 
