@@ -10,7 +10,7 @@ Accepted
 
 In the current architecture, we always receive a batch of products. For this batch, we check if any products need reassignment.
 In order to find out, we search for conflicting products with query by `SKUs and slugs for all locales and both current and staged`.
-This query can too long for GET request and fail due to maximum query length limit.  
+This query can be too long for GET request and fail due to maximum query length limit.  
 
 ## Decision
 Variant reassignment will be called only in case of errors and it will solve only the currently failed product. In addition, it will be called in specific actions.
