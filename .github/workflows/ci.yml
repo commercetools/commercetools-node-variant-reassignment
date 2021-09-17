@@ -24,8 +24,8 @@ jobs:
       - run: npm i
       - run: npm install -g codecov
       - run: npm run test
-      - run: codecov
         env:
           SPHERE_PROJECT_KEY: node-variant-reassignment-tests
           SPHERE_CLIENT_ID: ${{ secrets.SPHERE_CLIENT_ID }}
           SPHERE_CLIENT_SECRET: ${{ secrets.SPHERE_CLIENT_SECRET }}
+      - run: codecov
