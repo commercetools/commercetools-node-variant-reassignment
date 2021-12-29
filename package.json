@@ -24,8 +24,7 @@
   ],
   "main": "./dist/runner/variant-reassignment.js",
   "engines": {
-    "node": ">=4",
-    "npm": ">=3.10.8"
+    "node": ">=10"
   },
   "keywords": [
     "CTP products",
