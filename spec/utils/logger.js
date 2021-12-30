@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import errorToJson from 'utils-error-to-json'
-import uuid from 'uuid/v1'
+import { v4 as uuid } from 'uuid'
 
 import { Logger } from 'sphere-node-utils'
 
